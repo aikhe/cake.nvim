@@ -11,17 +11,19 @@ M.exec_float = function()
   local h = math.floor(vim.o.lines * (conf.size.h / 100))
   local w = math.floor(vim.o.columns * (conf.size.w / 100))
 
-  state.win = vim.api.nvim_open_win(state.buf, true, {
+  local win_opts = {
     relative = "editor",
-    row = (vim.o.lines - h) / 2 - 1,
-    col = (vim.o.columns - w) / 2,
     width = w,
     height = h,
+    row = (vim.o.lines - h) / 2 - 1,
+    col = (vim.o.columns - w) / 2,
     style = "minimal",
     border = conf.border,
-  })
+    title = "exec.nvim ('a' edit commands, 'r' rerun)",
+    title_pos = "left",
+  }
 
-  vim.cmd "stopinsert"
+  state.win = vim.api.nvim_open_win(state.buf, true, win_opts)
 end
 
 M.exec_split = function()
@@ -36,8 +38,6 @@ M.exec_split = function()
   if state.config.split_size then
     vim.cmd("resize " .. state.config.split_size)
   end
-
-  vim.cmd "stopinsert"
 end
 
 return M
