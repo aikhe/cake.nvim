@@ -5,10 +5,10 @@ local state = require "exec.state"
 
 ---Resets the terminal buffer by deleting it if it exists
 M.reset_buf = function()
-  if state.buf and api.nvim_buf_is_valid(state.buf) then
-    api.nvim_buf_delete(state.buf, { force = true })
+  if state.term_buf and api.nvim_buf_is_valid(state.term_buf) then
+    api.nvim_buf_delete(state.term_buf, { force = true })
   end
-  state.buf = nil
+  state.term_buf = nil
 end
 
 ---Returns the path to the commands JSON file
@@ -51,16 +51,16 @@ end
 M.new_term = function()
   if #state.commands == 0 then state.commands = M.load_commands() end
 
-  if not state.buf or not api.nvim_buf_is_valid(state.buf) then
-    state.buf = api.nvim_create_buf(false, true)
+  if not state.term_buf or not api.nvim_buf_is_valid(state.term_buf) then
+    state.term_buf = api.nvim_create_buf(false, true)
 
-    -- api.nvim_set_option_value("buflisted", false, { buf = state.buf })
-    -- api.nvim_set_option_value("bufhidden", "hide", { buf = state.buf })
+    -- api.nvim_set_option_value("buflisted", false, { buf = state.term_buf })
+    -- api.nvim_set_option_value("bufhidden", "hide", { buf = state.term_buf })
   end
 
-  M.exec_in_buf(state.buf, state.commands, state.config.terminal, state.cwd)
+  M.exec_in_buf(state.term_buf, state.commands, state.config.terminal, state.cwd)
 
-  local opts = { buffer = state.buf, noremap = true, silent = true }
+  local opts = { buffer = state.term_buf, noremap = true, silent = true }
 
   vim.keymap.set("n", state.config.edit_key, function() require("exec.api").edit_cmds() end, opts)
 
@@ -75,7 +75,7 @@ M.new_term = function()
     "t",
     "<Esc>",
     [[<C-\><C-n>]],
-    { buffer = state.buf, noremap = true, silent = true }
+    { buffer = state.term_buf, noremap = true, silent = true }
   )
 end
 

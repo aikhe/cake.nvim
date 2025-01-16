@@ -16,6 +16,10 @@ M.open = function(opts)
 
   if opts.reset then utils.reset_buf() end
 
+  if state.edit_volt_buf and vim.api.nvim_buf_is_valid(state.edit_volt_buf) then
+    require("volt").close(state.edit_volt_buf)
+  end
+
   local current_file = vim.fn.expand "%:p"
   if current_file ~= "" then
     state.cwd = vim.fn.fnamemodify(current_file, ":h")
@@ -52,13 +56,11 @@ end
 
 M.toggle = function()
   if state.win and vim.api.nvim_win_is_valid(state.win) then
-    vim.api.nvim_win_close(state.win, false)
+    require("volt").close(state.volt_buf)
 
     if vim.api.nvim_win_is_valid(state.prev_win) then
       vim.api.nvim_set_current_win(state.prev_win)
     end
-
-    state.win = nil
   else
     M.open { mode = state.last_mode }
   end
