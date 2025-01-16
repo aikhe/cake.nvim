@@ -3,6 +3,7 @@ local M = {}
 local api = vim.api
 local state = require "exec.state"
 
+---Resets the terminal buffer by deleting it if it exists
 M.reset_buf = function()
   if state.buf and api.nvim_buf_is_valid(state.buf) then
     api.nvim_buf_delete(state.buf, { force = true })
@@ -10,10 +11,14 @@ M.reset_buf = function()
   state.buf = nil
 end
 
+---Returns the path to the commands JSON file
+---@return string Path to the commands file
 M.get_cmds_path = function()
   return vim.fn.stdpath "data" .. "/exec_commands.json"
 end
 
+---Loads commands from the persistent JSON file
+---@return table List of commands
 M.load_commands = function()
   local path = M.get_cmds_path()
   local f = io.open(path, "r")
@@ -30,6 +35,8 @@ M.load_commands = function()
   return {}
 end
 
+---Saves the current list of commands to the persistent JSON file
+---@param cmds table List of commands to save
 M.save_commands = function(cmds)
   local path = M.get_cmds_path()
   local f = io.open(path, "w")
@@ -40,6 +47,7 @@ M.save_commands = function(cmds)
   end
 end
 
+---Initializes a new terminal buffer and sets up keymaps
 M.new_term = function()
   if #state.commands == 0 then state.commands = M.load_commands() end
 
@@ -54,7 +62,7 @@ M.new_term = function()
 
   local opts = { buffer = state.buf, noremap = true, silent = true }
 
-  vim.keymap.set("n", state.config.edit_key, function() M.edit_cmds() end, opts)
+  vim.keymap.set("n", state.config.edit_key, function() require("exec.api").edit_cmds() end, opts)
 
   vim.keymap.set(
     "n",
@@ -68,54 +76,6 @@ M.new_term = function()
     "<Esc>",
     [[<C-\><C-n>]],
     { buffer = state.buf, noremap = true, silent = true }
-  )
-end
-
-M.edit_cmds = function()
-  local buf = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_buf_set_lines(buf, 0, -1, false, state.commands)
-  vim.api.nvim_set_option_value("modified", false, { buf = buf })
-
-  vim.api.nvim_set_option_value("buftype", "acwrite", { buf = buf })
-  vim.api.nvim_set_option_value("bufhidden", "delete", { buf = buf })
-  vim.api.nvim_buf_set_name(buf, "Exec Commands")
-
-  local win_opts = {
-    relative = "editor",
-    width = 60,
-    height = 10,
-    col = (vim.o.columns - 60) / 2,
-    row = (vim.o.lines - 10) / 2,
-    style = "minimal",
-    border = state.config.border,
-    title = "edit commands",
-    title_pos = "center",
-  }
-
-  state.edit_win = vim.api.nvim_open_win(buf, true, win_opts)
-
-  vim.api.nvim_create_autocmd("BufWriteCmd", {
-    buffer = buf,
-    callback = function()
-      local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-
-      state.commands = {}
-      for _, line in ipairs(lines) do
-        if line ~= "" then table.insert(state.commands, line) end
-      end
-
-      M.save_commands(state.commands)
-
-      vim.api.nvim_set_option_value("modified", false, { buf = buf })
-      print "commands saved"
-    end,
-  })
-
-  vim.keymap.set(
-    "n",
-    "<Esc>",
-    ":q<CR>",
-    { buffer = buf, noremap = true, silent = true }
   )
 end
 
@@ -173,7 +133,7 @@ M.exec_in_buf = function(buf, cmd, terminal, cwd)
             vim.keymap.set(
               "n",
               state.config.edit_key,
-              function() M.edit_cmds() end,
+              function() require("exec.api").edit_cmds() end,
               {
                 buffer = buf,
                 noremap = true,
