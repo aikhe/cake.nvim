@@ -29,7 +29,7 @@ M.footer_layout = {
     lines = function()
       return {
         {
-          { " q ", "ExecKey" },
+          { " :q ", "ExecKey" },
           { " Quit ", "ExecLabel" },
           { "  " },
           { " p ", "ExecKey" },
@@ -74,7 +74,7 @@ M.edit_footer_layout = {
     lines = function()
       return {
         {
-          { " q ", "ExecKey" },
+          { " :q ", "ExecKey" },
           { " Quit ", "ExecLabel" },
           { "  " },
           { " p ", "ExecKey" },

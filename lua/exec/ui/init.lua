@@ -125,9 +125,7 @@ M.open = function()
     end,
   }
 
-  -- 8. Add mappings to term buffer for closing UI
-  local term_map_opts = { buffer = state.term_buf, silent = true }
-  vim.keymap.set("n", "q", function() volt.close(state.volt_buf) end, term_map_opts)
+  -- Note: User can use :q to quit (no q keybind)
 
   volt.run(state.volt_buf, {
     h = state.h,

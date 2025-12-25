@@ -85,6 +85,13 @@ M.switch_tab = function(idx)
   -- Update window if open
   if state.term_win and api.nvim_win_is_valid(state.term_win) then
     api.nvim_win_set_buf(state.term_win, state.term_buf)
+
+    -- If buffer is fresh (not a terminal yet), run commands
+    if vim.bo[state.term_buf].buftype ~= "terminal" then
+      local cmds = tab.commands or {}
+      M.exec_in_buf(state.term_buf, cmds, state.config.terminal, tab.cwd)
+    end
+    M.setup_term_keymaps(state.term_buf)
   end
 
   -- Redraw header to update tab highlights
@@ -112,35 +119,70 @@ M.kill_tab = function(idx)
   idx = idx or state.active_tab
   if idx < 1 or idx > #state.tabs then return end
 
-  local tab = state.tabs[idx]
-  if tab.buf and api.nvim_buf_is_valid(tab.buf) then
-    api.nvim_buf_delete(tab.buf, { force = true })
-  end
+  local tab_to_kill = state.tabs[idx]
+  local new_tab = nil
+  local new_active_idx = idx
 
-  table.remove(state.tabs, idx)
-
-  -- If we have tabs remaining, switch appropriately
-  if #state.tabs > 0 then
-    if state.active_tab > #state.tabs then
-      state.active_tab = #state.tabs
+  -- Determine next tab logic
+  if #state.tabs > 1 then
+    -- If killing the last tab, move to the previous one
+    if idx == #state.tabs then
+      new_active_idx = idx - 1
     end
-    local new_tab = state.tabs[state.active_tab]
-    state.term_buf = new_tab.buf
-    state.cwd = new_tab.cwd
-
-    if state.term_win and api.nvim_win_is_valid(state.term_win) then
-      api.nvim_win_set_buf(state.term_win, state.term_buf)
+    -- If killing a middle or first tab, the index stays the same (next tab shifts down)
+    -- effectively pointing to the adjacent one
+    
+    -- BUT we need to address the specific tab object because removing shifts indices
+    if idx == #state.tabs then
+       new_tab = state.tabs[idx - 1]
+    else
+       new_tab = state.tabs[idx + 1]
     end
   else
-    -- No tabs left, create a fresh one
-    local new_tab = M.create_tab()
-    state.active_tab = 1
-    state.term_buf = new_tab.buf
+    -- Creating a fresh tab if we are killing the only one
+    new_tab = M.create_tab { cwd = state.cwd or vim.fn.getcwd() }
+    new_active_idx = 1
   end
+
+  -- Switch window to new buffer immediately (if window is open)
+  -- This prevents the window from closing when the current buffer is deleted
+  if state.term_win and api.nvim_win_is_valid(state.term_win) then
+    api.nvim_win_set_buf(state.term_win, new_tab.buf)
+    
+    -- Initialize the new buffer if needed
+    if vim.bo[new_tab.buf].buftype ~= "terminal" then
+      local cmds = new_tab.commands or {}
+      M.exec_in_buf(new_tab.buf, cmds, state.config.terminal, new_tab.cwd)
+    end
+    M.setup_term_keymaps(new_tab.buf)
+  end
+
+  -- Now safely delete the old buffer
+  if tab_to_kill.buf and api.nvim_buf_is_valid(tab_to_kill.buf) and tab_to_kill.buf ~= new_tab.buf then
+    api.nvim_buf_delete(tab_to_kill.buf, { force = true })
+  end
+
+  -- Update state.tabs and active_tab
+  if #state.tabs > 1 then
+    table.remove(state.tabs, idx)
+    state.active_tab = new_active_idx
+  else
+    -- We created a new tab earlier, stored in `new_tab`
+    -- The old list had 1 item, we remove it, and we must ensure the new one is the only one
+    -- However, M.create_tab adds to the END of state.tabs.
+    -- So state.tabs currently has [OldTab, NewTab]
+    -- We want to remove OldTab (which is at index 1)
+    table.remove(state.tabs, 1)
+    state.active_tab = 1
+  end
+
+  -- Update current state refs
+  state.term_buf = new_tab.buf
+  state.cwd = new_tab.cwd
 
   M.save_tabs()
   M.redraw_header()
-  print("Tab " .. idx .. " killed!")
+  print("Tab killed!")
 end
 
 ---Redraws the header to reflect tab changes
