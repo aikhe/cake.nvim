@@ -312,11 +312,22 @@ M.init_term = function()
       -- First time: create initial tab with no commands
       M.create_tab { cwd = state.cwd or vim.fn.getcwd() }
     end
+  else
+    -- Ensure all existing tabs have valid buffers (resurrect if killed)
+    for _, tab in ipairs(state.tabs) do
+      if not tab.buf or not api.nvim_buf_is_valid(tab.buf) then
+        tab.buf = api.nvim_create_buf(false, true)
+      end
+    end
   end
 
   -- Set active tab's buffer as current
   local tab = state.tabs[state.active_tab]
   if tab then
+    -- Double check validity just in case
+    if not tab.buf or not api.nvim_buf_is_valid(tab.buf) then
+       tab.buf = api.nvim_create_buf(false, true)
+    end
     state.term_buf = tab.buf
     state.cwd = tab.cwd
   end

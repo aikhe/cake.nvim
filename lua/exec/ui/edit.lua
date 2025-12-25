@@ -146,6 +146,17 @@ M.open = function()
   })
 
   -- 6. Keymaps
+  local close_ui = function()
+    if state.edit_volt_buf and vim.api.nvim_buf_is_valid(state.edit_volt_buf) then
+      volt.close(state.edit_volt_buf)
+    else
+      close_all()
+    end
+  end
+
+  vim.keymap.set("n", "q", close_ui, { buffer = state.edit_buf, silent = true, nowait = true })
+  vim.keymap.set("n", "<Esc>", close_ui, { buffer = state.edit_buf, silent = true, nowait = true })
+
   vim.keymap.set("n", "p", function()
     require("exec").open()
   end, { buffer = state.edit_buf, silent = true })
