@@ -9,13 +9,17 @@ M.main_layout = {
   {
     lines = function()
       local tabs = components.tabs()
-      local nav = components.nav("term")
+      local nav = components.nav "term"
 
       -- Build line with tabs on left, pad, nav on right
       local line = {}
-      for _, v in ipairs(tabs) do table.insert(line, v) end
+      for _, v in ipairs(tabs) do
+        table.insert(line, v)
+      end
       table.insert(line, { "_pad_" })
-      for _, v in ipairs(nav) do table.insert(line, v) end
+      for _, v in ipairs(nav) do
+        table.insert(line, v)
+      end
 
       return { voltui.hpad(line, state.w - (state.xpad * 2)) }
     end,
@@ -55,12 +59,16 @@ M.edit_header_layout = {
   {
     lines = function()
       local tabs = components.tabs()
-      local nav = components.nav("commands")
+      local nav = components.nav "commands"
 
       local line = {}
-      for _, v in ipairs(tabs) do table.insert(line, v) end
+      for _, v in ipairs(tabs) do
+        table.insert(line, v)
+      end
       table.insert(line, { "_pad_" })
-      for _, v in ipairs(nav) do table.insert(line, v) end
+      for _, v in ipairs(nav) do
+        table.insert(line, v)
+      end
 
       return { voltui.hpad(line, state.w - (state.xpad * 2)) }
     end,

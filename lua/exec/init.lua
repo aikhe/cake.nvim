@@ -24,11 +24,23 @@ M.open = function(opts)
     require("volt").close(state.volt_buf)
   end
 
-  local current_file = vim.fn.expand "%:p"
-  if current_file ~= "" then
-    state.cwd = vim.fn.fnamemodify(current_file, ":h")
-  else
-    state.cwd = vim.fn.getcwd()
+  if not opts.reset then
+    local current_win = vim.api.nvim_get_current_win()
+    local current_buf = vim.api.nvim_win_get_buf(current_win)
+    local is_terminal = vim.bo[current_buf].buftype == "terminal"
+
+    if not is_terminal then
+      if state.config.use_file_dir then
+        local current_file = vim.fn.expand "%:p"
+        if current_file ~= "" then
+          state.cwd = vim.fn.fnamemodify(current_file, ":h")
+        else
+          state.cwd = vim.fn.getcwd()
+        end
+      else
+        state.cwd = vim.fn.getcwd()
+      end
+    end
   end
 
   state.prev_win = vim.api.nvim_get_current_win()

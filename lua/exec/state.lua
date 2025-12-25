@@ -51,6 +51,7 @@ local M = {
 
     terminal = "", -- custom terminal (e.g. "pwsh", "zsh", "cmd")
     edit_key = "p", -- key to edit commands
+    use_file_dir = false, -- use current file directory instead of CWD
   },
 }
 

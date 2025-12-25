@@ -6,20 +6,48 @@ local state = require "exec.state"
 
 return function(ns)
   local bg
+  local colors = {}
 
+  -- 1. Extract Colors
   if vim.g.base46_cache then
-    local colors = dofile(vim.g.base46_cache .. "colors")
-    bg = colors.black
+    local base46_colors = dofile(vim.g.base46_cache .. "colors")
+    bg = base46_colors.black
+    colors.red = base46_colors.red
+    colors.green = base46_colors.green
+    colors.blue = base46_colors.blue
+    colors.yellow = base46_colors.yellow
+    colors.purple = base46_colors.purple
+    colors.cyan = base46_colors.cyan
+    colors.orange = base46_colors.orange
+    colors.grey = base46_colors.grey
+    colors.white = base46_colors.white
   else
     bg = get_hl("Normal").bg
+    
+    -- Fallback map
+    local function fetch(group, fallback)
+       local val = get_hl(group).fg
+       return val or fallback
+    end
+
+    colors.red = fetch("DiagnosticError", "#ff5555")
+    colors.green = fetch("String", "#50fa7b")
+    colors.blue = fetch("Function", "#8be9fd")
+    colors.yellow = fetch("DiagnosticWarn", "#f1fa8c")
+    colors.purple = fetch("Keyword", "#bd93f9")
+    colors.cyan = fetch("DiagnosticHint", "#8be9fd")
+    colors.orange = fetch("Constant", "#ffb86c")
+    colors.grey = fetch("Comment", "#6272a4")
+    colors.white = fetch("Normal", "#f8f8f2")
   end
 
+  -- Handle Transparency
   local transparent = not bg
-
   if transparent then
     bg = "#000000"
   end
 
+  -- 2. Setup Backgrounds & Borders
   if state.config.border then
     -- Visible border: window bg same as editor, border is lighter
     local border_fg = lighten(bg, 15)
@@ -39,14 +67,29 @@ return function(ns)
     api.nvim_set_hl(state.term_ns, "FloatBorder", { fg = term_bg, bg = term_bg })
   end
 
-  -- FoldColumn for terminal padding (used for side padding if needed)
+  -- FoldColumn for terminal padding
   api.nvim_set_hl(state.term_ns, "FoldColumn", { bg = "NONE" })
 
-  -- Custom highlights for exec.nvim
-  api.nvim_set_hl(ns, "ExecTitle", { fg = "#cdd6f4", bold = true })
-  api.nvim_set_hl(ns, "ExecAccent", { fg = "#f38ba8" })
-  api.nvim_set_hl(ns, "ExecLabel", { fg = "#9399b2" })
-  api.nvim_set_hl(ns, "ExecKey", { fg = "#cdd6f4", bg = lighten(bg, 10) })
-  api.nvim_set_hl(ns, "ExecTabActive", { fg = "#cdd6f4", bg = lighten(bg, 15), bold = true })
-  api.nvim_set_hl(ns, "ExecTabInactive", { fg = "#9399b2", bg = lighten(bg, 5) })
+  -- 3. Custom Highlights for exec.nvim
+  -- Map derived colors to Exec groups
+  api.nvim_set_hl(ns, "ExecTitle", { fg = colors.blue, bold = true })
+  api.nvim_set_hl(ns, "ExecAccent", { fg = colors.red })
+  api.nvim_set_hl(ns, "ExecLabel", { fg = colors.grey })
+  
+  -- Key: White text on slightly lighter bg
+  api.nvim_set_hl(ns, "ExecKey", { fg = colors.white, bg = lighten(bg, 10) })
+  
+  -- Tabs
+  api.nvim_set_hl(ns, "ExecTabActive", { fg = colors.white, bg = lighten(bg, 15), bold = true })
+  api.nvim_set_hl(ns, "ExecTabInactive", { fg = colors.grey, bg = lighten(bg, 5) }) 
+  
+  -- Expose generic palette for custom usage if needed
+  api.nvim_set_hl(ns, "ExecRed", { fg = colors.red })
+  api.nvim_set_hl(ns, "ExecGreen", { fg = colors.green })
+  api.nvim_set_hl(ns, "ExecBlue", { fg = colors.blue })
+  api.nvim_set_hl(ns, "ExecYellow", { fg = colors.yellow })
+  api.nvim_set_hl(ns, "ExecPurple", { fg = colors.purple })
+  api.nvim_set_hl(ns, "ExecCyan", { fg = colors.cyan })
+  api.nvim_set_hl(ns, "ExecOrange", { fg = colors.orange })
+  api.nvim_set_hl(ns, "ExecGrey", { fg = colors.grey })
 end
