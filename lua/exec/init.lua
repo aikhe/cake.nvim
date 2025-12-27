@@ -14,9 +14,8 @@ M.open = function(opts)
   opts = opts or {}
   state.last_mode = opts.mode or state.last_mode or state.config.mode
 
-  if opts.reset and state.buf and vim.api.nvim_buf_is_valid(state.buf) then
-    vim.api.nvim_buf_delete(state.buf, { force = true })
-    state.buf = nil
+  if opts.reset then
+    utils.reset_buf()
   end
 
   state.prev_win = vim.api.nvim_get_current_win()
