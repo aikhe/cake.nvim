@@ -11,9 +11,8 @@ M.setup = function(opts)
 end
 
 M.open = function(opts)
-  state.volt_set = true
-
   opts = opts or {}
+  state.last_mode = opts.mode or state.last_mode or state.config.mode
 
   if opts.reset and state.buf and vim.api.nvim_buf_is_valid(state.buf) then
     vim.api.nvim_buf_delete(state.buf, { force = true })
@@ -21,12 +20,9 @@ M.open = function(opts)
   end
 
   state.prev_win = vim.api.nvim_get_current_win()
-
   utils.new_term()
 
-  local mode = opts.mode or state.config.mode
-
-  if mode == "float" then
+  if state.last_mode == "float" then
     api.exec_float()
   else
     api.exec_split()
@@ -43,7 +39,7 @@ M.toggle = function()
 
     state.win = nil
   else
-    M.open()
+    M.open { mode = state.last_mode }
   end
 end
 

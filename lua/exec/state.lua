@@ -1,4 +1,5 @@
 local M = {
+  last_mode = nil,
   config = {
     mode = "float", -- default mode e.g float, split, full
     mapping = true,
