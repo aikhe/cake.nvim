@@ -26,12 +26,36 @@ M.exec_in_buf = function(buf, cmd, terminal)
   if vim.bo[buf].buftype == "terminal" then return end
 
   local final_cmd = cmd
-  if type(cmd) == "table" then final_cmd = table.concat(cmd, " && ") end
+  if type(cmd) == "table" then
+    local sep = " && "
+    local term_check = terminal or state.config.terminal or vim.o.shell
+    if term_check:find "powershell" or term_check:find "pwsh" then
+      sep = "; "
+    end
+    final_cmd = table.concat(cmd, sep)
+  end
+
+  local term = terminal or state.config.terminal or vim.o.shell
+  local job_cmd
+
+  if final_cmd then
+    local flag = "-c"
+
+    if term:find "powershell" or term:find "pwsh" then
+      flag = "-Command"
+    elseif term:find "cmd" then
+      flag = "/c"
+    end
+
+    job_cmd = { term, flag, final_cmd }
+  else
+    job_cmd = term
+  end
 
   api.nvim_buf_call(
     buf,
     function()
-      vim.fn.jobstart(final_cmd or terminal or vim.o.shell, {
+      vim.fn.jobstart(job_cmd, {
         term = true,
       })
     end
