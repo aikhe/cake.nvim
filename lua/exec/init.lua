@@ -9,36 +9,20 @@ M.setup = function(opts)
   if state.mapping then require "exec.mappings"() end
 end
 
-M.open = function(mode)
-  state.mode = mode or state.mode
+M.open = function(mode, opts)
+  state.volt_set = true
+
+  opts = opts or {}
+
+  if opts.reset and state.buf and vim.api.nvim_buf_is_valid(state.buf) then
+    vim.api.nvim_buf_delete(state.buf, { force = true })
+    state.buf = nil
+  end
+
   state.prev_win = vim.api.nvim_get_current_win()
   state.buf = state.buf or vim.api.nvim_create_buf(false, true)
 
-  if state.mode == "float" then
-    local conf = state.config
-    local h = math.floor(vim.o.lines * (conf.size.h / 100))
-    local w = math.floor(vim.o.columns * (conf.size.w / 100))
-
-    state.win = vim.api.nvim_open_win(state.buf, true, {
-      relative = "editor",
-      row = (vim.o.lines - h) / 2 - 1,
-      col = (vim.o.columns - w) / 2,
-      width = w,
-      height = h,
-      style = "minimal",
-      border = conf.border,
-    })
-  else
-    vim.cmd(state.config.split_direction or "split")
-    state.win = vim.api.nvim_get_current_win()
-    vim.api.nvim_win_set_buf(state.win, state.buf)
-
-    if state.config.split_size then
-      vim.cmd("resize " .. state.config.split_size)
-    end
-  end
-
-  utils.exec_in_buf(state.buf, state.config.cmd)
+  utils.exec_in_buf(state.buf, state.config.cmd, state.config.terminal)
 end
 
 M.toggle = function()

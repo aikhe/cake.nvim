@@ -3,7 +3,8 @@ local M = {}
 ---Execute a command in a buffer, converting it to a terminal if needed
 ---@param buf integer Buffer number
 ---@param cmd string|nil Command to execute (if nil, opens a terminal)
-M.exec_in_buf = function(buf, cmd)
+---@param terminal string|nil Custom terminal executable
+M.exec_in_buf = function(buf, cmd, terminal)
   if not buf or not vim.api.nvim_buf_is_valid(buf) then return end
 
   if vim.bo[buf].buftype == "terminal" then return end
@@ -11,7 +12,7 @@ M.exec_in_buf = function(buf, cmd)
   vim.api.nvim_buf_call(
     buf,
     function()
-      vim.fn.jobstart(cmd or vim.o.shell, {
+      vim.fn.jobstart(cmd or terminal or vim.o.shell, {
         term = true,
       })
     end
