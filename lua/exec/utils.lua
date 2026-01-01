@@ -8,7 +8,14 @@ M.exec_in_buf = function(buf, cmd)
 
   if vim.bo[buf].buftype == "terminal" then return end
 
-  vim.api.nvim_buf_call(buf, function() vim.fn.jobstart(cmd or vim.o.shell) end)
+  vim.api.nvim_buf_call(
+    buf,
+    function()
+      vim.fn.jobstart(cmd or vim.o.shell, {
+        term = true,
+      })
+    end
+  )
 end
 
 return M
