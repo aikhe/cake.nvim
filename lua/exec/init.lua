@@ -1,15 +1,16 @@
 local M = {}
 
+local api = require "exec.api"
 local state = require "exec.state"
 local utils = require "exec.utils"
 
 M.setup = function(opts)
   state.config = vim.tbl_deep_extend("force", state.config, opts or {})
 
-  if state.mapping then require "exec.mappings"() end
+  if state.config.mapping then require "exec.mappings"() end
 end
 
-M.open = function(mode, opts)
+M.open = function(opts)
   state.volt_set = true
 
   opts = opts or {}
@@ -20,9 +21,16 @@ M.open = function(mode, opts)
   end
 
   state.prev_win = vim.api.nvim_get_current_win()
-  state.buf = state.buf or vim.api.nvim_create_buf(false, true)
 
-  utils.exec_in_buf(state.buf, state.config.cmd, state.config.terminal)
+  utils.new_term()
+
+  local mode = opts.mode or state.config.mode
+
+  if mode == "float" then
+    api.exec_float()
+  else
+    api.exec_split()
+  end
 end
 
 M.toggle = function()
