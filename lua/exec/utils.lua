@@ -6,12 +6,17 @@ local state = require "exec.state"
 M.reset_buf = function()
   if state.buf and api.nvim_buf_is_valid(state.buf) then
     api.nvim_buf_delete(state.buf, { force = true })
-    state.buf = nil
   end
+  state.buf = nil
 end
 
 M.new_term = function()
-  state.buf = state.buf or api.nvim_create_buf(false, true)
+  if not state.buf or not api.nvim_buf_is_valid(state.buf) then
+    state.buf = api.nvim_create_buf(false, true)
+
+    -- api.nvim_set_option_value("buflisted", false, { buf = state.buf })
+    -- api.nvim_set_option_value("bufhidden", "hide", { buf = state.buf })
+  end
 
   M.exec_in_buf(state.buf, state.config.cmd, state.config.terminal)
 end
@@ -52,14 +57,22 @@ M.exec_in_buf = function(buf, cmd, terminal)
     job_cmd = term
   end
 
-  api.nvim_buf_call(
-    buf,
-    function()
-      vim.fn.jobstart(job_cmd, {
-        term = true,
-      })
-    end
-  )
+  api.nvim_buf_call(buf, function()
+    vim.fn.jobstart(job_cmd, {
+      term = true,
+      on_exit = function()
+        vim.schedule(function()
+          if api.nvim_buf_is_valid(buf) then
+            local keys =
+              { "i", "I", "a", "A", "o", "O", "r", "R", "c", "C", "s", "S" }
+            for _, key in ipairs(keys) do
+              vim.keymap.set("n", key, "<Nop>", { buffer = buf, nowait = true })
+            end
+          end
+        end)
+      end,
+    })
+  end)
 end
 
 return M
