@@ -10,7 +10,7 @@ M.setup = function(opts)
 end
 
 M.open = function(mode)
-  state.mode = mode or state.mode or "float"
+  state.mode = mode or state.mode
   state.prev_win = vim.api.nvim_get_current_win()
   state.buf = state.buf or vim.api.nvim_create_buf(false, true)
 
@@ -18,6 +18,7 @@ M.open = function(mode)
     local conf = state.config
     local h = math.floor(vim.o.lines * (conf.size.h / 100))
     local w = math.floor(vim.o.columns * (conf.size.w / 100))
+
     state.win = vim.api.nvim_open_win(state.buf, true, {
       relative = "editor",
       row = (vim.o.lines - h) / 2 - 1,
@@ -31,7 +32,10 @@ M.open = function(mode)
     vim.cmd(state.config.split_direction or "split")
     state.win = vim.api.nvim_get_current_win()
     vim.api.nvim_win_set_buf(state.win, state.buf)
-    if state.config.split_size then vim.cmd("resize " .. state.config.split_size) end
+
+    if state.config.split_size then
+      vim.cmd("resize " .. state.config.split_size)
+    end
   end
 
   utils.exec_in_buf(state.buf, state.config.cmd)
@@ -40,7 +44,11 @@ end
 M.toggle = function()
   if state.win and vim.api.nvim_win_is_valid(state.win) then
     vim.api.nvim_win_close(state.win, false)
-    if vim.api.nvim_win_is_valid(state.prev_win) then vim.api.nvim_set_current_win(state.prev_win) end
+
+    if vim.api.nvim_win_is_valid(state.prev_win) then
+      vim.api.nvim_set_current_win(state.prev_win)
+    end
+
     state.win = nil
   else
     M.open()

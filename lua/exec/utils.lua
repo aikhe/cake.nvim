@@ -6,10 +6,9 @@ local M = {}
 M.exec_in_buf = function(buf, cmd)
   if not buf or not vim.api.nvim_buf_is_valid(buf) then return end
 
-  -- Use termopen which automatically sets buftype to terminal
-  vim.api.nvim_buf_call(buf, function()
-    vim.fn.termopen(cmd or vim.o.shell)
-  end)
+  if vim.bo[buf].buftype == "terminal" then return end
+
+  vim.api.nvim_buf_call(buf, function() vim.fn.jobstart(cmd or vim.o.shell) end)
 end
 
 return M
