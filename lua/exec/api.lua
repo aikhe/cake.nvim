@@ -19,7 +19,7 @@ M.exec_float = function()
     col = (vim.o.columns - w) / 2,
     style = "minimal",
     border = conf.border,
-    title = "exec.nvim ('a' edit commands, 'r' rerun)",
+    title = "exec.nvim",
     title_pos = "left",
   }
 
