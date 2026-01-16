@@ -143,6 +143,9 @@ M.open = function()
     pattern = tostring(state.term_win),
     once = true,
     callback = function()
+      -- If we are resetting, don't trigger cleanup
+      if state.resetting then return end
+
       -- Use pcall because volt.close might have already run
       pcall(function()
         vim.schedule(function()

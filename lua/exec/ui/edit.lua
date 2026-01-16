@@ -130,6 +130,8 @@ M.open = function()
     pattern = tostring(state.edit_win),
     once = true,
     callback = function()
+      if state.resetting then return end
+      
       pcall(function()
         vim.schedule(function()
           if state.edit_volt_buf and vim.api.nvim_buf_is_valid(state.edit_volt_buf) then

@@ -56,6 +56,9 @@ M.open = function(opts)
       end,
     })
   end
+
+  -- Reset the flag after everything is established
+  state.resetting = false
 end
 
 M.toggle = function()

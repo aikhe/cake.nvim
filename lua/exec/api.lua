@@ -24,6 +24,7 @@ end
 
 ---Opens a Volt-powered floating window to edit the current list of commands
 M.edit_cmds = function()
+  state.resetting = true
   require("exec.ui.edit").open()
 end
 

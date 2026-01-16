@@ -5,9 +5,12 @@ local state = require "exec.state"
 
 ---Resets the terminal buffer by deleting it if it exists
 M.reset_buf = function()
-  if state.term_buf and api.nvim_buf_is_valid(state.term_buf) then
-    api.nvim_buf_delete(state.term_buf, { force = true })
+  for _, buf in ipairs(state.term_bufs) do
+    if api.nvim_buf_is_valid(buf) then
+      api.nvim_buf_delete(buf, { force = true })
+    end
   end
+  state.term_bufs = {}
   state.term_buf = nil
 end
 
@@ -54,6 +57,7 @@ M.new_term = function(opts)
   if #state.commands == 0 then state.commands = M.load_commands() end
 
   if opts.force_new or not state.term_buf or not api.nvim_buf_is_valid(state.term_buf) then
+    if not opts.force_new then state.term_bufs = {} end -- Clear if not specifically making a NEW session
     state.term_buf = api.nvim_create_buf(false, true)
     table.insert(state.term_bufs, state.term_buf)
   end
@@ -64,10 +68,12 @@ M.new_term = function(opts)
   
   -- New terminal session mapping
   vim.keymap.set("n", "t", function()
+    state.resetting = true
     M.new_term { force_new = true }
     if state.term_win and api.nvim_win_is_valid(state.term_win) then
       api.nvim_win_set_buf(state.term_win, state.term_buf)
-      M.exec_in_buf(state.term_buf, state.commands, state.config.terminal, state.cwd)
+      -- Spawn a shell (nil command)
+      M.exec_in_buf(state.term_buf, nil, state.config.terminal, state.cwd)
     else
       require("exec").open()
     end
@@ -76,7 +82,14 @@ M.new_term = function(opts)
   vim.keymap.set(
     "n",
     "r",
-    function() require("exec").open { reset = true } end,
+    function()
+      if #state.commands > 0 then
+        state.resetting = true
+        require("exec").open { reset = true }
+      else
+        print "No commands to rerun!"
+      end
+    end,
     opts_map
   )
 
@@ -158,10 +171,12 @@ M.exec_in_buf = function(buf, cmd, terminal, cwd)
               "n",
               "t",
               function()
+                state.resetting = true
                 M.new_term { force_new = true }
                 if state.term_win and api.nvim_win_is_valid(state.term_win) then
                   api.nvim_win_set_buf(state.term_win, state.term_buf)
-                  M.exec_in_buf(state.term_buf, state.commands, state.config.terminal, state.cwd)
+                  -- Spawn a shell (nil command)
+                  M.exec_in_buf(state.term_buf, nil, state.config.terminal, state.cwd)
                 else
                   require("exec").open()
                 end
@@ -172,7 +187,14 @@ M.exec_in_buf = function(buf, cmd, terminal, cwd)
             vim.keymap.set(
               "n",
               "r",
-              function() require("exec").open { reset = true } end,
+              function()
+                if #state.commands > 0 then
+                  state.resetting = true
+                  require("exec").open { reset = true }
+                else
+                  print "No commands to rerun!"
+                end
+              end,
               { buffer = buf, noremap = true, silent = true }
             )
 

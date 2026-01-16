@@ -30,6 +30,7 @@ M.title = function()
         click = function()
           vim.cmd "stopinsert"
           vim.schedule(function()
+            state.resetting = true
             state.current_tab = "commands"
             require("exec.api").edit_cmds()
           end)
@@ -87,6 +88,7 @@ M.edit_header = function()
       {
         click = function()
           vim.schedule(function()
+            state.resetting = true
             state.current_tab = "term"
             require("exec").open()
           end)
