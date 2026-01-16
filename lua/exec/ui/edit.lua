@@ -5,51 +5,6 @@ local utils = require "exec.utils"
 
 local M = {}
 
-M.header = function()
-  local width = state.w - (state.xpad * 2) - 4
-  local term_hl = state.current_tab == "term" and "ExecTabActive" or "ExecTabInactive"
-  local cmds_hl = state.current_tab == "commands" and "ExecTabActive" or "ExecTabInactive"
-
-  local line = {
-    { "  ", "ExecAccent" },
-    { "Exec  ", "ExecTitle" },
-    { " Term ", term_hl, {
-      click = function()
-        vim.schedule(function()
-          state.current_tab = "term"
-          require("exec").open()
-        end)
-      end
-    } },
-    { "  ", "" },
-    { " Commands ", cmds_hl, {
-      click = function()
-        -- Already on commands tab
-      end
-    } },
-  }
-
-  local lines = { voltui.hpad(line, width) }
-  voltui.border(lines)
-  return lines
-end
-
-M.footer = function()
-  local width = state.w - (state.xpad * 2)
-  local key = function(char) return { " " .. char .. " ", "ExecKey" } end
-  local txt = function(str) return { str, "ExecLabel" } end
-
-  local line = {
-    key "ESC",
-    txt " Cancel  ",
-    { "_pad_", "" },
-    key "Ctrl+S",
-    txt " Save & Exit ",
-  }
-
-  return { voltui.hpad(line, width) }
-end
-
 M.open = function()
   state.current_tab = "commands"
   vim.cmd("stopinsert")
@@ -60,13 +15,13 @@ M.open = function()
   end
 
   -- 1. Create Header
+  local layout = require "exec.ui.layout"
   state.edit_volt_buf = vim.api.nvim_create_buf(false, true)
-  local header_layout = require "exec.ui.edit_layout"
   
   volt.gen_data {
     {
       buf = state.edit_volt_buf,
-      layout = header_layout,
+      layout = layout.edit_header_layout,
       xpad = state.xpad,
       ns = state.ns,
     },
@@ -92,7 +47,8 @@ M.open = function()
   -- 2. Create/Reuse the actual Text Buffer (Editor)
   if not state.edit_buf or not vim.api.nvim_buf_is_valid(state.edit_buf) then
     state.edit_buf = vim.api.nvim_create_buf(false, true)
-    vim.api.nvim_buf_set_name(state.edit_buf, "Exec Commands Edit")
+    -- Check if name is taken, if so, just use what it has or ignore
+    pcall(vim.api.nvim_buf_set_name, state.edit_buf, "Exec Commands Edit")
     vim.api.nvim_set_option_value("buftype", "acwrite", { buf = state.edit_buf })
   end
   
@@ -114,12 +70,11 @@ M.open = function()
 
   -- 3. Create Footer
   state.edit_footer_buf = vim.api.nvim_create_buf(false, true)
-  local footer_layout = require "exec.ui.edit_footer_layout"
 
   volt.gen_data {
     {
       buf = state.edit_footer_buf,
-      layout = footer_layout,
+      layout = layout.edit_footer_layout,
       xpad = state.xpad,
       ns = state.ns,
     },
@@ -160,15 +115,30 @@ M.open = function()
     state.edit_win = nil
     state.edit_footer_win = nil
     state.edit_volt_buf = nil
-    state.edit_buf = nil
+    -- state.edit_buf = nil (Persist this buffer)
     state.edit_footer_buf = nil
   end
 
   volt.mappings {
-    bufs = { state.edit_volt_buf, state.edit_buf, state.edit_footer_buf },
+    bufs = { state.edit_volt_buf, state.edit_footer_buf },
     winclosed_event = true,
     after_close = close_all,
   }
+
+  -- Ghost window fix: Close UI if edit window is closed via :q
+  vim.api.nvim_create_autocmd("WinClosed", {
+    pattern = tostring(state.edit_win),
+    once = true,
+    callback = function()
+      pcall(function()
+        vim.schedule(function()
+          if state.edit_volt_buf and vim.api.nvim_buf_is_valid(state.edit_volt_buf) then
+            volt.close(state.edit_volt_buf)
+          end
+        end)
+      end)
+    end,
+  })
 
   -- 6. Keymaps
   vim.keymap.set("n", "p", function()
@@ -181,12 +151,9 @@ M.open = function()
     for _, line in ipairs(lines) do
       if line ~= "" then table.insert(state.commands, line) end
     end
-    utils.save_commands(state.commands)
+    require("exec.utils").save_commands(state.commands)
     vim.api.nvim_set_option_value("modified", false, { buf = state.edit_buf })
     print "Commands saved!"
-    close_all()
-    -- Reopen terminal UI
-    require("exec").open()
   end, { buffer = state.edit_buf, silent = true })
 
   vim.api.nvim_create_autocmd("BufWriteCmd", {

@@ -48,34 +48,43 @@ M.save_commands = function(cmds)
 end
 
 ---Initializes a new terminal buffer and sets up keymaps
-M.new_term = function()
+---@param opts table? Options (e.g., force_new)
+M.new_term = function(opts)
+  opts = opts or {}
   if #state.commands == 0 then state.commands = M.load_commands() end
 
-  if not state.term_buf or not api.nvim_buf_is_valid(state.term_buf) then
+  if opts.force_new or not state.term_buf or not api.nvim_buf_is_valid(state.term_buf) then
     state.term_buf = api.nvim_create_buf(false, true)
-
-    -- api.nvim_set_option_value("buflisted", false, { buf = state.term_buf })
-    -- api.nvim_set_option_value("bufhidden", "hide", { buf = state.term_buf })
+    table.insert(state.term_bufs, state.term_buf)
   end
 
-  M.exec_in_buf(state.term_buf, state.commands, state.config.terminal, state.cwd)
+  local opts_map = { buffer = state.term_buf, noremap = true, silent = true }
 
-  local opts = { buffer = state.term_buf, noremap = true, silent = true }
-
-  vim.keymap.set("n", state.config.edit_key, function() require("exec.api").edit_cmds() end, opts)
+  vim.keymap.set("n", state.config.edit_key, function() require("exec.api").edit_cmds() end, opts_map)
+  
+  -- New terminal session mapping
+  vim.keymap.set("n", "t", function()
+    M.new_term { force_new = true }
+    if state.term_win and api.nvim_win_is_valid(state.term_win) then
+      api.nvim_win_set_buf(state.term_win, state.term_buf)
+      M.exec_in_buf(state.term_buf, state.commands, state.config.terminal, state.cwd)
+    else
+      require("exec").open()
+    end
+  end, opts_map)
 
   vim.keymap.set(
     "n",
     "r",
     function() require("exec").open { reset = true } end,
-    opts
+    opts_map
   )
 
   vim.keymap.set(
     "t",
     "<Esc>",
     [[<C-\><C-n>]],
-    { buffer = state.term_buf, noremap = true, silent = true }
+    { buffer = state.term_buf, noremap = true, silent = true, nowait = true }
   )
 end
 
@@ -91,18 +100,22 @@ M.exec_in_buf = function(buf, cmd, terminal, cwd)
 
   local final_cmd = cmd
   if type(cmd) == "table" then
-    local sep = " && "
-    local term_check = terminal or state.config.terminal or vim.o.shell
-    if term_check:find "powershell" or term_check:find "pwsh" then
-      sep = "; "
+    if #cmd == 0 then
+      final_cmd = nil
+    else
+      local sep = " && "
+      local term_check = terminal or state.config.terminal or vim.o.shell
+      if term_check:find "powershell" or term_check:find "pwsh" then
+        sep = "; "
+      end
+      final_cmd = table.concat(cmd, sep)
     end
-    final_cmd = table.concat(cmd, sep)
   end
 
   local term = terminal or state.config.terminal or vim.o.shell
   local job_cmd
 
-  if final_cmd then
+  if final_cmd and final_cmd ~= "" then
     local flag = "-c"
 
     if term:find "powershell" or term:find "pwsh" then
@@ -142,10 +155,32 @@ M.exec_in_buf = function(buf, cmd, terminal, cwd)
             )
 
             vim.keymap.set(
+              "n",
+              "t",
+              function()
+                M.new_term { force_new = true }
+                if state.term_win and api.nvim_win_is_valid(state.term_win) then
+                  api.nvim_win_set_buf(state.term_win, state.term_buf)
+                  M.exec_in_buf(state.term_buf, state.commands, state.config.terminal, state.cwd)
+                else
+                  require("exec").open()
+                end
+              end,
+              { buffer = buf, noremap = true, silent = true }
+            )
+            
+            vim.keymap.set(
+              "n",
+              "r",
+              function() require("exec").open { reset = true } end,
+              { buffer = buf, noremap = true, silent = true }
+            )
+
+            vim.keymap.set(
               "t",
               "<Esc>",
               [[<C-\><C-n>]],
-              { buffer = buf, noremap = true, silent = true }
+              { buffer = buf, noremap = true, silent = true, nowait = true }
             )
 
             vim.keymap.set(

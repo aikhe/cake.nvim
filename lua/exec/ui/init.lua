@@ -4,62 +4,6 @@ local utils = require "exec.utils"
 
 local M = {}
 
-M.title = function()
-  local width = state.w - (state.xpad * 2) - 4
-  local term_hl = state.current_tab == "term" and "ExecTabActive" or "ExecTabInactive"
-  local cmds_hl = state.current_tab == "commands" and "ExecTabActive" or "ExecTabInactive"
-
-  local line = {
-    { "  ", "ExecAccent" },
-    { "Exec  ", "ExecTitle" },
-    { " Term ", term_hl, {
-      click = function()
-        -- Already on term tab, maybe just refresh or do nothing
-      end
-    } },
-    { "  ", "" },
-    { " Commands ", cmds_hl, {
-      click = function()
-        vim.cmd("stopinsert")
-        vim.schedule(function()
-          state.current_tab = "commands"
-          require("exec.api").edit_cmds()
-        end)
-      end
-    } },
-  }
-
-  local lines = { voltui.hpad(line, width) }
-  voltui.border(lines)
-  return lines
-end
-
-M.separator = function()
-  return {
-    {
-      { string.rep("─", state.w - (state.xpad * 2)), "ExecLabel" },
-    },
-  }
-end
-
-M.footer = function()
-  local width = state.w - (state.xpad * 2)
-  local key = function(char) return { " " .. char .. " ", "ExecKey" } end
-  local txt = function(str) return { str, "ExecLabel" } end
-
-  local line = {
-    key "ESC",
-    txt " Close  ",
-    key "r",
-    txt " Reset  ",
-    { "_pad_", "" },
-    key "p",
-    txt " Edit  ",
-  }
-
-  return { voltui.hpad(line, width) }
-end
-
 M.open = function()
   local volt = require "volt"
   state.current_tab = "term"
@@ -70,7 +14,7 @@ M.open = function()
   volt.gen_data {
     {
       buf = state.volt_buf,
-      layout = layout,
+      layout = layout.main_layout,
       xpad = state.xpad,
       ns = state.ns,
     },
@@ -122,12 +66,11 @@ M.open = function()
 
   -- 6. Create Footer window
   state.footer_buf = vim.api.nvim_create_buf(false, true)
-  local footer_layout = require "exec.ui.footer_layout"
 
   volt.gen_data {
     {
       buf = state.footer_buf,
-      layout = footer_layout,
+      layout = layout.footer_layout,
       xpad = state.xpad,
       ns = state.ns,
     },
@@ -190,10 +133,25 @@ M.open = function()
   vim.keymap.set("n", "q", function() volt.close(state.volt_buf) end, term_opts)
   vim.keymap.set("n", "<Esc>", function() volt.close(state.volt_buf) end, term_opts)
 
-  -- 9. Finalize Volt UI (Main window)
   volt.run(state.volt_buf, {
     h = state.h,
     w = state.w,
+  })
+  
+  -- Ghost window fix: Close UI if terminal window is closed via :q
+  vim.api.nvim_create_autocmd("WinClosed", {
+    pattern = tostring(state.term_win),
+    once = true,
+    callback = function()
+      -- Use pcall because volt.close might have already run
+      pcall(function()
+        vim.schedule(function()
+          if state.volt_buf and vim.api.nvim_buf_is_valid(state.volt_buf) then
+            volt.close(state.volt_buf)
+          end
+        end)
+      end)
+    end,
   })
   
   vim.schedule(function()

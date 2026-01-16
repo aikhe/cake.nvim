@@ -20,6 +20,10 @@ M.open = function(opts)
     require("volt").close(state.edit_volt_buf)
   end
 
+  if state.volt_buf and vim.api.nvim_buf_is_valid(state.volt_buf) then
+    require("volt").close(state.volt_buf)
+  end
+
   local current_file = vim.fn.expand "%:p"
   if current_file ~= "" then
     state.cwd = vim.fn.fnamemodify(current_file, ":h")

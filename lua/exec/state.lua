@@ -16,6 +16,7 @@ local M = {
   -- Terminal state
   term_buf = nil,
   term_win = nil,
+  term_bufs = {}, -- Track all terminal buffers
   term_h = 15,
 
   -- Footer state
