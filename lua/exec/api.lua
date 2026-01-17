@@ -10,7 +10,7 @@ end
 ---Opens the terminal in a split window
 M.exec_split = function()
   if not state.term_buf or not vim.api.nvim_buf_is_valid(state.term_buf) then
-    require("exec.utils").new_term()
+    require("exec.utils").init_term()
   end
 
   vim.cmd(state.config.split_direction or "split")

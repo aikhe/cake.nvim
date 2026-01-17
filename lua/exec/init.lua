@@ -31,10 +31,7 @@ M.open = function(opts)
     state.cwd = vim.fn.getcwd()
   end
 
-  print(state.cwd)
-
   state.prev_win = vim.api.nvim_get_current_win()
-  utils.new_term()
 
   if state.last_mode == "float" then
     api.exec_float()

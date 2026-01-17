@@ -3,16 +3,160 @@ local M = {}
 local api = vim.api
 local state = require "exec.state"
 
----Resets the terminal buffer by deleting it if it exists
-M.reset_buf = function()
-  for _, buf in ipairs(state.term_bufs) do
-    if api.nvim_buf_is_valid(buf) then
-      api.nvim_buf_delete(buf, { force = true })
+-- ============================================================================
+-- Tab Persistence
+-- ============================================================================
+
+---Returns the path to the tabs JSON file
+---@return string Path to the tabs file
+M.get_tabs_path = function()
+  return vim.fn.stdpath "data" .. "/exec_tabs.json"
+end
+
+---Loads tabs from the persistent JSON file
+---@return table List of tabs
+M.load_tabs = function()
+  local path = M.get_tabs_path()
+  local f = io.open(path, "r")
+
+  if f then
+    local content = f:read "*a"
+    f:close()
+
+    if content and content ~= "" then
+      local ok, decoded = pcall(vim.fn.json_decode, content)
+      if ok and type(decoded) == "table" then
+        return decoded
+      end
     end
   end
-  state.term_bufs = {}
-  state.term_buf = nil
+  return {}
 end
+
+---Saves the current tabs to the persistent JSON file
+M.save_tabs = function()
+  local path = M.get_tabs_path()
+  local f = io.open(path, "w")
+
+  if f then
+    -- Save cwd and commands per tab (not buffers, they're transient)
+    local save_data = {}
+    for _, tab in ipairs(state.tabs) do
+      table.insert(save_data, { cwd = tab.cwd, commands = tab.commands or {} })
+    end
+    f:write(vim.fn.json_encode(save_data))
+    f:close()
+  end
+end
+
+---Creates a new tab and adds it to the list
+---@param opts table? Options: { cwd, commands }
+---@return table The new tab
+M.create_tab = function(opts)
+  opts = opts or {}
+  local new_buf = api.nvim_create_buf(false, true)
+  local cwd = opts.cwd or vim.fn.getcwd()
+  local id = #state.tabs + 1
+
+  local tab = {
+    id = id,
+    buf = new_buf,
+    cwd = cwd,
+    commands = opts.commands or {}, -- Each tab has its own commands
+  }
+
+  table.insert(state.tabs, tab)
+  return tab
+end
+
+---Switches to a tab by index
+---@param idx number Tab index to switch to
+M.switch_tab = function(idx)
+  if idx < 1 or idx > #state.tabs then
+    print("Tab " .. idx .. " does not exist!")
+    return
+  end
+
+  state.active_tab = idx
+  local tab = state.tabs[idx]
+  state.term_buf = tab.buf
+  state.cwd = tab.cwd
+
+  -- Update window if open
+  if state.term_win and api.nvim_win_is_valid(state.term_win) then
+    api.nvim_win_set_buf(state.term_win, state.term_buf)
+  end
+
+  -- Redraw header to update tab highlights
+  M.redraw_header()
+end
+
+---Saves the current session as the active tab
+M.save_current_tab = function()
+  if #state.tabs == 0 then
+    print "No tabs to save!"
+    return
+  end
+
+  local tab = state.tabs[state.active_tab]
+  if tab then
+    tab.cwd = state.cwd or vim.fn.getcwd()
+    M.save_tabs()
+    print("Tab " .. state.active_tab .. " saved!")
+  end
+end
+
+---Kills/deletes a tab by index
+---@param idx number? Tab index to kill (defaults to active)
+M.kill_tab = function(idx)
+  idx = idx or state.active_tab
+  if idx < 1 or idx > #state.tabs then return end
+
+  local tab = state.tabs[idx]
+  if tab.buf and api.nvim_buf_is_valid(tab.buf) then
+    api.nvim_buf_delete(tab.buf, { force = true })
+  end
+
+  table.remove(state.tabs, idx)
+
+  -- If we have tabs remaining, switch appropriately
+  if #state.tabs > 0 then
+    if state.active_tab > #state.tabs then
+      state.active_tab = #state.tabs
+    end
+    local new_tab = state.tabs[state.active_tab]
+    state.term_buf = new_tab.buf
+    state.cwd = new_tab.cwd
+
+    if state.term_win and api.nvim_win_is_valid(state.term_win) then
+      api.nvim_win_set_buf(state.term_win, state.term_buf)
+    end
+  else
+    -- No tabs left, create a fresh one
+    local new_tab = M.create_tab()
+    state.active_tab = 1
+    state.term_buf = new_tab.buf
+  end
+
+  M.save_tabs()
+  M.redraw_header()
+  print("Tab " .. idx .. " killed!")
+end
+
+---Redraws the header to reflect tab changes
+M.redraw_header = function()
+  local volt = require "volt"
+  if state.volt_buf and api.nvim_buf_is_valid(state.volt_buf) then
+    volt.redraw(state.volt_buf, "header")
+  end
+  if state.edit_volt_buf and api.nvim_buf_is_valid(state.edit_volt_buf) then
+    volt.redraw(state.edit_volt_buf, "edit_header")
+  end
+end
+
+-- ============================================================================
+-- Commands Persistence
+-- ============================================================================
 
 ---Returns the path to the commands JSON file
 ---@return string Path to the commands file
@@ -50,55 +194,92 @@ M.save_commands = function(cmds)
   end
 end
 
----Initializes a new terminal buffer and sets up keymaps
----@param opts table? Options (e.g., force_new)
-M.new_term = function(opts)
-  opts = opts or {}
-  if #state.commands == 0 then state.commands = M.load_commands() end
+-- ============================================================================
+-- Terminal Management
+-- ============================================================================
 
-  if opts.force_new or not state.term_buf or not api.nvim_buf_is_valid(state.term_buf) then
-    if not opts.force_new then state.term_bufs = {} end -- Clear if not specifically making a NEW session
-    state.term_buf = api.nvim_create_buf(false, true)
-    table.insert(state.term_bufs, state.term_buf)
-  end
+---Sets up keymaps for a terminal buffer
+---@param buf number Buffer to set keymaps on
+M.setup_term_keymaps = function(buf)
+  local opts = { buffer = buf, noremap = true, silent = true }
 
-  local opts_map = { buffer = state.term_buf, noremap = true, silent = true }
+  -- Edit commands
+  vim.keymap.set("n", state.config.edit_key, function()
+    require("exec.api").edit_cmds()
+  end, opts)
 
-  vim.keymap.set("n", state.config.edit_key, function() require("exec.api").edit_cmds() end, opts_map)
-  
-  -- New terminal session mapping
-  vim.keymap.set("n", "t", function()
+  -- New tab (n key)
+  vim.keymap.set("n", "n", function()
     state.resetting = true
-    M.new_term { force_new = true }
+    local tab = M.create_tab { cwd = state.cwd }
+    state.active_tab = #state.tabs
+    state.term_buf = tab.buf
+
     if state.term_win and api.nvim_win_is_valid(state.term_win) then
       api.nvim_win_set_buf(state.term_win, state.term_buf)
-      -- Spawn a shell (nil command)
-      M.exec_in_buf(state.term_buf, nil, state.config.terminal, state.cwd)
-    else
-      require("exec").open()
+      M.exec_in_buf(state.term_buf, nil, state.config.terminal, tab.cwd)
     end
-  end, opts_map)
 
-  vim.keymap.set(
-    "n",
-    "r",
-    function()
-      if #state.commands > 0 then
-        state.resetting = true
-        require("exec").open { reset = true }
-      else
-        print "No commands to rerun!"
+    M.setup_term_keymaps(state.term_buf)
+    M.redraw_header()
+  end, opts)
+
+  -- Save current tab (s key)
+  vim.keymap.set("n", "s", function()
+    M.save_current_tab()
+  end, opts)
+
+  -- Kill current tab (x key)
+  vim.keymap.set("n", "x", function()
+    M.kill_tab()
+  end, opts)
+
+  -- Rerun commands
+  vim.keymap.set("n", "r", function()
+    local tab = state.tabs[state.active_tab]
+    if tab and tab.commands and #tab.commands > 0 then
+      state.resetting = true
+      require("exec").open { reset = true }
+    else
+      print "No commands to rerun!"
+    end
+  end, opts)
+
+  -- Tab switching (1-9)
+  for i = 1, 9 do
+    vim.keymap.set("n", tostring(i), function()
+      M.switch_tab(i)
+    end, opts)
+  end
+
+  -- Escape in terminal mode
+  vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]], { buffer = buf, noremap = true, silent = true, nowait = true })
+end
+
+---Initializes terminal for the active tab
+M.init_term = function()
+  -- Load persisted tabs or create first one
+  if #state.tabs == 0 then
+    local saved_tabs = M.load_tabs()
+    if #saved_tabs > 0 then
+      -- Restore saved tabs (create new buffers for each)
+      for _, saved in ipairs(saved_tabs) do
+        M.create_tab { cwd = saved.cwd, commands = saved.commands or {} }
       end
-    end,
-    opts_map
-  )
+    else
+      -- First time: create initial tab with no commands
+      M.create_tab { cwd = state.cwd or vim.fn.getcwd() }
+    end
+  end
 
-  vim.keymap.set(
-    "t",
-    "<Esc>",
-    [[<C-\><C-n>]],
-    { buffer = state.term_buf, noremap = true, silent = true, nowait = true }
-  )
+  -- Set active tab's buffer as current
+  local tab = state.tabs[state.active_tab]
+  if tab then
+    state.term_buf = tab.buf
+    state.cwd = tab.cwd
+  end
+
+  M.setup_term_keymaps(state.term_buf)
 end
 
 ---Execute a command in a buffer, converting it to a terminal if needed
@@ -150,72 +331,27 @@ M.exec_in_buf = function(buf, cmd, terminal, cwd)
         vim.schedule(function()
           if api.nvim_buf_is_valid(buf) then
             vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
+            M.setup_term_keymaps(buf)
 
-            -- local keys = { "i", "I", "a", "A", "o", "O", "c", "C", "s", "S" }
-            -- for _, key in ipairs(keys) do
-            --   vim.keymap.set("n", key, "<Nop>", { buffer = buf, nowait = true })
-            -- end
-
-            vim.keymap.set(
-              "n",
-              state.config.edit_key,
-              function() require("exec.api").edit_cmds() end,
-              {
-                buffer = buf,
-                noremap = true,
-                silent = true,
-              }
-            )
-
-            vim.keymap.set(
-              "n",
-              "t",
-              function()
-                state.resetting = true
-                M.new_term { force_new = true }
-                if state.term_win and api.nvim_win_is_valid(state.term_win) then
-                  api.nvim_win_set_buf(state.term_win, state.term_buf)
-                  -- Spawn a shell (nil command)
-                  M.exec_in_buf(state.term_buf, nil, state.config.terminal, state.cwd)
-                else
-                  require("exec").open()
-                end
-              end,
-              { buffer = buf, noremap = true, silent = true }
-            )
-            
-            vim.keymap.set(
-              "n",
-              "r",
-              function()
-                if #state.commands > 0 then
-                  state.resetting = true
-                  require("exec").open { reset = true }
-                else
-                  print "No commands to rerun!"
-                end
-              end,
-              { buffer = buf, noremap = true, silent = true }
-            )
-
-            vim.keymap.set(
-              "t",
-              "<Esc>",
-              [[<C-\><C-n>]],
-              { buffer = buf, noremap = true, silent = true, nowait = true }
-            )
-
-            vim.keymap.set(
-              "n",
-              "<Esc>",
-              function() require("exec").toggle() end,
-              { buffer = buf, noremap = true, silent = true }
-            )
+            vim.keymap.set("n", "<Esc>", function()
+              require("exec").toggle()
+            end, { buffer = buf, noremap = true, silent = true })
           end
         end)
       end,
     })
   end)
+end
+
+---Resets the current tab's terminal buffer (for rerun)
+M.reset_buf = function()
+  local tab = state.tabs[state.active_tab]
+  if tab and tab.buf and api.nvim_buf_is_valid(tab.buf) then
+    api.nvim_buf_delete(tab.buf, { force = true })
+    -- Create a new buffer for this tab
+    tab.buf = api.nvim_create_buf(false, true)
+    state.term_buf = tab.buf
+  end
 end
 
 return M

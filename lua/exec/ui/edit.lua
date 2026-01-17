@@ -6,7 +6,7 @@ local utils = require "exec.utils"
 local M = {}
 
 M.open = function()
-  state.current_tab = "commands"
+  state.current_view = "commands"
   vim.cmd("stopinsert")
   
   -- If terminal UI is open, close it first to avoid clutter
@@ -52,7 +52,10 @@ M.open = function()
     vim.api.nvim_set_option_value("buftype", "acwrite", { buf = state.edit_buf })
   end
   
-  vim.api.nvim_buf_set_lines(state.edit_buf, 0, -1, false, state.commands)
+  -- Load current tab's commands
+  local tab = state.tabs[state.active_tab]
+  local cmds = (tab and tab.commands) or {}
+  vim.api.nvim_buf_set_lines(state.edit_buf, 0, -1, false, cmds)
   vim.api.nvim_set_option_value("modified", false, { buf = state.edit_buf })
 
   local editor_opts = {
@@ -149,13 +152,16 @@ M.open = function()
 
   vim.keymap.set("n", "<C-s>", function()
     local lines = vim.api.nvim_buf_get_lines(state.edit_buf, 0, -1, false)
-    state.commands = {}
-    for _, line in ipairs(lines) do
-      if line ~= "" then table.insert(state.commands, line) end
+    local tab = state.tabs[state.active_tab]
+    if tab then
+      tab.commands = {}
+      for _, line in ipairs(lines) do
+        if line ~= "" then table.insert(tab.commands, line) end
+      end
+      require("exec.utils").save_tabs()
+      vim.api.nvim_set_option_value("modified", false, { buf = state.edit_buf })
+      print "Commands saved!"
     end
-    require("exec.utils").save_commands(state.commands)
-    vim.api.nvim_set_option_value("modified", false, { buf = state.edit_buf })
-    print "Commands saved!"
   end, { buffer = state.edit_buf, silent = true })
 
   vim.api.nvim_create_autocmd("BufWriteCmd", {

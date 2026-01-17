@@ -1,4 +1,3 @@
-local voltui = require "volt.ui"
 local state = require "exec.state"
 local utils = require "exec.utils"
 
@@ -6,7 +5,11 @@ local M = {}
 
 M.open = function()
   local volt = require "volt"
-  state.current_tab = "term"
+  state.current_view = "term"
+
+  -- Initialize tabs if needed
+  utils.init_term()
+
   -- 1. Create Volt buffer and generate layout to get height
   state.volt_buf = vim.api.nvim_create_buf(false, true)
   local layout = require "exec.ui.layout"
@@ -23,7 +26,6 @@ M.open = function()
   state.h = require("volt.state")[state.volt_buf].h
 
   -- 2. Calculate total height
-  -- Total height = Volt window height + border + Terminal height + border + Footer height + border
   local border_h = 2
   local total_h = state.h + border_h + state.term_h + border_h + state.footer_h + border_h
   local start_row = math.floor((vim.o.lines - total_h) / 2)
@@ -46,10 +48,6 @@ M.open = function()
   vim.api.nvim_win_set_hl_ns(state.win, state.ns)
 
   -- 5. Handle Terminal
-  if not state.term_buf or not vim.api.nvim_buf_is_valid(state.term_buf) then
-    state.term_buf = vim.api.nvim_create_buf(false, true)
-  end
-
   local term_opts = {
     relative = "editor",
     width = state.w,
@@ -98,11 +96,12 @@ M.open = function()
 
   -- Start terminal job if not already running
   if vim.bo[state.term_buf].buftype ~= "terminal" then
-    utils.exec_in_buf(state.term_buf, state.commands, state.config.terminal, state.cwd)
+    local tab = state.tabs[state.active_tab]
+    local cmds = (tab and tab.commands) or {}
+    utils.exec_in_buf(state.term_buf, cmds, state.config.terminal, state.cwd)
   end
 
   -- 7. Setup Volt Mappings for cleanup
-  -- We remove state.term_buf from here to prevent volt.close from deleting it
   volt.mappings {
     bufs = { state.volt_buf, state.footer_buf },
     winclosed_event = true,
@@ -119,8 +118,6 @@ M.open = function()
 
       safe_close(state.term_win)
       state.term_win = nil
-      -- Keep state.term_buf to persist its state
-      -- state.term_buf = nil 
 
       safe_close(state.footer_win)
       state.footer_win = nil
@@ -128,25 +125,22 @@ M.open = function()
     end,
   }
 
-  -- 8. Add mappings to term buffer to close UI since it's no longer in volt.mappings
-  local term_opts = { buffer = state.term_buf, silent = true }
-  vim.keymap.set("n", "q", function() volt.close(state.volt_buf) end, term_opts)
-  vim.keymap.set("n", "<Esc>", function() volt.close(state.volt_buf) end, term_opts)
+  -- 8. Add mappings to term buffer for closing UI
+  local term_map_opts = { buffer = state.term_buf, silent = true }
+  vim.keymap.set("n", "q", function() volt.close(state.volt_buf) end, term_map_opts)
 
   volt.run(state.volt_buf, {
     h = state.h,
     w = state.w,
   })
-  
+
   -- Ghost window fix: Close UI if terminal window is closed via :q
   vim.api.nvim_create_autocmd("WinClosed", {
     pattern = tostring(state.term_win),
     once = true,
     callback = function()
-      -- If we are resetting, don't trigger cleanup
       if state.resetting then return end
 
-      -- Use pcall because volt.close might have already run
       pcall(function()
         vim.schedule(function()
           if state.volt_buf and vim.api.nvim_buf_is_valid(state.volt_buf) then
@@ -156,7 +150,7 @@ M.open = function()
       end)
     end,
   })
-  
+
   vim.schedule(function()
     if state.term_win and vim.api.nvim_win_is_valid(state.term_win) then
       vim.api.nvim_set_current_win(state.term_win)

@@ -4,20 +4,23 @@ local M = {
   xpad = 2,
   w = 80,
   h = 20,
-  current_tab = "term", -- "term" or "commands"
+  current_view = "term", -- "term" or "commands"
 
   last_mode = nil,
-  commands = {},
   cwd = nil,
   resetting = false, -- Flag to prevent cleanup when intentionally reloading UI
 
   volt_buf = nil, -- Main UI buffer
   win = nil, -- Main UI window
 
-  -- Terminal state
+  -- Tab management
+  -- Each tab: { id, buf, cwd, commands = {} }
+  tabs = {},
+  active_tab = 1, -- Current active tab index
+
+  -- Terminal state (current active terminal)
   term_buf = nil,
   term_win = nil,
-  term_bufs = {}, -- Track all terminal buffers
   term_h = 15,
 
   -- Footer state
