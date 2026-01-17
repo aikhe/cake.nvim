@@ -89,14 +89,14 @@ M.open = function()
   vim.api.nvim_win_set_hl_ns(state.edit_container_win, state.term_ns)
 
   local term_w = state.w - (state.xpad * 2)
-  local term_col = container_opts.col + state.xpad + (state.config.border and 1 or 0)
+  local term_col = container_opts.col + state.xpad + 1
 
   local editor_opts = {
     relative = "editor",
     width = term_w,
     height = state.term_h,
     col = term_col,
-    row = container_opts.row + (state.config.border and 1 or 0),
+    row = container_opts.row + 1,
     style = "minimal",
     border = "none",
   }
