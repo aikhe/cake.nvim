@@ -92,10 +92,17 @@ M.switch_tab = function(idx)
       M.exec_in_buf(state.term_buf, cmds, state.config.terminal, tab.cwd)
     end
     M.setup_term_keymaps(state.term_buf)
+
+    vim.schedule(function()
+      if state.term_win and api.nvim_win_is_valid(state.term_win) then
+        api.nvim_set_current_win(state.term_win)
+      end
+    end)
   end
 
   -- Redraw header to update tab highlights
   M.redraw_header()
+  M.redraw_footer()
 end
 
 ---Saves the current session as the active tab
@@ -196,6 +203,68 @@ M.redraw_header = function()
   end
 end
 
+---Redraws the footer to reflect cursor changes
+M.redraw_footer = function()
+  local volt = require "volt"
+  if state.footer_buf and api.nvim_buf_is_valid(state.footer_buf) then
+    volt.redraw(state.footer_buf, "footer")
+  end
+  if state.edit_footer_buf and api.nvim_buf_is_valid(state.edit_footer_buf) then
+    volt.redraw(state.edit_footer_buf, "edit_footer")
+  end
+end
+
+---Sets up cursor events for a buffer to update the footer
+---@param buf number
+M.setup_cursor_events = function(buf)
+  local group = api.nvim_create_augroup("ExecCursor" .. buf, { clear = true })
+
+  -- Normal mode updates
+  api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+    buffer = buf,
+    group = group,
+    callback = function()
+      M.redraw_footer()
+    end,
+  })
+
+  -- Terminal mode updates (requires polling as no events fire)
+  api.nvim_create_autocmd("TermEnter", {
+    buffer = buf,
+    group = group,
+    callback = function()
+      if state.cursor_timer then
+        state.cursor_timer:stop()
+      else
+        state.cursor_timer = vim.uv.new_timer()
+      end
+      
+      state.cursor_timer:start(0, 100, vim.schedule_wrap(function()
+        if state.win and api.nvim_win_is_valid(state.win) then
+          M.redraw_footer()
+        else
+          if state.cursor_timer then
+            state.cursor_timer:stop()
+            state.cursor_timer = nil
+          end
+        end
+      end))
+    end,
+  })
+
+  api.nvim_create_autocmd({ "TermLeave", "BufLeave" }, {
+    buffer = buf,
+    group = group,
+    callback = function()
+      if state.cursor_timer then
+        state.cursor_timer:stop()
+        state.cursor_timer = nil
+      end
+      M.redraw_footer() -- Final update
+    end,
+  })
+end
+
 -- ============================================================================
 -- Commands Persistence
 -- ============================================================================
@@ -266,10 +335,15 @@ M.setup_term_keymaps = function(buf)
     M.redraw_header()
   end, opts)
 
-  -- Save current tab (s key)
-  vim.keymap.set("n", "s", function()
+  -- Save current tab (:w support)
+  -- We use command abbreviation because 'terminal' buftype prevents :w even with BufWriteCmd
+  api.nvim_buf_create_user_command(buf, "ExecSave", function()
     M.save_current_tab()
-  end, opts)
+  end, {})
+  
+  local abbrev_cmd = "cnoreabbrev <expr> <buffer> w getcmdtype() == ':' && getcmdline() == 'w' ? 'ExecSave' : 'w'"
+  vim.cmd(abbrev_cmd)
+  vim.cmd("cnoreabbrev <expr> <buffer> write getcmdtype() == ':' && getcmdline() == 'write' ? 'ExecSave' : 'write'")
 
   -- Kill current tab (x key)
   vim.keymap.set("n", "x", function()
@@ -293,6 +367,8 @@ M.setup_term_keymaps = function(buf)
       M.switch_tab(i)
     end, opts)
   end
+
+  M.setup_cursor_events(buf)
 
   -- Escape in terminal mode
   vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]], { buffer = buf, noremap = true, silent = true, nowait = true })

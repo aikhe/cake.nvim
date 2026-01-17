@@ -4,12 +4,16 @@ local api = require "exec.api"
 local state = require "exec.state"
 local utils = require "exec.utils"
 
+---Setup the plugin with user options
+---@param opts table? Configuration options
 M.setup = function(opts)
   state.config = vim.tbl_deep_extend("force", state.config, opts or {})
 
   if state.config.mapping then require "exec.mappings"() end
 end
 
+---Open the terminal UI
+---@param opts table? { mode: 'float'|'split', reset: boolean }
 M.open = function(opts)
   opts = opts or {}
   state.last_mode = opts.mode or state.last_mode or state.config.mode
@@ -70,6 +74,7 @@ M.open = function(opts)
   state.resetting = false
 end
 
+---Toggle the terminal UI
 M.toggle = function()
   if state.win and vim.api.nvim_win_is_valid(state.win) then
     require("volt").close(state.volt_buf)

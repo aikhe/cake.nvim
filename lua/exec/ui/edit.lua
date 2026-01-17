@@ -5,6 +5,7 @@ local utils = require "exec.utils"
 
 local M = {}
 
+---Opens the editor UI for commands
 M.open = function()
   state.current_view = "commands"
   vim.cmd("stopinsert")
@@ -28,8 +29,19 @@ M.open = function()
   }
 
   local header_h = require("volt.state")[state.edit_volt_buf].h
+  
+  -- Dynamic sizing (same as main UI)
+  state.w = math.floor(vim.o.columns * (state.config.size.w / 100))
+  local target_total_h = math.floor(vim.o.lines * (state.config.size.h / 100))
+  
   local border_h = 2
-  local total_h = header_h + border_h + state.term_h + border_h + state.footer_h + border_h
+  local total_borders = border_h * 3
+  
+  -- Update term_h (reusing state.term_h for editor height consistency)
+  state.term_h = target_total_h - header_h - state.footer_h - total_borders
+  if state.term_h < 1 then state.term_h = 1 end
+
+  local total_h = header_h + state.term_h + state.footer_h + total_borders
   local start_row = math.floor((vim.o.lines - total_h) / 2)
 
   local header_opts = {
@@ -58,14 +70,35 @@ M.open = function()
   vim.api.nvim_buf_set_lines(state.edit_buf, 0, -1, false, cmds)
   vim.api.nvim_set_option_value("modified", false, { buf = state.edit_buf })
 
-  local editor_opts = {
+  vim.api.nvim_set_option_value("modified", false, { buf = state.edit_buf })
+  
+  local container_border = state.config.border and "single" or { " ", " ", " ", " ", " ", " ", " ", " " }
+  state.edit_container_buf = vim.api.nvim_create_buf(false, true)
+
+  local container_opts = {
     relative = "editor",
     width = state.w,
     height = state.term_h,
     col = (vim.o.columns - state.w) / 2,
     row = start_row + header_h + border_h,
     style = "minimal",
-    border = "single",
+    border = container_border,
+  }
+
+  state.edit_container_win = vim.api.nvim_open_win(state.edit_container_buf, false, container_opts)
+  vim.api.nvim_win_set_hl_ns(state.edit_container_win, state.term_ns)
+
+  local term_w = state.w - (state.xpad * 2)
+  local term_col = container_opts.col + state.xpad + (state.config.border and 1 or 0)
+
+  local editor_opts = {
+    relative = "editor",
+    width = term_w,
+    height = state.term_h,
+    col = term_col,
+    row = container_opts.row + (state.config.border and 1 or 0),
+    style = "minimal",
+    border = "none",
   }
   state.edit_win = vim.api.nvim_open_win(state.edit_buf, true, editor_opts)
   -- Use term namespace for background consistency
@@ -108,18 +141,29 @@ M.open = function()
   volt.run(state.edit_volt_buf, { h = header_h, w = state.w })
   volt.run(state.edit_footer_buf, { h = state.footer_h, w = state.w })
 
+  -- Setup cursor events for tracking
+  utils.setup_cursor_events(state.edit_buf)
+
   -- 5. Cleanup logic
   local function close_all()
     local function sc(w) if w and vim.api.nvim_win_is_valid(w) then vim.api.nvim_win_close(w, true) end end
     sc(state.edit_volt_win)
     sc(state.edit_win)
+    sc(state.edit_container_win)
     sc(state.edit_footer_win)
     state.edit_volt_win = nil
     state.edit_win = nil
+    state.edit_container_win = nil
+    state.edit_container_buf = nil
     state.edit_footer_win = nil
     state.edit_volt_buf = nil
     -- state.edit_buf = nil (Persist this buffer)
     state.edit_footer_buf = nil
+
+    if state.cursor_timer then
+      state.cursor_timer:stop()
+      state.cursor_timer = nil
+    end
   end
 
   local mappings_config = {

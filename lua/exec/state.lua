@@ -2,7 +2,7 @@ local M = {
   ns = vim.api.nvim_create_namespace "Exec",
   term_ns = vim.api.nvim_create_namespace "ExecTerm",
   xpad = 2,
-  w = 80,
+  w = 50,
   h = 20,
   current_view = "term", -- "term" or "commands"
 
@@ -21,16 +21,21 @@ local M = {
   -- Terminal state (current active terminal)
   term_buf = nil,
   term_win = nil,
+  container_win = nil, -- Outer container for padding
+  container_buf = nil,
   term_h = 15,
 
   -- Footer state
   footer_buf = nil,
   footer_win = nil,
   footer_h = 1,
+  cursor_timer = nil,
 
   -- Edit UI state
   edit_buf = nil,
   edit_win = nil,
+  edit_container_buf = nil,
+  edit_container_win = nil,
   edit_volt_buf = nil,
   edit_volt_win = nil,
   edit_footer_buf = nil,
@@ -44,7 +49,7 @@ local M = {
     border = false, -- false = invisible border (using colors as padding), true = visible border
     size = {
       h = 60,
-      w = 80,
+      w = 50,
     },
     split_direction = "split", -- "split" or "vsplit"
     split_size = nil, -- size in lines for split window

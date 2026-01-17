@@ -23,11 +23,11 @@ return function(ns)
     colors.white = base46_colors.white
   else
     bg = get_hl("Normal").bg
-    
+
     -- Fallback map
     local function fetch(group, fallback)
-       local val = get_hl(group).fg
-       return val or fallback
+      local val = get_hl(group).fg
+      return val or fallback
     end
 
     colors.red = fetch("DiagnosticError", "#ff5555")
@@ -43,9 +43,7 @@ return function(ns)
 
   -- Handle Transparency
   local transparent = not bg
-  if transparent then
-    bg = "#000000"
-  end
+  if transparent then bg = "#000000" end
 
   -- 2. Setup Backgrounds & Borders
   if state.config.border then
@@ -63,8 +61,12 @@ return function(ns)
     api.nvim_set_hl(ns, "FloatBorder", { fg = window_bg, bg = window_bg })
     -- Terminal darker when border is invisible
     local term_bg = lighten(bg, -2) -- Darker than editor bg
-    api.nvim_set_hl(state.term_ns, "Normal", { bg = term_bg })
-    api.nvim_set_hl(state.term_ns, "FloatBorder", { fg = term_bg, bg = term_bg })
+    api.nvim_set_hl(state.term_ns, "Normal", { bg = window_bg })
+    api.nvim_set_hl(
+      state.term_ns,
+      "FloatBorder",
+      { fg = window_bg, bg = window_bg }
+    )
   end
 
   -- FoldColumn for terminal padding
@@ -75,14 +77,43 @@ return function(ns)
   api.nvim_set_hl(ns, "ExecTitle", { fg = colors.blue, bold = true })
   api.nvim_set_hl(ns, "ExecAccent", { fg = colors.red })
   api.nvim_set_hl(ns, "ExecLabel", { fg = colors.grey })
-  
+
   -- Key: White text on slightly lighter bg
   api.nvim_set_hl(ns, "ExecKey", { fg = colors.white, bg = lighten(bg, 10) })
-  
+
   -- Tabs
-  api.nvim_set_hl(ns, "ExecTabActive", { fg = colors.white, bg = lighten(bg, 15), bold = true })
-  api.nvim_set_hl(ns, "ExecTabInactive", { fg = colors.grey, bg = lighten(bg, 5) }) 
-  
+  if state.config.border then
+    api.nvim_set_hl(
+      ns,
+      "ExecTabActive",
+      { fg = colors.white, bg = bg, bold = true }
+    )
+    api.nvim_set_hl(ns, "ExecTabInactive", { fg = colors.grey, bg = bg })
+  else
+    api.nvim_set_hl(
+      ns,
+      "ExecTabActive",
+      { fg = colors.white, bg = lighten(bg, 2), bold = true }
+    )
+    api.nvim_set_hl(
+      ns,
+      "ExecTabInactive",
+      { fg = colors.grey, bg = lighten(bg, 2) }
+    )
+  end
+
+  -- Window
+  api.nvim_set_hl(
+    ns,
+    "ExecWinActive",
+    { fg = colors.white, bg = lighten(bg, 14), bold = true }
+  )
+  api.nvim_set_hl(
+    ns,
+    "ExecWinInactive",
+    { fg = colors.grey, bg = lighten(bg, 4) }
+  )
+
   -- Expose generic palette for custom usage if needed
   api.nvim_set_hl(ns, "ExecRed", { fg = colors.red })
   api.nvim_set_hl(ns, "ExecGreen", { fg = colors.green })

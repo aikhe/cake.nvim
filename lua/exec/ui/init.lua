@@ -3,6 +3,7 @@ local utils = require "exec.utils"
 
 local M = {}
 
+---Open the main terminal UI
 M.open = function()
   local volt = require "volt"
   state.current_view = "term"
@@ -25,9 +26,24 @@ M.open = function()
 
   state.h = require("volt.state")[state.volt_buf].h
 
-  -- 2. Calculate total height
-  local border_h = 2
-  local total_h = state.h + border_h + state.term_h + border_h + state.footer_h + border_h
+  -- 2. Calculate dynamic dimensions
+  -- Width based on config percentage
+  state.w = math.floor(vim.o.columns * (state.config.size.w / 100))
+
+  -- Total target height based on config percentage
+  local target_total_h = math.floor(vim.o.lines * (state.config.size.h / 100))
+
+  local border_h = 2 -- Single border height (1 top + 1 bottom)
+  local total_borders = border_h * 3 -- Header + Term + Footer borders
+
+  -- Calculate terminal height to fill the remaining space
+  -- term_h = total - header - footer - borders
+  state.term_h = target_total_h - state.h - state.footer_h - total_borders
+
+  -- Safety check for min height
+  if state.term_h < 1 then state.term_h = 1 end
+
+  local total_h = state.h + state.term_h + state.footer_h + total_borders
   local start_row = math.floor((vim.o.lines - total_h) / 2)
 
   -- 3. Create Volt window (Header)
@@ -44,18 +60,39 @@ M.open = function()
   state.win = vim.api.nvim_open_win(state.volt_buf, false, main_opts)
 
   -- 4. Apply highlights
-  require("exec.ui.hl")(state.ns)
+  require "exec.ui.hl"(state.ns)
   vim.api.nvim_win_set_hl_ns(state.win, state.ns)
 
-  -- 5. Handle Terminal
-  local term_opts = {
+  -- 5. Handle Terminal (Container + Inner Terminal)
+  local container_border = state.config.border and "single" or { " ", " ", " ", " ", " ", " ", " ", " " }
+  state.container_buf = vim.api.nvim_create_buf(false, true) -- Empty buffer for container padding
+
+  local container_opts = {
     relative = "editor",
     width = state.w,
     height = state.term_h,
     col = (vim.o.columns - state.w) / 2,
     row = start_row + state.h + border_h,
     style = "minimal",
-    border = "single",
+    border = container_border,
+  }
+
+  state.container_win = vim.api.nvim_open_win(state.container_buf, false, container_opts)
+  -- Use term namespace for container background (padding color)
+  vim.api.nvim_win_set_hl_ns(state.container_win, state.term_ns)
+
+  -- Inner Terminal Options (offset by xpad)
+  local term_w = state.w - (state.xpad * 2)
+  local term_col = container_opts.col + state.xpad + (state.config.border and 1 or 0)
+
+  local term_opts = {
+    relative = "editor",
+    width = term_w,
+    height = state.term_h,
+    col = term_col,
+    row = container_opts.row + (state.config.border and 1 or 0),
+    style = "minimal",
+    border = "none",
   }
 
   state.term_win = vim.api.nvim_open_win(state.term_buf, true, term_opts)
@@ -118,10 +155,19 @@ M.open = function()
 
       safe_close(state.term_win)
       state.term_win = nil
+      
+      safe_close(state.container_win)
+      state.container_win = nil
+      state.container_buf = nil
 
       safe_close(state.footer_win)
       state.footer_win = nil
       state.footer_buf = nil
+
+      if state.cursor_timer then
+        state.cursor_timer:stop()
+        state.cursor_timer = nil
+      end
     end,
   }
 
