@@ -122,11 +122,13 @@ M.open = function()
     state.edit_footer_buf = nil
   end
 
-  volt.mappings {
+  local mappings_config = {
     bufs = { state.edit_volt_buf, state.edit_footer_buf },
     winclosed_event = true,
     after_close = close_all,
   }
+
+  volt.mappings(mappings_config)
 
   -- Ghost window fix: Close UI if edit window is closed via :q
   vim.api.nvim_create_autocmd("WinClosed", {
@@ -137,9 +139,8 @@ M.open = function()
       
       pcall(function()
         vim.schedule(function()
-          if state.edit_volt_buf and vim.api.nvim_buf_is_valid(state.edit_volt_buf) then
-            volt.close(state.edit_volt_buf)
-          end
+          -- Use direct close utility instead of unreliable feedkeys
+          require("volt.utils").close(mappings_config)
         end)
       end)
     end,
@@ -147,11 +148,7 @@ M.open = function()
 
   -- 6. Keymaps
   local close_ui = function()
-    if state.edit_volt_buf and vim.api.nvim_buf_is_valid(state.edit_volt_buf) then
-      volt.close(state.edit_volt_buf)
-    else
-      close_all()
-    end
+      require("volt.utils").close(mappings_config)
   end
 
   vim.keymap.set("n", "q", close_ui, { buffer = state.edit_buf, silent = true, nowait = true })
@@ -181,6 +178,9 @@ M.open = function()
        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-s>", true, false, true), "m", false)
     end
   })
+
+  -- Reset resetting flag to allow cleanup on exit
+  state.resetting = false
 end
 
 return M

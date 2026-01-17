@@ -43,8 +43,8 @@ local M = {
     mapping = true,
     border = false, -- false = invisible border (using colors as padding), true = visible border
     size = {
-      h = 50,
-      w = 50,
+      h = 60,
+      w = 80,
     },
     split_direction = "split", -- "split" or "vsplit"
     split_size = nil, -- size in lines for split window
