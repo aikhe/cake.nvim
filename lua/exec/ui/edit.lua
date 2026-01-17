@@ -196,6 +196,11 @@ M.open = function()
   end
 
   vim.keymap.set("n", "q", close_ui, { buffer = state.edit_buf, silent = true, nowait = true })
+  
+  vim.keymap.set("n", "?", function()
+    require("exec.ui.help").open()
+  end, { buffer = state.edit_buf, silent = true, nowait = true })
+
   vim.keymap.set("n", "<Esc>", close_ui, { buffer = state.edit_buf, silent = true, nowait = true })
 
   vim.keymap.set("n", "p", function()

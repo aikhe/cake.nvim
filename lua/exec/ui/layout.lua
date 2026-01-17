@@ -135,4 +135,27 @@ M.edit_footer_layout = {
   },
 }
 
+---Footer for help view
+M.help_footer_layout = {
+  {
+    lines = function()
+      local line = {
+        { " q ", "ExecKey" },
+        { " 󰈆 Quit ", "ExecLabel" },
+      }
+
+      table.insert(line, { "_pad_" })
+
+      local right = components.cursor_pos()
+
+      for _, v in ipairs(right) do
+        table.insert(line, v)
+      end
+
+      return { voltui.hpad(line, state.w - (state.xpad * 2)) }
+    end,
+    name = "help_footer",
+  },
+}
+
 return M

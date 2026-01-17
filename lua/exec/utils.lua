@@ -370,6 +370,11 @@ M.setup_term_keymaps = function(buf)
 
   M.setup_cursor_events(buf)
 
+  -- Help (?)
+  vim.keymap.set("n", "?", function()
+    require("exec.ui.help").open()
+  end, opts)
+
   -- Escape in terminal mode
   vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]], { buffer = buf, noremap = true, silent = true, nowait = true })
 end

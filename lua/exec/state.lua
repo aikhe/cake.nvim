@@ -41,6 +41,11 @@ local M = {
   edit_footer_buf = nil,
   edit_footer_win = nil,
 
+  -- Help UI state
+  help_buf = nil,
+  help_return_view = nil, -- "term" or "commands"
+  help_prev_buf = nil,    -- buffer ID to restore
+
   job_id = nil, -- current terminal job ID
 
   config = {
