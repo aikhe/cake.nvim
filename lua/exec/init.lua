@@ -4,15 +4,11 @@ local api = require "exec.api"
 local state = require "exec.state"
 local utils = require "exec.utils"
 
----setup the plugin with user config
 ---@param opts table? configuration options
 M.setup = function(opts)
   state.config = vim.tbl_deep_extend("force", state.config, opts or {})
-
-  vim.api.nvim_create_user_command("Exec", function() M.open { reset = true } end, {})
 end
 
----open exec
 ---@param opts table? { mode: 'float'|'split', reset: boolean }
 M.open = function(opts)
   opts = opts or {}
@@ -74,7 +70,6 @@ M.open = function(opts)
   state.resetting = false
 end
 
----toggle exec
 M.toggle = function()
   if state.win and vim.api.nvim_win_is_valid(state.win) then
     require("volt").close(state.volt_buf)
