@@ -7,6 +7,24 @@ local state = require "exec.state"
 ---@return string Path to the tabs file
 M.get_tabs_path = function() return vim.fn.stdpath "data" .. "/exec_tabs.json" end
 
+---returns the current context CWD based on config
+---@return string Path to the directory
+M.get_context_cwd = function()
+  local context_win = state.prev_win or vim.api.nvim_get_current_win()
+  local ok, context_buf = pcall(vim.api.nvim_win_get_buf, context_win)
+  if not ok then context_buf = vim.api.nvim_get_current_buf() end
+
+  -- if we are in a terminal, don't use file dir (not meaningful)
+  local buftype = vim.api.nvim_get_option_value("buftype", { buf = context_buf })
+
+  if state.config.use_file_dir and buftype ~= "terminal" then
+    local path = vim.api.nvim_buf_get_name(context_buf)
+    if path ~= "" then return vim.fn.fnamemodify(path, ":p:h") end
+  end
+
+  return vim.fn.getcwd()
+end
+
 ---loads tabs from the save file
 ---@return table List of tabs
 M.load_tabs = function()
@@ -303,7 +321,7 @@ M.setup_term_keymaps = function(buf)
 
   vim.keymap.set("n", "n", function()
     state.resetting = true
-    local tab = M.create_tab { cwd = state.cwd }
+    local tab = M.create_tab { cwd = M.get_context_cwd() }
     state.active_tab = #state.tabs
     state.term.buf = tab.buf
 
@@ -316,10 +334,11 @@ M.setup_term_keymaps = function(buf)
     M.redraw_header()
   end, opts)
 
-  local abbrev_cmd =
-    "cnoreabbrev <expr> <buffer> w getcmdtype() == ':' && getcmdline() == 'w' ? 'ExecSave' : 'w'"
-  vim.cmd(abbrev_cmd)
-  vim.cmd "cnoreabbrev <expr> <buffer> write getcmdtype() == ':' && getcmdline() == 'write' ? 'ExecSave' : 'write'"
+  vim.api.nvim_buf_call(buf, function()
+    vim.cmd "cnoreabbrev <expr> <buffer> w getcmdtype() == ':' && getcmdline() ==# 'w' ? 'ExecSave' : 'w'"
+    vim.cmd "cnoreabbrev <expr> <buffer> w! getcmdtype() == ':' && getcmdline() ==# 'w!' ? 'ExecSave' : 'w!'"
+    vim.cmd "cnoreabbrev <expr> <buffer> write getcmdtype() == ':' && getcmdline() ==# 'write' ? 'ExecSave' : 'write'"
+  end)
 
   -- kill current tab
   vim.keymap.set("n", "x", function() M.kill_tab() end, opts)

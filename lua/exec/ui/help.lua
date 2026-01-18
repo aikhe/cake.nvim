@@ -29,10 +29,11 @@ M.open = function()
       "n      New Tab",
       "x      Kill Tab",
       "r      Rerun Commands",
-      ":w     Save Tab/Commands",
       "1-9    Switch Tab",
       "?      Help",
-      "q      Quit",
+      "q      Quit in Help",
+      "",
+      ":w     Save Tab/Commands",
       "",
     }
 

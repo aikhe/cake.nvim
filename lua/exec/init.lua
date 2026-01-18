@@ -4,18 +4,6 @@ local api = require "exec.api"
 local state = require "exec.state"
 local utils = require "exec.utils"
 
-local function ensure_setup()
-  if state.setup_done then return end
-
-  local opts = {}
-  local ok, lazy_config = pcall(require, "lazy.core.config")
-  if ok and lazy_config.plugins["exec"] then
-    opts = lazy_config.plugins["exec"].opts or {}
-  end
-
-  M.setup(opts)
-end
-
 ---@param opts table? configuration options
 M.setup = function(opts)
   state.config = vim.tbl_deep_extend("force", state.config, opts or {})
@@ -24,7 +12,6 @@ end
 
 ---@param opts table? { mode: 'float'|'split', reset: boolean }
 M.open = function(opts)
-  ensure_setup()
   opts = opts or {}
   state.last_mode = opts.mode or state.last_mode or state.config.mode
 
@@ -38,25 +25,7 @@ M.open = function(opts)
     require("volt").close(state.volt_buf)
   end
 
-  if not opts.reset then
-    local current_win = vim.api.nvim_get_current_win()
-    local current_buf = vim.api.nvim_win_get_buf(current_win)
-    local is_terminal = vim.bo[current_buf].buftype == "terminal"
-
-    if not is_terminal then
-      if state.config.use_file_dir then
-        local current_file = vim.fn.expand "%:p"
-
-        if current_file ~= "" then
-          state.cwd = vim.fn.fnamemodify(current_file, ":h")
-        else
-          state.cwd = vim.fn.getcwd()
-        end
-      else
-        state.cwd = vim.fn.getcwd()
-      end
-    end
-  end
+  if not opts.reset then state.cwd = utils.get_context_cwd() end
 
   state.prev_win = vim.api.nvim_get_current_win()
 
@@ -85,7 +54,6 @@ M.open = function(opts)
 end
 
 M.toggle = function()
-  ensure_setup()
   if state.win and vim.api.nvim_win_is_valid(state.win) then
     require("volt").close(state.volt_buf)
 
@@ -97,14 +65,8 @@ M.toggle = function()
   end
 end
 
-M.open_float = function()
-  ensure_setup()
-  M.open { mode = "float", reset = true }
-end
+M.open_float = function() M.open { mode = "float", reset = true } end
 
-M.open_split = function()
-  ensure_setup()
-  M.open { mode = "split", reset = true }
-end
+M.open_split = function() M.open { mode = "split", reset = true } end
 
 return M
