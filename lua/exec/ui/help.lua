@@ -54,7 +54,7 @@ M.open = function()
     volt.gen_data {
       {
         buf = footer_buf,
-        layout = layout.help,
+        layout = layout.help_footer,
         xpad = state.xpad,
         ns = state.ns,
       },
