@@ -2,7 +2,7 @@ local state = require "exec.state"
 
 local M = {}
 
----Renders tab numbers in header (simple text like nav)
+---renders tab numbers in header
 M.tabs = function()
   local line = {}
   local num_icons = {
@@ -18,7 +18,7 @@ M.tabs = function()
   }
 
   if #state.tabs == 0 then
-    -- No tabs yet, show placeholder
+    -- placeholder
     local icon = num_icons[1] or "1"
     table.insert(line, { icon .. " ", "ExecTabActive" })
   else
@@ -38,8 +38,8 @@ M.tabs = function()
   return line
 end
 
----Renders navigation indicator (right side)
----@param active string "term" or "commands"
+---navigation indicator
+---@param active string "term" or "cmd"
 M.nav = function(active)
   local term_hl = (active == "term") and "ExecTabActive" or "ExecTabInactive"
   local cmd_hl = (active == "commands") and "ExecTabActive" or "ExecTabInactive"
@@ -59,12 +59,10 @@ M.nav = function(active)
   }
 end
 
----Renders current cursor position (line : col)
+---current cursor position
 M.cursor_pos = function()
   local view = state.current_view
-  if view == "help" then
-    view = state.help_return_view -- Fallback to the underlying view for cursor
-  end
+  if view == "help" then view = state.help_return_view end
 
   local win = (view == "term") and state.term_win or state.edit_win
   if not win or not vim.api.nvim_win_is_valid(win) then

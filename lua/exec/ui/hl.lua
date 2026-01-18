@@ -81,7 +81,7 @@ return function(ns)
   -- Key: White text on slightly lighter bg
   api.nvim_set_hl(ns, "ExecKey", { fg = colors.white, bg = lighten(bg, 10) })
 
-  -- Tabs
+  -- tabs
   if state.config.border then
     api.nvim_set_hl(
       ns,

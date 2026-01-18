@@ -5,39 +5,36 @@ local utils = require "exec.utils"
 
 local M = {}
 
----Opens the editor UI for commands
 M.open = function()
   state.current_view = "commands"
-  vim.cmd("stopinsert")
-  
-  -- If terminal UI is open, close it first to avoid clutter
+  vim.cmd "stopinsert"
+
   if state.win and vim.api.nvim_win_is_valid(state.win) then
     volt.close(state.volt_buf)
   end
 
-  -- 1. Create Header
+  -- header
   local layout = require "exec.ui.layout"
   state.edit_volt_buf = vim.api.nvim_create_buf(false, true)
-  
+
   volt.gen_data {
     {
       buf = state.edit_volt_buf,
-      layout = layout.edit_header_layout,
+      layout = layout.edit_header,
       xpad = state.xpad,
       ns = state.ns,
     },
   }
 
   local header_h = require("volt.state")[state.edit_volt_buf].h
-  
-  -- Dynamic sizing (same as main UI)
+
+  -- dynamic sizing (same as main UI)
   state.w = math.floor(vim.o.columns * (state.config.size.w / 100))
   local target_total_h = math.floor(vim.o.lines * (state.config.size.h / 100))
-  
+
   local border_h = 2
   local total_borders = border_h * 3
-  
-  -- Update term_h (reusing state.term_h for editor height consistency)
+
   state.term_h = target_total_h - header_h - state.footer_h - total_borders
   if state.term_h < 1 then state.term_h = 1 end
 
@@ -53,26 +50,32 @@ M.open = function()
     style = "minimal",
     border = "single",
   }
-  state.edit_volt_win = vim.api.nvim_open_win(state.edit_volt_buf, false, header_opts)
+  state.edit_volt_win =
+    vim.api.nvim_open_win(state.edit_volt_buf, false, header_opts)
   vim.api.nvim_win_set_hl_ns(state.edit_volt_win, state.ns)
 
-  -- 2. Create/Reuse the actual Text Buffer (Editor)
+  -- create/reuse the text buffer
   if not state.edit_buf or not vim.api.nvim_buf_is_valid(state.edit_buf) then
     state.edit_buf = vim.api.nvim_create_buf(false, true)
-    -- Check if name is taken, if so, just use what it has or ignore
+
     pcall(vim.api.nvim_buf_set_name, state.edit_buf, "Exec Commands Edit")
-    vim.api.nvim_set_option_value("buftype", "acwrite", { buf = state.edit_buf })
+    vim.api.nvim_set_option_value(
+      "buftype",
+      "acwrite",
+      { buf = state.edit_buf }
+    )
   end
-  
-  -- Load current tab's commands
+
+  -- load current tab's commands
   local tab = state.tabs[state.active_tab]
   local cmds = (tab and tab.commands) or {}
   vim.api.nvim_buf_set_lines(state.edit_buf, 0, -1, false, cmds)
   vim.api.nvim_set_option_value("modified", false, { buf = state.edit_buf })
 
   vim.api.nvim_set_option_value("modified", false, { buf = state.edit_buf })
-  
-  local container_border = state.config.border and "single" or { " ", " ", " ", " ", " ", " ", " ", " " }
+
+  local container_border = state.config.border and "single"
+    or { " ", " ", " ", " ", " ", " ", " ", " " }
   state.edit_container_buf = vim.api.nvim_create_buf(false, true)
 
   local container_opts = {
@@ -85,7 +88,8 @@ M.open = function()
     border = container_border,
   }
 
-  state.edit_container_win = vim.api.nvim_open_win(state.edit_container_buf, false, container_opts)
+  state.edit_container_win =
+    vim.api.nvim_open_win(state.edit_container_buf, false, container_opts)
   vim.api.nvim_win_set_hl_ns(state.edit_container_win, state.term_ns)
 
   local term_w = state.w - (state.xpad * 2)
@@ -101,16 +105,15 @@ M.open = function()
     border = "none",
   }
   state.edit_win = vim.api.nvim_open_win(state.edit_buf, true, editor_opts)
-  -- Use term namespace for background consistency
+  -- term namespace for background consistency
   vim.api.nvim_win_set_hl_ns(state.edit_win, state.term_ns)
 
-  -- 3. Create Footer
   state.edit_footer_buf = vim.api.nvim_create_buf(false, true)
 
   volt.gen_data {
     {
       buf = state.edit_footer_buf,
-      layout = layout.edit_footer_layout,
+      layout = layout.edit_footer,
       xpad = state.xpad,
       ns = state.ns,
     },
@@ -125,28 +128,30 @@ M.open = function()
     style = "minimal",
     border = "single",
   }
-  state.edit_footer_win = vim.api.nvim_open_win(state.edit_footer_buf, false, footer_opts)
+  state.edit_footer_win =
+    vim.api.nvim_open_win(state.edit_footer_buf, false, footer_opts)
   vim.api.nvim_win_set_hl_ns(state.edit_footer_win, state.ns)
 
   require("volt.events").add { state.edit_volt_buf, state.edit_footer_buf }
 
-  -- Set focus to the editor window
   vim.schedule(function()
     if state.edit_win and vim.api.nvim_win_is_valid(state.edit_win) then
       vim.api.nvim_set_current_win(state.edit_win)
     end
   end)
 
-  -- 4. Apply Volt run for highlights
   volt.run(state.edit_volt_buf, { h = header_h, w = state.w })
   volt.run(state.edit_footer_buf, { h = state.footer_h, w = state.w })
 
-  -- Setup cursor events for tracking
   utils.setup_cursor_events(state.edit_buf)
 
-  -- 5. Cleanup logic
+  -- cleanup
   local function close_all()
-    local function sc(w) if w and vim.api.nvim_win_is_valid(w) then vim.api.nvim_win_close(w, true) end end
+    local function sc(w)
+      if w and vim.api.nvim_win_is_valid(w) then
+        vim.api.nvim_win_close(w, true)
+      end
+    end
     sc(state.edit_volt_win)
     sc(state.edit_win)
     sc(state.edit_container_win)
@@ -157,7 +162,7 @@ M.open = function()
     state.edit_container_buf = nil
     state.edit_footer_win = nil
     state.edit_volt_buf = nil
-    -- state.edit_buf = nil (Persist this buffer)
+    -- state.edit_buf = nil
     state.edit_footer_buf = nil
 
     if state.cursor_timer then
@@ -174,44 +179,55 @@ M.open = function()
 
   volt.mappings(mappings_config)
 
-  -- Ghost window fix: Close UI if edit window is closed via :q
   vim.api.nvim_create_autocmd("WinClosed", {
     pattern = tostring(state.edit_win),
     once = true,
     callback = function()
       if state.resetting then return end
-      
+
       pcall(function()
-        vim.schedule(function()
-          -- Use direct close utility instead of unreliable feedkeys
-          require("volt.utils").close(mappings_config)
-        end)
+        vim.schedule(
+          function() require("volt.utils").close(mappings_config) end
+        )
       end)
     end,
   })
 
-  -- 6. Keymaps
-  local close_ui = function()
-      require("volt.utils").close(mappings_config)
-  end
+  local close_ui = function() require("volt.utils").close(mappings_config) end
 
-  vim.keymap.set("n", "q", close_ui, { buffer = state.edit_buf, silent = true, nowait = true })
-  
-  vim.keymap.set("n", "?", function()
-    require("exec.ui.help").open()
-  end, { buffer = state.edit_buf, silent = true, nowait = true })
+  vim.keymap.set(
+    "n",
+    "q",
+    close_ui,
+    { buffer = state.edit_buf, silent = true, nowait = true }
+  )
 
-  vim.keymap.set("n", "<Esc>", close_ui, { buffer = state.edit_buf, silent = true, nowait = true })
+  vim.keymap.set(
+    "n",
+    "?",
+    function() require("exec.ui.help").open() end,
+    { buffer = state.edit_buf, silent = true, nowait = true }
+  )
 
-  vim.keymap.set("n", "p", function()
-    require("exec").open()
-  end, { buffer = state.edit_buf, silent = true })
+  vim.keymap.set(
+    "n",
+    "<Esc>",
+    close_ui,
+    { buffer = state.edit_buf, silent = true, nowait = true }
+  )
+
+  vim.keymap.set(
+    "n",
+    "p",
+    function() require("exec").open() end,
+    { buffer = state.edit_buf, silent = true }
+  )
 
   vim.keymap.set("n", "<C-s>", function()
     local lines = vim.api.nvim_buf_get_lines(state.edit_buf, 0, -1, false)
-    local tab = state.tabs[state.active_tab]
-    if tab then
-      tab.commands = {}
+    local current_tab = state.tabs[state.active_tab]
+    if current_tab then
+      current_tab.commands = {}
       for _, line in ipairs(lines) do
         if line ~= "" then table.insert(tab.commands, line) end
       end
@@ -224,11 +240,14 @@ M.open = function()
   vim.api.nvim_create_autocmd("BufWriteCmd", {
     buffer = state.edit_buf,
     callback = function()
-       vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-s>", true, false, true), "m", false)
-    end
+      vim.api.nvim_feedkeys(
+        vim.api.nvim_replace_termcodes("<C-s>", true, false, true),
+        "m",
+        false
+      )
+    end,
   })
 
-  -- Reset resetting flag to allow cleanup on exit
   state.resetting = false
 end
 

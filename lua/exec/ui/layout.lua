@@ -4,8 +4,7 @@ local components = require "exec.ui.components"
 
 local M = {}
 
----Header for terminal view: tabs left, nav right (styled like footer)
-M.main_layout = {
+M.header = {
   {
     lines = function()
       local tabs = components.tabs()
@@ -43,8 +42,7 @@ M.main_layout = {
   },
 }
 
----Footer with keybinds
-M.footer_layout = {
+M.footer = {
   {
     lines = function()
       local line = {
@@ -72,20 +70,18 @@ M.footer_layout = {
   },
 }
 
----Header for edit/commands view: tabs left, nav right (commands active)
-M.edit_header_layout = {
+M.edit_header = {
   {
     lines = function()
+      local title = { " 󰆍 exec.nvim ", "ExecTitle" }
       local tabs = components.tabs()
       local nav = components.nav "commands"
-      local title = { " 󰆍 exec.nvim ", "ExecTitle" }
 
       local W = state.w - (state.xpad * 2)
       local w_tabs = voltui.line_w(tabs)
       local w_nav = voltui.line_w(nav)
       local w_title = vim.api.nvim_strwidth(title[1])
 
-      -- Aim for absolute center
       local center_start = math.floor((W - w_title) / 2)
       local pad1 = center_start - w_tabs
       if pad1 < 1 then pad1 = 1 end
@@ -112,8 +108,7 @@ M.edit_header_layout = {
   },
 }
 
----Footer for edit view
-M.edit_footer_layout = {
+M.edit_footer = {
   {
     lines = function()
       local line = {
@@ -135,8 +130,7 @@ M.edit_footer_layout = {
   },
 }
 
----Footer for help view
-M.help_footer_layout = {
+M.help_footer = {
   {
     lines = function()
       local line = {

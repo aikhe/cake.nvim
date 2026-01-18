@@ -4,15 +4,15 @@ local api = require "exec.api"
 local state = require "exec.state"
 local utils = require "exec.utils"
 
----Setup the plugin with user options
----@param opts table? Configuration options
+---setup the plugin with user config
+---@param opts table? configuration options
 M.setup = function(opts)
   state.config = vim.tbl_deep_extend("force", state.config, opts or {})
 
   if state.config.mapping then require "exec.mappings"() end
 end
 
----Open the terminal UI
+---open exec
 ---@param opts table? { mode: 'float'|'split', reset: boolean }
 M.open = function(opts)
   opts = opts or {}
@@ -36,6 +36,7 @@ M.open = function(opts)
     if not is_terminal then
       if state.config.use_file_dir then
         local current_file = vim.fn.expand "%:p"
+
         if current_file ~= "" then
           state.cwd = vim.fn.fnamemodify(current_file, ":h")
         else
@@ -70,11 +71,10 @@ M.open = function(opts)
     })
   end
 
-  -- Reset the flag after everything is established
   state.resetting = false
 end
 
----Toggle the terminal UI
+---toggle exec
 M.toggle = function()
   if state.win and vim.api.nvim_win_is_valid(state.win) then
     require("volt").close(state.volt_buf)

@@ -2,12 +2,9 @@ local M = {}
 
 local state = require "exec.state"
 
----Opens a floating terminal window with exec.nvim using Volt UI
-M.exec_float = function()
-  require("exec.ui").open()
-end
+M.exec_float = function() require("exec.ui").open() end
 
----Opens the terminal in a split window
+-- WIP
 M.exec_split = function()
   if not state.term_buf or not vim.api.nvim_buf_is_valid(state.term_buf) then
     require("exec.utils").init_term()
@@ -22,7 +19,6 @@ M.exec_split = function()
   end
 end
 
----Opens a Volt-powered floating window to edit the current list of commands
 M.edit_cmds = function()
   state.resetting = true
   require("exec.ui.edit").open()
