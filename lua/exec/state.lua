@@ -54,19 +54,19 @@ local M = {
 
   -- WIP
   config = {
-    mode = "float", -- default mode e.g float, split, full
     border = false,
     size = {
       h = 60,
       w = 50,
     },
-    split_direction = "split", -- "split" or "vsplit"
-    split_size = nil, -- size in lines for split window
 
     terminal = "", -- custom terminal e.g. "pwsh", "zsh", "cmd"
-    edit_key = "p",
+    edit_key = "c",
     use_file_dir = false,
 
+    -- mode = "float", -- default mode e.g float, split, full
+    -- split_direction = "h", -- "v" or "h"
+    -- split_size = nil, -- size in lines for split window
     -- exec_at_start = true -- run commands at open
   },
 }

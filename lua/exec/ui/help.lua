@@ -25,7 +25,7 @@ M.open = function()
       "Keybindings",
       "-----------",
       "",
-      "p      Edit Commands",
+      string.format("%-6s Edit Commands", state.config.edit_key),
       "n      New Tab",
       "x      Kill Tab",
       "r      Rerun Commands",

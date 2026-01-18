@@ -46,7 +46,7 @@ M.footer = {
   {
     lines = function()
       local line = {
-        { " p ", "ExecKey" },
+        { " " .. state.config.edit_key .. " ", "ExecKey" },
         { "  Edit Cmd ", "ExecLabel" },
         { " " },
         { " n ", "ExecKey" },
@@ -112,7 +112,7 @@ M.edit_footer = {
   {
     lines = function()
       local line = {
-        { " p ", "ExecKey" },
+        { " " .. state.config.edit_key .. " ", "ExecKey" },
         { "  Terminal ", "ExecLabel" },
       }
 
