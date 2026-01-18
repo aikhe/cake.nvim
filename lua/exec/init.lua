@@ -87,4 +87,7 @@ M.toggle = function()
   end
 end
 
+M.open_float = function() M.open { mode = "float", reset = true } end
+M.open_split = function() M.open { mode = "split", reset = true } end
+
 return M

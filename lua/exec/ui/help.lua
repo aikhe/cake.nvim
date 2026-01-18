@@ -22,17 +22,17 @@ M.open = function()
 
     local help_text = {
       "",
-      "  Keybindings",
-      "  -----------",
+      "Keybindings",
+      "-----------",
       "",
-      "  p      Edit Commands",
-      "  n      New Tab",
-      "  x      Kill Tab",
-      "  r      Rerun Commands",
-      "  :w     Save Tab/Commands",
-      "  1-9    Switch Tab",
-      "  ?      Help",
-      "  q      Quit",
+      "p      Edit Commands",
+      "n      New Tab",
+      "x      Kill Tab",
+      "r      Rerun Commands",
+      ":w     Save Tab/Commands",
+      "1-9    Switch Tab",
+      "?      Help",
+      "q      Quit",
       "",
     }
 
