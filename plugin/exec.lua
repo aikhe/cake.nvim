@@ -15,3 +15,9 @@ vim.api.nvim_create_user_command(
   function() require("exec").open_split() end,
   {}
 )
+
+vim.api.nvim_create_user_command(
+  "ExecSave",
+  function() require("exec.utils").save_current_tab() end,
+  {}
+)

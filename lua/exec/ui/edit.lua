@@ -218,7 +218,7 @@ M.open = function()
 
   vim.keymap.set(
     "n",
-    "p",
+    state.config.edit_key,
     function() require("exec").open() end,
     { buffer = state.edit.buf, silent = true }
   )

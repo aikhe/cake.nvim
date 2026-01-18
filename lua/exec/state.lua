@@ -9,6 +9,7 @@ local M = {
   last_mode = nil,
   cwd = nil,
   resetting = false, -- flag to prevent cleanup when intentionally reloading UI
+  setup_done = false,
 
   volt_buf = nil, -- main UI buffer
   win = nil, -- main UI window

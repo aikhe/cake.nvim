@@ -298,6 +298,9 @@ M.setup_term_keymaps = function(buf)
     opts
   )
 
+  -- escape to toggle/close UI (Normal mode)
+  vim.keymap.set("n", "<Esc>", function() require("exec").toggle() end, opts)
+
   vim.keymap.set("n", "n", function()
     state.resetting = true
     local tab = M.create_tab { cwd = state.cwd }
@@ -312,14 +315,6 @@ M.setup_term_keymaps = function(buf)
     M.setup_term_keymaps(state.term.buf)
     M.redraw_header()
   end, opts)
-
-  -- saving
-  api.nvim_buf_create_user_command(
-    buf,
-    "ExecSave",
-    function() M.save_current_tab() end,
-    {}
-  )
 
   local abbrev_cmd =
     "cnoreabbrev <expr> <buffer> w getcmdtype() == ':' && getcmdline() == 'w' ? 'ExecSave' : 'w'"
@@ -451,13 +446,6 @@ M.exec_in_buf = function(buf, cmd, terminal, cwd)
           if api.nvim_buf_is_valid(buf) then
             vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
             M.setup_term_keymaps(buf)
-
-            vim.keymap.set(
-              "n",
-              "<Esc>",
-              function() require("exec").toggle() end,
-              { buffer = buf, noremap = true, silent = true }
-            )
           end
         end)
       end,

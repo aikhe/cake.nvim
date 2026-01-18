@@ -4,13 +4,27 @@ local api = require "exec.api"
 local state = require "exec.state"
 local utils = require "exec.utils"
 
+local function ensure_setup()
+  if state.setup_done then return end
+
+  local opts = {}
+  local ok, lazy_config = pcall(require, "lazy.core.config")
+  if ok and lazy_config.plugins["exec"] then
+    opts = lazy_config.plugins["exec"].opts or {}
+  end
+
+  M.setup(opts)
+end
+
 ---@param opts table? configuration options
 M.setup = function(opts)
   state.config = vim.tbl_deep_extend("force", state.config, opts or {})
+  state.setup_done = true
 end
 
 ---@param opts table? { mode: 'float'|'split', reset: boolean }
 M.open = function(opts)
+  ensure_setup()
   opts = opts or {}
   state.last_mode = opts.mode or state.last_mode or state.config.mode
 
@@ -71,6 +85,7 @@ M.open = function(opts)
 end
 
 M.toggle = function()
+  ensure_setup()
   if state.win and vim.api.nvim_win_is_valid(state.win) then
     require("volt").close(state.volt_buf)
 
@@ -82,7 +97,14 @@ M.toggle = function()
   end
 end
 
-M.open_float = function() M.open { mode = "float", reset = true } end
-M.open_split = function() M.open { mode = "split", reset = true } end
+M.open_float = function()
+  ensure_setup()
+  M.open { mode = "float", reset = true }
+end
+
+M.open_split = function()
+  ensure_setup()
+  M.open { mode = "split", reset = true }
+end
 
 return M
