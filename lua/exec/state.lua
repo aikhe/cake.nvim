@@ -55,7 +55,6 @@ local M = {
   -- WIP
   config = {
     mode = "float", -- default mode e.g float, split, full
-    mapping = true, -- use default keybind
     border = false,
     size = {
       h = 60,

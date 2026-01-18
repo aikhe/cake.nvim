@@ -9,7 +9,7 @@ local utils = require "exec.utils"
 M.setup = function(opts)
   state.config = vim.tbl_deep_extend("force", state.config, opts or {})
 
-  if state.config.mapping then require "exec.mappings"() end
+  vim.api.nvim_create_user_command("Exec", function() M.open { reset = true } end, {})
 end
 
 ---open exec
