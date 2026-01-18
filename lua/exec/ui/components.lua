@@ -62,9 +62,9 @@ end
 ---current cursor position
 M.cursor_pos = function()
   local view = state.current_view
-  if view == "help" then view = state.help_return_view end
+  if view == "help" then view = state.help.return_view end
 
-  local win = (view == "term") and state.term_win or state.edit_win
+  local win = (view == "term") and state.term.win or state.edit.win
   if not win or not vim.api.nvim_win_is_valid(win) then
     return { { "󰉢 0 : 0 ", "ExecLabel" } }
   end

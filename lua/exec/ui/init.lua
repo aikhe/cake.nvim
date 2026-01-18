@@ -30,11 +30,11 @@ M.open = function()
   local border_h = 2
   local total_borders = border_h * 3
 
-  state.term_h = target_total_h - state.h - state.footer_h - total_borders
+  state.term.h = target_total_h - state.h - state.footer.h - total_borders
 
-  if state.term_h < 1 then state.term_h = 1 end
+  if state.term.h < 1 then state.term.h = 1 end
 
-  local total_h = state.h + state.term_h + state.footer_h + total_borders
+  local total_h = state.h + state.term.h + state.footer.h + total_borders
   local start_row = math.floor((vim.o.lines - total_h) / 2)
 
   local main_opts = {
@@ -55,21 +55,21 @@ M.open = function()
   -- window for border
   local container_border = state.config.border and "single"
     or { " ", " ", " ", " ", " ", " ", " ", " " }
-  state.container_buf = vim.api.nvim_create_buf(false, true)
+  state.container.buf = vim.api.nvim_create_buf(false, true)
 
   local container_opts = {
     relative = "editor",
     width = state.w,
-    height = state.term_h,
+    height = state.term.h,
     col = (vim.o.columns - state.w) / 2,
     row = start_row + state.h + border_h,
     style = "minimal",
     border = container_border,
   }
 
-  state.container_win =
-    vim.api.nvim_open_win(state.container_buf, false, container_opts)
-  vim.api.nvim_win_set_hl_ns(state.container_win, state.term_ns)
+  state.container.win =
+    vim.api.nvim_open_win(state.container.buf, false, container_opts)
+  vim.api.nvim_win_set_hl_ns(state.container.win, state.term_ns)
 
   -- inner terminal
   local term_w = state.w - (state.xpad * 2)
@@ -78,23 +78,23 @@ M.open = function()
   local term_opts = {
     relative = "editor",
     width = term_w,
-    height = state.term_h,
+    height = state.term.h,
     col = term_col,
     row = container_opts.row + 1,
     style = "minimal",
     border = "none",
   }
 
-  state.term_win = vim.api.nvim_open_win(state.term_buf, true, term_opts)
-  vim.api.nvim_win_set_hl_ns(state.term_win, state.term_ns)
-  vim.api.nvim_set_current_win(state.term_win)
+  state.term.win = vim.api.nvim_open_win(state.term.buf, true, term_opts)
+  vim.api.nvim_win_set_hl_ns(state.term.win, state.term_ns)
+  vim.api.nvim_set_current_win(state.term.win)
 
   -- footer
-  state.footer_buf = vim.api.nvim_create_buf(false, true)
+  state.footer.buf = vim.api.nvim_create_buf(false, true)
 
   volt.gen_data {
     {
-      buf = state.footer_buf,
+      buf = state.footer.buf,
       layout = layout.footer,
       xpad = state.xpad,
       ns = state.ns,
@@ -104,33 +104,33 @@ M.open = function()
   local footer_opts = {
     relative = "editor",
     width = state.w,
-    height = state.footer_h,
+    height = state.footer.h,
     col = (vim.o.columns - state.w) / 2,
-    row = start_row + state.h + border_h + state.term_h + border_h,
+    row = start_row + state.h + border_h + state.term.h + border_h,
     style = "minimal",
     border = "single",
   }
 
-  state.footer_win = vim.api.nvim_open_win(state.footer_buf, false, footer_opts)
-  vim.api.nvim_win_set_hl_ns(state.footer_win, state.ns)
+  state.footer.win = vim.api.nvim_open_win(state.footer.buf, false, footer_opts)
+  vim.api.nvim_win_set_hl_ns(state.footer.win, state.ns)
 
-  require("volt.events").add { state.volt_buf, state.footer_buf }
+  require("volt.events").add { state.volt_buf, state.footer.buf }
 
-  volt.run(state.footer_buf, {
-    h = state.footer_h,
+  volt.run(state.footer.buf, {
+    h = state.footer.h,
     w = state.w,
   })
 
   -- start terminal job
-  if vim.bo[state.term_buf].buftype ~= "terminal" then
+  if vim.bo[state.term.buf].buftype ~= "terminal" then
     local tab = state.tabs[state.active_tab]
     local cmds = (tab and tab.commands) or {}
-    utils.exec_in_buf(state.term_buf, cmds, state.config.terminal, state.cwd)
+    utils.exec_in_buf(state.term.buf, cmds, state.config.terminal, state.cwd)
   end
 
   -- volt mappings for cleanup
   volt.mappings {
-    bufs = { state.volt_buf, state.footer_buf },
+    bufs = { state.volt_buf, state.footer.buf },
     winclosed_event = true,
     after_close = function()
       local function safe_close(win)
@@ -143,20 +143,20 @@ M.open = function()
       state.win = nil
       state.volt_buf = nil
 
-      safe_close(state.term_win)
-      state.term_win = nil
+      safe_close(state.term.win)
+      state.term.win = nil
 
-      safe_close(state.container_win)
-      state.container_win = nil
-      state.container_buf = nil
+      safe_close(state.container.win)
+      state.container.win = nil
+      state.container.buf = nil
 
-      safe_close(state.footer_win)
-      state.footer_win = nil
-      state.footer_buf = nil
+      safe_close(state.footer.win)
+      state.footer.win = nil
+      state.footer.buf = nil
 
-      if state.cursor_timer then
-        state.cursor_timer:stop()
-        state.cursor_timer = nil
+      if state.footer.cursor_timer then
+        state.footer.cursor_timer:stop()
+        state.footer.cursor_timer = nil
       end
     end,
   }
@@ -167,7 +167,7 @@ M.open = function()
   })
 
   vim.api.nvim_create_autocmd("WinClosed", {
-    pattern = tostring(state.term_win),
+    pattern = tostring(state.term.win),
     once = true,
     callback = function()
       if state.resetting then return end
@@ -183,8 +183,8 @@ M.open = function()
   })
 
   vim.schedule(function()
-    if state.term_win and vim.api.nvim_win_is_valid(state.term_win) then
-      vim.api.nvim_set_current_win(state.term_win)
+    if state.term.win and vim.api.nvim_win_is_valid(state.term.win) then
+      vim.api.nvim_set_current_win(state.term.win)
     end
   end)
 end

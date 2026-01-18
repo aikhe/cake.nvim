@@ -20,8 +20,8 @@ M.open = function(opts)
 
   if opts.reset then utils.reset_buf() end
 
-  if state.edit_volt_buf and vim.api.nvim_buf_is_valid(state.edit_volt_buf) then
-    require("volt").close(state.edit_volt_buf)
+  if state.edit.volt_buf and vim.api.nvim_buf_is_valid(state.edit.volt_buf) then
+    require("volt").close(state.edit.volt_buf)
   end
 
   if state.volt_buf and vim.api.nvim_buf_is_valid(state.volt_buf) then
@@ -62,11 +62,11 @@ M.open = function(opts)
       once = true,
 
       callback = function()
-        if state.edit_win and vim.api.nvim_win_is_valid(state.edit_win) then
-          vim.api.nvim_win_close(state.edit_win, true)
+        if state.edit.win and vim.api.nvim_win_is_valid(state.edit.win) then
+          vim.api.nvim_win_close(state.edit.win, true)
         end
 
-        state.edit_win = nil
+        state.edit.win = nil
       end,
     })
   end

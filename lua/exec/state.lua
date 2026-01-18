@@ -16,38 +16,46 @@ local M = {
   tabs = {}, -- each tab: { id, buf, cwd, commands = {} }
   active_tab = 1,
 
-  -- current active terminal
-  term_buf = nil,
-  term_win = nil,
+  term = {
+    buf = nil,
+    win = nil,
+    h = 15,
+    job_id = nil,
+  },
 
-  container_win = nil, -- outer container for padding
-  container_buf = nil,
-  term_h = 15,
+  container = {
+    buf = nil,
+    win = nil,
+  },
 
-  footer_buf = nil,
-  footer_win = nil,
-  footer_h = 1,
-  cursor_timer = nil,
+  footer = {
+    buf = nil,
+    win = nil,
+    h = 1,
+    cursor_timer = nil,
+  },
 
-  edit_buf = nil,
-  edit_win = nil,
-  edit_container_buf = nil,
-  edit_container_win = nil,
-  edit_volt_buf = nil,
-  edit_volt_win = nil,
-  edit_footer_buf = nil,
-  edit_footer_win = nil,
+  edit = {
+    buf = nil,
+    win = nil,
+    container_buf = nil,
+    container_win = nil,
+    volt_buf = nil,
+    volt_win = nil,
+    footer_buf = nil,
+    footer_win = nil,
+  },
 
-  help_buf = nil,
-  help_return_view = nil, -- "term" or "commands"
-  help_prev_buf = nil, -- buffer ID to restore
-
-  job_id = nil, -- current terminal job ID
+  help = {
+    buf = nil,
+    return_view = nil, -- "term" or "commands"
+    prev_buf = nil, -- buffer ID to restore
+  },
 
   -- WIP
   config = {
     mode = "float", -- default mode e.g float, split, full
-    mapping = true,
+    mapping = true, -- use default keybind
     border = false,
     size = {
       h = 60,
@@ -59,7 +67,11 @@ local M = {
     terminal = "", -- custom terminal e.g. "pwsh", "zsh", "cmd"
     edit_key = "p",
     use_file_dir = false,
+
+    -- exec_at_start = true -- run commands at open
   },
 }
+
+M.w_with_pad = M.w - (2 * M.xpad)
 
 return M

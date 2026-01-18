@@ -71,22 +71,22 @@ M.switch_tab = function(idx)
 
   state.active_tab = idx
   local tab = state.tabs[idx]
-  state.term_buf = tab.buf
+  state.term.buf = tab.buf
   state.cwd = tab.cwd
 
-  if state.term_win and api.nvim_win_is_valid(state.term_win) then
-    api.nvim_win_set_buf(state.term_win, state.term_buf)
+  if state.term.win and api.nvim_win_is_valid(state.term.win) then
+    api.nvim_win_set_buf(state.term.win, state.term.buf)
 
     -- if buffer is fresh (not a terminal yet), run commands
-    if vim.bo[state.term_buf].buftype ~= "terminal" then
+    if vim.bo[state.term.buf].buftype ~= "terminal" then
       local cmds = tab.commands or {}
-      M.exec_in_buf(state.term_buf, cmds, state.config.terminal, tab.cwd)
+      M.exec_in_buf(state.term.buf, cmds, state.config.terminal, tab.cwd)
     end
-    M.setup_term_keymaps(state.term_buf)
+    M.setup_term_keymaps(state.term.buf)
 
     vim.schedule(function()
-      if state.term_win and api.nvim_win_is_valid(state.term_win) then
-        api.nvim_set_current_win(state.term_win)
+      if state.term.win and api.nvim_win_is_valid(state.term.win) then
+        api.nvim_set_current_win(state.term.win)
       end
     end)
   end
@@ -137,8 +137,8 @@ M.kill_tab = function(idx)
   end
 
   -- switch window to new buffer immediately
-  if state.term_win and api.nvim_win_is_valid(state.term_win) then
-    api.nvim_win_set_buf(state.term_win, new_tab.buf)
+  if state.term.win and api.nvim_win_is_valid(state.term.win) then
+    api.nvim_win_set_buf(state.term.win, new_tab.buf)
 
     -- initialize the new buffer if needed
     if vim.bo[new_tab.buf].buftype ~= "terminal" then
@@ -167,7 +167,7 @@ M.kill_tab = function(idx)
   end
 
   -- update current state refs
-  state.term_buf = new_tab.buf
+  state.term.buf = new_tab.buf
   state.cwd = new_tab.cwd
 
   M.save_tabs()
@@ -181,19 +181,19 @@ M.redraw_header = function()
   if state.volt_buf and api.nvim_buf_is_valid(state.volt_buf) then
     volt.redraw(state.volt_buf, "header")
   end
-  if state.edit_volt_buf and api.nvim_buf_is_valid(state.edit_volt_buf) then
-    volt.redraw(state.edit_volt_buf, "edit_header")
+  if state.edit.volt_buf and api.nvim_buf_is_valid(state.edit.volt_buf) then
+    volt.redraw(state.edit.volt_buf, "edit_header")
   end
 end
 
 ---redraws the footer to reflect cursor changes
 M.redraw_footer = function()
   local volt = require "volt"
-  if state.footer_buf and api.nvim_buf_is_valid(state.footer_buf) then
-    volt.redraw(state.footer_buf, "footer")
+  if state.footer.buf and api.nvim_buf_is_valid(state.footer.buf) then
+    volt.redraw(state.footer.buf, "footer")
   end
-  if state.edit_footer_buf and api.nvim_buf_is_valid(state.edit_footer_buf) then
-    volt.redraw(state.edit_footer_buf, "edit_footer")
+  if state.edit.footer_buf and api.nvim_buf_is_valid(state.edit.footer_buf) then
+    volt.redraw(state.edit.footer_buf, "edit_footer")
   end
 end
 
@@ -214,22 +214,22 @@ M.setup_cursor_events = function(buf)
     buffer = buf,
     group = group,
     callback = function()
-      if state.cursor_timer then
-        state.cursor_timer:stop()
+      if state.footer.cursor_timer then
+        state.footer.cursor_timer:stop()
       else
-        state.cursor_timer = vim.uv.new_timer()
+        state.footer.cursor_timer = vim.uv.new_timer()
       end
 
-      state.cursor_timer:start(
+      state.footer.cursor_timer:start(
         0,
         100,
         vim.schedule_wrap(function()
           if state.win and api.nvim_win_is_valid(state.win) then
             M.redraw_footer()
           else
-            if state.cursor_timer then
-              state.cursor_timer:stop()
-              state.cursor_timer = nil
+            if state.footer.cursor_timer then
+              state.footer.cursor_timer:stop()
+              state.footer.cursor_timer = nil
             end
           end
         end)
@@ -241,9 +241,9 @@ M.setup_cursor_events = function(buf)
     buffer = buf,
     group = group,
     callback = function()
-      if state.cursor_timer then
-        state.cursor_timer:stop()
-        state.cursor_timer = nil
+      if state.footer.cursor_timer then
+        state.footer.cursor_timer:stop()
+        state.footer.cursor_timer = nil
       end
       M.redraw_footer()
     end,
@@ -302,14 +302,14 @@ M.setup_term_keymaps = function(buf)
     state.resetting = true
     local tab = M.create_tab { cwd = state.cwd }
     state.active_tab = #state.tabs
-    state.term_buf = tab.buf
+    state.term.buf = tab.buf
 
-    if state.term_win and api.nvim_win_is_valid(state.term_win) then
-      api.nvim_win_set_buf(state.term_win, state.term_buf)
-      M.exec_in_buf(state.term_buf, nil, state.config.terminal, tab.cwd)
+    if state.term.win and api.nvim_win_is_valid(state.term.win) then
+      api.nvim_win_set_buf(state.term.win, state.term.buf)
+      M.exec_in_buf(state.term.buf, nil, state.config.terminal, tab.cwd)
     end
 
-    M.setup_term_keymaps(state.term_buf)
+    M.setup_term_keymaps(state.term.buf)
     M.redraw_header()
   end, opts)
 
@@ -385,11 +385,11 @@ M.init_term = function()
   -- set active tab's buffer as current
   local tab = state.tabs[state.active_tab]
   if tab then
-    state.term_buf = tab.buf
+    state.term.buf = tab.buf
     state.cwd = tab.cwd
   end
 
-  M.setup_term_keymaps(state.term_buf)
+  M.setup_term_keymaps(state.term.buf)
 end
 
 ---execute a command in a buffer, converting it to a terminal
@@ -434,7 +434,7 @@ M.exec_in_buf = function(buf, cmd, terminal, cwd)
   end
 
   api.nvim_buf_call(buf, function()
-    state.job_id = vim.fn.jobstart(job_cmd, {
+    state.term.job_id = vim.fn.jobstart(job_cmd, {
       term = true,
       cwd = cwd,
       on_exit = function()
@@ -463,7 +463,7 @@ M.reset_buf = function()
     api.nvim_buf_delete(tab.buf, { force = true })
 
     tab.buf = api.nvim_create_buf(false, true)
-    state.term_buf = tab.buf
+    state.term.buf = tab.buf
   end
 end
 
