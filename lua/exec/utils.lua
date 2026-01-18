@@ -392,6 +392,28 @@ M.init_term = function()
   M.setup_term_keymaps(state.term.buf)
 end
 
+local function get_shell_info(terminal)
+  local shell = terminal or state.config.terminal
+  if shell == nil or shell == "" then shell = vim.o.shell end
+
+  local lower = shell:lower()
+  local info = {
+    path = shell,
+    flag = "-c",
+    sep = " && ",
+  }
+
+  if lower:find "powershell" or lower:find "pwsh" then
+    info.flag = "-Command"
+    info.sep = "; "
+  elseif lower:find "cmd" then
+    info.flag = "/c"
+    info.sep = " && "
+  end
+
+  return info
+end
+
 ---execute a command in a buffer, converting it to a terminal
 ---@param buf integer buffer number
 ---@param cmd string|table|nil command to execute (if nil, opens a terminal)
@@ -402,35 +424,22 @@ M.exec_in_buf = function(buf, cmd, terminal, cwd)
 
   if vim.bo[buf].buftype == "terminal" then return end
 
+  local shell_info = get_shell_info(terminal)
   local final_cmd = cmd
+
   if type(cmd) == "table" then
     if #cmd == 0 then
       final_cmd = nil
     else
-      local sep = " && "
-      local term_check = terminal or state.config.terminal or vim.o.shell
-      if term_check:find "powershell" or term_check:find "pwsh" then
-        sep = "; "
-      end
-      final_cmd = table.concat(cmd, sep)
+      final_cmd = table.concat(cmd, shell_info.sep)
     end
   end
 
-  local term = terminal or state.config.terminal or vim.o.shell
   local job_cmd
-
   if final_cmd and final_cmd ~= "" then
-    local flag = "-c"
-
-    if term:find "powershell" or term:find "pwsh" then
-      flag = "-Command"
-    elseif term:find "cmd" then
-      flag = "/c"
-    end
-
-    job_cmd = { term, flag, final_cmd }
+    job_cmd = { shell_info.path, shell_info.flag, final_cmd }
   else
-    job_cmd = term
+    job_cmd = shell_info.path
   end
 
   api.nvim_buf_call(buf, function()
