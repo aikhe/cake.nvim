@@ -55,8 +55,13 @@ end
 
 ---creates a new tab and adds it to the list
 ---@param opts table? options: { cwd, commands }
----@return table
+---@return table|nil
 M.create_tab = function(opts)
+  if #state.tabs >= 9 then
+    vim.notify("Maximum of 9 tabs reached!", vim.log.levels.WARN)
+    return nil
+  end
+
   opts = opts or {}
   local new_buf = vim.api.nvim_create_buf(false, true)
   local cwd = opts.cwd or vim.fn.getcwd()
@@ -335,8 +340,15 @@ M.setup_term_keymaps = function(buf)
   vim.keymap.set("n", "<Esc>", function() require("exec").toggle() end, opts)
 
   vim.keymap.set("n", "n", function()
+    if #state.tabs >= 9 then
+      vim.notify("Maximum of 9 tabs reached!", vim.log.levels.WARN)
+      return
+    end
+
     state.resetting = true
     local tab = M.create_tab { cwd = utils.get_context_cwd() }
+    if not tab then return end
+
     state.active_tab = #state.tabs
     state.term.buf = tab.buf
 

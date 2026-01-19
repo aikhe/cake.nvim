@@ -62,7 +62,7 @@ local M = {
     },
 
     terminal = "", -- custom terminal e.g. "pwsh", "zsh", "cmd"
-    edit_key = "c",
+    edit_key = "p",
     use_file_dir = false,
 
     -- mode = "float", -- default mode e.g float, split, full
