@@ -14,7 +14,7 @@ M.open = function()
   end
 
   -- header
-  local layout = require "exec.ui.layout"
+  local layout = require "exec.layout"
   state.edit.volt_buf = vim.api.nvim_create_buf(false, true)
 
   volt.gen_data {
@@ -143,7 +143,7 @@ M.open = function()
   volt.run(state.edit.volt_buf, { h = header_h, w = state.w })
   volt.run(state.edit.footer_buf, { h = state.footer.h, w = state.w })
 
-  utils.setup_cursor_events(state.edit.buf)
+  require("exec.api").setup_cursor_events(state.edit.buf)
 
   -- cleanup
   local function close_all()
@@ -205,7 +205,7 @@ M.open = function()
   vim.keymap.set(
     "n",
     "?",
-    function() require("exec.ui.help").open() end,
+    function() require("exec.help").open() end,
     { buffer = state.edit.buf, silent = true, nowait = true }
   )
 

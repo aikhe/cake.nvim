@@ -15,7 +15,7 @@ M.open = function(opts)
   opts = opts or {}
   state.last_mode = opts.mode or state.last_mode or state.config.mode
 
-  if opts.reset then utils.reset_buf() end
+  if opts.reset then api.reset_buf() end
 
   if state.edit.volt_buf and vim.api.nvim_buf_is_valid(state.edit.volt_buf) then
     require("volt").close(state.edit.volt_buf)

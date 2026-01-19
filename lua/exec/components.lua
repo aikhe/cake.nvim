@@ -2,7 +2,6 @@ local state = require "exec.state"
 
 local M = {}
 
----renders tab numbers in header
 M.tabs = function()
   local line = {}
   local num_icons = {
@@ -28,7 +27,7 @@ M.tabs = function()
       local icon = num_icons[i] or tostring(i)
 
       local actions = {
-        click = function() require("exec.utils").switch_tab(i) end,
+        click = function() require("exec.api").switch_tab(i) end,
       }
 
       table.insert(line, { icon .. "  ", hl, actions })
@@ -38,7 +37,6 @@ M.tabs = function()
   return line
 end
 
----navigation indicator
 ---@param active string "term" or "cmd"
 M.nav = function(active)
   local term_hl = (active == "term") and "ExecTabActive" or "ExecTabInactive"
@@ -59,7 +57,6 @@ M.nav = function(active)
   }
 end
 
----current cursor position
 M.cursor_pos = function()
   local view = state.current_view
   if view == "help" then view = state.help.return_view end

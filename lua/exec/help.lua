@@ -1,7 +1,7 @@
 local M = {}
 
 local volt = require "volt"
-local layout = require "exec.ui.layout"
+local layout = require "exec.layout"
 local state = require "exec.state"
 
 M.open = function()

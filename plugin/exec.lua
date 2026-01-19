@@ -18,6 +18,6 @@ vim.api.nvim_create_user_command(
 
 vim.api.nvim_create_user_command(
   "ExecSave",
-  function() require("exec.utils").save_current_tab() end,
+  function() require("exec.api").save_current_tab() end,
   {}
 )

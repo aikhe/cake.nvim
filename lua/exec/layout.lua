@@ -1,6 +1,6 @@
 local state = require "exec.state"
 local voltui = require "volt.ui"
-local components = require "exec.ui.components"
+local components = require "exec.components"
 
 local M = {}
 
