@@ -58,7 +58,7 @@ M.open = function()
   if not state.edit.buf or not vim.api.nvim_buf_is_valid(state.edit.buf) then
     state.edit.buf = vim.api.nvim_create_buf(false, true)
 
-    pcall(vim.api.nvim_buf_set_name, state.edit.buf, "Bday Commands Edit")
+    pcall(vim.api.nvim_buf_set_name, state.edit.buf, "Commands")
     vim.api.nvim_set_option_value(
       "buftype",
       "acwrite",
@@ -197,13 +197,6 @@ M.open = function()
 
   vim.keymap.set(
     "n",
-    "q",
-    close_ui,
-    { buffer = state.edit.buf, silent = true, nowait = true }
-  )
-
-  vim.keymap.set(
-    "n",
     "?",
     function() require("bday.help").open() end,
     { buffer = state.edit.buf, silent = true, nowait = true }
@@ -236,7 +229,11 @@ M.open = function()
           if line ~= "" then table.insert(current_tab.commands, line) end
         end
         require("bday.utils").save_tabs()
-        vim.api.nvim_set_option_value("modified", false, { buf = state.edit.buf })
+        vim.api.nvim_set_option_value(
+          "modified",
+          false,
+          { buf = state.edit.buf }
+        )
         vim.notify("Commands saved!", vim.log.levels.INFO)
       end
     end,

@@ -98,7 +98,7 @@ M.open = function()
       buf = state.footer.buf,
       layout = layout.footer,
       xpad = state.xpad,
-      ns = state.ns,
+      ns = state.term_ns,
     },
   }
 
@@ -113,7 +113,7 @@ M.open = function()
   }
 
   state.footer.win = vim.api.nvim_open_win(state.footer.buf, false, footer_opts)
-  vim.api.nvim_win_set_hl_ns(state.footer.win, state.ns)
+  vim.api.nvim_win_set_hl_ns(state.footer.win, state.term_ns)
 
   require("volt.events").add { state.volt_buf, state.footer.buf }
 

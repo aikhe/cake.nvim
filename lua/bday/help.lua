@@ -57,7 +57,7 @@ M.open = function()
         buf = footer_buf,
         layout = layout.help_footer,
         xpad = state.xpad,
-        ns = state.ns,
+        ns = state.term_ns,
       },
     }
 
@@ -100,7 +100,7 @@ M.close = function()
         buf = footer_buf,
         layout = footer_layout,
         xpad = state.xpad,
-        ns = state.ns,
+        ns = state.term_ns,
       },
     }
 

@@ -4,15 +4,15 @@ local M = {
   xpad = 2,
   w = 50,
   h = 20,
-  current_view = "term", -- "term" or "commands"
+  current_view = "term",
 
   last_mode = nil,
   cwd = nil,
-  resetting = false, -- flag to prevent cleanup when intentionally reloading UI
+  resetting = false,
   setup_done = false,
 
-  volt_buf = nil, -- main UI buffer
-  win = nil, -- main UI window
+  volt_buf = nil,
+  win = nil,
 
   tabs = {}, -- each tab: { id, buf, cwd, commands = {} }
   active_tab = 1,
@@ -53,7 +53,6 @@ local M = {
     prev_buf = nil, -- buffer ID to restore
   },
 
-  -- WIP
   config = {
 
     terminal = "", -- custom terminal e.g. "powershell", "zsh", "cmd"
@@ -65,7 +64,8 @@ local M = {
     edit_key = "m",
     use_file_dir = false,
 
-    -- mode = "float", -- default mode e.g float, split, full
+    -- WIP
+    mode = "float", -- default mode e.g float, split, full
     -- split_direction = "h", -- "v" or "h"
     -- split_size = nil, -- size in lines for split window
     -- bday_at_start = true -- run commands at open
