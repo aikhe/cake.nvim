@@ -302,7 +302,6 @@ M.exec_in_buf = function(buf, cmd, terminal, cwd)
   end
 
   vim.api.nvim_buf_call(buf, function()
-    -- Validate cwd is a valid directory
     local valid_cwd = cwd
     if not valid_cwd or vim.fn.isdirectory(valid_cwd) ~= 1 then
       valid_cwd = vim.fn.getcwd()

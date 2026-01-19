@@ -108,7 +108,7 @@ M.get_shell_info = function(terminal)
 
   if lower:find "powershell" or lower:find "pwsh" then
     info.flag = "-Command"
-    info.sep = "; "
+    info.sep = "\n"
   elseif lower:find "cmd" then
     info.flag = "/c"
     info.sep = " && "
