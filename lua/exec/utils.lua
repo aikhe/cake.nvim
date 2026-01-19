@@ -103,12 +103,11 @@ M.get_shell_info = function(terminal)
   local info = {
     path = shell,
     flag = "-c",
-    sep = " && ",
+    sep = "\n",
   }
 
   if lower:find "powershell" or lower:find "pwsh" then
     info.flag = "-Command"
-    info.sep = "\n"
   elseif lower:find "cmd" then
     info.flag = "/c"
     info.sep = " && "

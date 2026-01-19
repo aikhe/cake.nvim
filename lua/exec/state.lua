@@ -55,14 +55,14 @@ local M = {
 
   -- WIP
   config = {
+
+    terminal = "", -- custom terminal e.g. "powershell", "zsh", "cmd"
     border = false,
     size = {
       h = 60,
       w = 50,
     },
-
-    terminal = "", -- custom terminal e.g. "pwsh", "zsh", "cmd"
-    edit_key = "p",
+    edit_key = "m",
     use_file_dir = false,
 
     -- mode = "float", -- default mode e.g float, split, full
