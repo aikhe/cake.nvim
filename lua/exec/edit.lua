@@ -223,28 +223,20 @@ M.open = function()
     { buffer = state.edit.buf, silent = true }
   )
 
-  vim.keymap.set("n", "<C-s>", function()
-    local lines = vim.api.nvim_buf_get_lines(state.edit.buf, 0, -1, false)
-    local current_tab = state.tabs[state.active_tab]
-    if current_tab then
-      current_tab.commands = {}
-      for _, line in ipairs(lines) do
-        if line ~= "" then table.insert(tab.commands, line) end
-      end
-      require("exec.utils").save_tabs()
-      vim.api.nvim_set_option_value("modified", false, { buf = state.edit.buf })
-      print "Commands saved!"
-    end
-  end, { buffer = state.edit.buf, silent = true })
-
   vim.api.nvim_create_autocmd("BufWriteCmd", {
     buffer = state.edit.buf,
     callback = function()
-      vim.api.nvim_feedkeys(
-        vim.api.nvim_replace_termcodes("<C-s>", true, false, true),
-        "m",
-        false
-      )
+      local lines = vim.api.nvim_buf_get_lines(state.edit.buf, 0, -1, false)
+      local current_tab = state.tabs[state.active_tab]
+      if current_tab then
+        current_tab.commands = {}
+        for _, line in ipairs(lines) do
+          if line ~= "" then table.insert(current_tab.commands, line) end
+        end
+        require("exec.utils").save_tabs()
+        vim.api.nvim_set_option_value("modified", false, { buf = state.edit.buf })
+        print "Commands saved!"
+      end
     end,
   })
 
