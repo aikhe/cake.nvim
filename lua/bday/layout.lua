@@ -1,6 +1,6 @@
-local state = require "exec.state"
+local state = require "bday.state"
 local voltui = require "volt.ui"
-local components = require "exec.components"
+local components = require "bday.components"
 
 local M = {}
 
@@ -9,7 +9,7 @@ M.header = {
     lines = function()
       local tabs = components.tabs()
       local nav = components.nav "term"
-      local title = { " 󰆍 exec.nvim ", "ExecTitle" }
+      local title = { " bday.nvim", "BdayTitle" }
 
       local W = state.w - (state.xpad * 2)
       local w_tabs = voltui.line_w(tabs)
@@ -46,14 +46,14 @@ M.footer = {
   {
     lines = function()
       local line = {
-        { " " .. state.config.edit_key .. " ", "ExecKey" },
-        { "  Edit Cmd ", "ExecLabel" },
+        { " " .. state.config.edit_key .. " ", "BdayKey" },
+        { "  Edit Cmd ", "BdayLabel" },
         { " " },
-        { " n ", "ExecKey" },
-        { " 󰓩 New Tab ", "ExecLabel" },
+        { " n ", "BdayKey" },
+        { " 󰓩 New Tab ", "BdayLabel" },
         { " " },
-        { " ? ", "ExecKey" },
-        { "  Help ", "ExecLabel" },
+        { " ? ", "BdayKey" },
+        { "  Help ", "BdayLabel" },
       }
 
       table.insert(line, { "_pad_" })
@@ -73,7 +73,7 @@ M.footer = {
 M.edit_header = {
   {
     lines = function()
-      local title = { " 󰆍 exec.nvim ", "ExecTitle" }
+      local title = { "  bday.nvim ", "BdayTitle" }
       local tabs = components.tabs()
       local nav = components.nav "commands"
 
@@ -112,8 +112,8 @@ M.edit_footer = {
   {
     lines = function()
       local line = {
-        { " " .. state.config.edit_key .. " ", "ExecKey" },
-        { "  Terminal ", "ExecLabel" },
+        { " " .. state.config.edit_key .. " ", "BdayKey" },
+        { "  Terminal ", "BdayLabel" },
       }
 
       table.insert(line, { "_pad_" })
@@ -134,8 +134,8 @@ M.help_footer = {
   {
     lines = function()
       local line = {
-        { " q ", "ExecKey" },
-        { " 󰈆 Quit ", "ExecLabel" },
+        { " q ", "BdayKey" },
+        { " 󰈆 Quit ", "BdayLabel" },
       }
 
       table.insert(line, { "_pad_" })

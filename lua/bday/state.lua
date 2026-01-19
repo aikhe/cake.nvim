@@ -1,6 +1,6 @@
 local M = {
-  ns = vim.api.nvim_create_namespace "Exec",
-  term_ns = vim.api.nvim_create_namespace "ExecTerm",
+  ns = vim.api.nvim_create_namespace "Bday",
+  term_ns = vim.api.nvim_create_namespace "BdayTerm",
   xpad = 2,
   w = 50,
   h = 20,
@@ -68,7 +68,7 @@ local M = {
     -- mode = "float", -- default mode e.g float, split, full
     -- split_direction = "h", -- "v" or "h"
     -- split_size = nil, -- size in lines for split window
-    -- exec_at_start = true -- run commands at open
+    -- bday_at_start = true -- run commands at open
   },
 }
 

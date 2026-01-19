@@ -1,7 +1,7 @@
 local volt = require "volt"
 local voltui = require "volt.ui"
-local state = require "exec.state"
-local utils = require "exec.utils"
+local state = require "bday.state"
+local utils = require "bday.utils"
 
 local M = {}
 
@@ -14,7 +14,7 @@ M.open = function()
   end
 
   -- header
-  local layout = require "exec.layout"
+  local layout = require "bday.layout"
   state.edit.volt_buf = vim.api.nvim_create_buf(false, true)
 
   volt.gen_data {
@@ -58,7 +58,7 @@ M.open = function()
   if not state.edit.buf or not vim.api.nvim_buf_is_valid(state.edit.buf) then
     state.edit.buf = vim.api.nvim_create_buf(false, true)
 
-    pcall(vim.api.nvim_buf_set_name, state.edit.buf, "Exec Commands Edit")
+    pcall(vim.api.nvim_buf_set_name, state.edit.buf, "Bday Commands Edit")
     vim.api.nvim_set_option_value(
       "buftype",
       "acwrite",
@@ -115,7 +115,7 @@ M.open = function()
       buf = state.edit.footer_buf,
       layout = layout.edit_footer,
       xpad = state.xpad,
-      ns = state.ns,
+      ns = state.term_ns,
     },
   }
 
@@ -130,7 +130,7 @@ M.open = function()
   }
   state.edit.footer_win =
     vim.api.nvim_open_win(state.edit.footer_buf, false, footer_opts)
-  vim.api.nvim_win_set_hl_ns(state.edit.footer_win, state.ns)
+  vim.api.nvim_win_set_hl_ns(state.edit.footer_win, state.term_ns)
 
   require("volt.events").add { state.edit.volt_buf, state.edit.footer_buf }
 
@@ -143,7 +143,7 @@ M.open = function()
   volt.run(state.edit.volt_buf, { h = header_h, w = state.w })
   volt.run(state.edit.footer_buf, { h = state.footer.h, w = state.w })
 
-  require("exec.api").setup_cursor_events(state.edit.buf)
+  require("bday.api").setup_cursor_events(state.edit.buf)
 
   -- cleanup
   local function close_all()
@@ -205,26 +205,28 @@ M.open = function()
   vim.keymap.set(
     "n",
     "?",
-    function() require("exec.help").open() end,
+    function() require("bday.help").open() end,
     { buffer = state.edit.buf, silent = true, nowait = true }
   )
 
   vim.keymap.set(
     "n",
     "<Esc>",
-    close_ui,
+    function() require("bday").open() end,
     { buffer = state.edit.buf, silent = true, nowait = true }
   )
 
   vim.keymap.set(
     "n",
     state.config.edit_key,
-    function() require("exec").open() end,
+    function() require("bday").open() end,
     { buffer = state.edit.buf, silent = true }
   )
 
+  local group = vim.api.nvim_create_augroup("BdayEditSave", { clear = true })
   vim.api.nvim_create_autocmd("BufWriteCmd", {
     buffer = state.edit.buf,
+    group = group,
     callback = function()
       local lines = vim.api.nvim_buf_get_lines(state.edit.buf, 0, -1, false)
       local current_tab = state.tabs[state.active_tab]
@@ -233,9 +235,9 @@ M.open = function()
         for _, line in ipairs(lines) do
           if line ~= "" then table.insert(current_tab.commands, line) end
         end
-        require("exec.utils").save_tabs()
+        require("bday.utils").save_tabs()
         vim.api.nvim_set_option_value("modified", false, { buf = state.edit.buf })
-        print "Commands saved!"
+        vim.notify("Commands saved!", vim.log.levels.INFO)
       end
     end,
   })

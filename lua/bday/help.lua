@@ -1,8 +1,8 @@
 local M = {}
 
 local volt = require "volt"
-local layout = require "exec.layout"
-local state = require "exec.state"
+local layout = require "bday.layout"
+local state = require "bday.state"
 
 M.open = function()
   if state.current_view == "help" then return end
@@ -41,7 +41,7 @@ M.open = function()
     vim.api.nvim_set_option_value("modifiable", false, { buf = state.help.buf })
     vim.api.nvim_set_option_value(
       "filetype",
-      "exec_help",
+      "bday_help",
       { buf = state.help.buf }
     )
   end

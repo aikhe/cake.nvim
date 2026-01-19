@@ -1,10 +1,10 @@
 local M = {}
 
-local state = require "exec.state"
+local state = require "bday.state"
 
 ---returns the path to the tabs save file
 ---@return string Path to the tabs file
-M.get_tabs_path = function() return vim.fn.stdpath "data" .. "/exec_tabs.json" end
+M.get_tabs_path = function() return vim.fn.stdpath "data" .. "/bday_tabs.json" end
 
 ---returns the current context CWD based on config
 ---@return string Path to the directory
@@ -62,7 +62,7 @@ end
 ---returns the path to the commands JSON file
 ---@return string path to the commands file
 M.get_cmds_path = function()
-  return vim.fn.stdpath "data" .. "/exec_commands.json"
+  return vim.fn.stdpath "data" .. "/bday_commands.json"
 end
 
 ---loads commands from the persistent JSON file

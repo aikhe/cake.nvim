@@ -1,10 +1,10 @@
 local M = {}
 
-local state = require "exec.state"
+local state = require "bday.state"
 
-M.exec_float = function() require("exec.ui").open() end
+M.bday_float = function() require("bday.ui").open() end
 
-M.exec_split = function()
+M.bday_split = function()
   if not state.term.buf or not vim.api.nvim_buf_is_valid(state.term.buf) then
     M.init_term()
   end
@@ -20,12 +20,12 @@ end
 
 M.edit_cmds = function()
   state.resetting = true
-  require("exec.edit").open()
+  require("bday.edit").open()
 end
 
 ---initializes terminal for the active tab
 M.init_term = function()
-  local utils = require "exec.utils"
+  local utils = require "bday.utils"
 
   if #state.tabs == 0 then
     local saved_tabs = utils.load_tabs()
@@ -97,7 +97,7 @@ M.switch_tab = function(idx)
     -- if buffer is not a terminal yet, run commands
     if vim.bo[state.term.buf].buftype ~= "terminal" then
       local cmds = tab.commands or {}
-      M.exec_in_buf(state.term.buf, cmds, state.config.terminal, tab.cwd)
+      M.bday_in_buf(state.term.buf, cmds, state.config.terminal, tab.cwd)
     end
     M.setup_term_keymaps(state.term.buf)
 
@@ -115,7 +115,7 @@ end
 
 ---saves the current session as the active tab
 M.save_current_tab = function()
-  local utils = require "exec.utils"
+  local utils = require "bday.utils"
   if #state.tabs == 0 then
     print "No tabs to save!"
     return
@@ -132,7 +132,7 @@ end
 ---kills/deletes a tab by index
 ---@param idx number? tab index to kill (defaults to active)
 M.kill_tab = function(idx)
-  local utils = require "exec.utils"
+  local utils = require "bday.utils"
   idx = idx or state.active_tab
   if idx < 1 or idx > #state.tabs then return end
 
@@ -162,7 +162,7 @@ M.kill_tab = function(idx)
     -- initialize the new buffer if needed
     if vim.bo[new_tab.buf].buftype ~= "terminal" then
       local cmds = new_tab.commands or {}
-      M.exec_in_buf(new_tab.buf, cmds, state.config.terminal, new_tab.cwd)
+      M.bday_in_buf(new_tab.buf, cmds, state.config.terminal, new_tab.cwd)
     end
     M.setup_term_keymaps(new_tab.buf)
   end
@@ -222,7 +222,7 @@ end
 ---@param buf number
 M.setup_cursor_events = function(buf)
   local group =
-    vim.api.nvim_create_augroup("ExecCursor" .. buf, { clear = true })
+    vim.api.nvim_create_augroup("BdayCursor" .. buf, { clear = true })
 
   -- normal mode updates
   vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
@@ -277,8 +277,8 @@ end
 ---@param cmd string|table|nil command to execute (if nil, opens a terminal)
 ---@param terminal string|nil custom terminal executable
 ---@param cwd string|nil directory to execute in
-M.exec_in_buf = function(buf, cmd, terminal, cwd)
-  local utils = require "exec.utils"
+M.bday_in_buf = function(buf, cmd, terminal, cwd)
+  local utils = require "bday.utils"
   if not buf or not vim.api.nvim_buf_is_valid(buf) then return end
 
   if vim.bo[buf].buftype == "terminal" then return end
@@ -336,13 +336,13 @@ end
 ---sets up keymaps for a terminal buffer
 ---@param buf number buffer to set keymaps on
 M.setup_term_keymaps = function(buf)
-  local utils = require "exec.utils"
+  local utils = require "bday.utils"
   local opts = { buffer = buf, noremap = true, silent = true }
 
   vim.keymap.set("n", state.config.edit_key, function() M.edit_cmds() end, opts)
 
   -- escape to toggle/close UI (Normal mode)
-  vim.keymap.set("n", "<Esc>", function() require("exec").toggle() end, opts)
+  vim.keymap.set("n", "<Esc>", function() require("bday").toggle() end, opts)
 
   vim.keymap.set("n", "n", function()
     if #state.tabs >= 9 then
@@ -359,7 +359,7 @@ M.setup_term_keymaps = function(buf)
 
     if state.term.win and vim.api.nvim_win_is_valid(state.term.win) then
       vim.api.nvim_win_set_buf(state.term.win, state.term.buf)
-      M.exec_in_buf(state.term.buf, nil, state.config.terminal, tab.cwd)
+      M.bday_in_buf(state.term.buf, nil, state.config.terminal, tab.cwd)
     end
 
     M.setup_term_keymaps(state.term.buf)
@@ -367,9 +367,9 @@ M.setup_term_keymaps = function(buf)
   end, opts)
 
   vim.api.nvim_buf_call(buf, function()
-    vim.cmd "cnoreabbrev <expr> <buffer> w getcmdtype() == ':' && getcmdline() ==# 'w' ? 'ExecSave' : 'w'"
-    vim.cmd "cnoreabbrev <expr> <buffer> w! getcmdtype() == ':' && getcmdline() ==# 'w!' ? 'ExecSave' : 'w!'"
-    vim.cmd "cnoreabbrev <expr> <buffer> write getcmdtype() == ':' && getcmdline() ==# 'write' ? 'ExecSave' : 'write'"
+    vim.cmd "cnoreabbrev <expr> <buffer> w getcmdtype() == ':' && getcmdline() ==# 'w' ? 'BdaySave' : 'w'"
+    vim.cmd "cnoreabbrev <expr> <buffer> w! getcmdtype() == ':' && getcmdline() ==# 'w!' ? 'BdaySave' : 'w!'"
+    vim.cmd "cnoreabbrev <expr> <buffer> write getcmdtype() == ':' && getcmdline() ==# 'write' ? 'BdaySave' : 'write'"
   end)
 
   -- kill current tab
@@ -380,7 +380,7 @@ M.setup_term_keymaps = function(buf)
     local tab = state.tabs[state.active_tab]
     if tab and tab.commands and #tab.commands > 0 then
       state.resetting = true
-      require("exec").open { reset = true }
+      require("bday").open { reset = true }
     else
       print "No commands to rerun!"
     end
@@ -394,7 +394,7 @@ M.setup_term_keymaps = function(buf)
   M.setup_cursor_events(buf)
 
   -- help
-  vim.keymap.set("n", "?", function() require("exec.help").open() end, opts)
+  vim.keymap.set("n", "?", function() require("bday.help").open() end, opts)
 
   -- escape in terminal mode
   vim.keymap.set(

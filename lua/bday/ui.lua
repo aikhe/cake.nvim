@@ -1,5 +1,5 @@
-local state = require "exec.state"
-local utils = require "exec.utils"
+local state = require "bday.state"
+local utils = require "bday.utils"
 
 local M = {}
 
@@ -7,10 +7,10 @@ M.open = function()
   local volt = require "volt"
   state.current_view = "term"
 
-  require("exec.api").init_term()
+  require("bday.api").init_term()
 
   state.volt_buf = vim.api.nvim_create_buf(false, true)
-  local layout = require "exec.layout"
+  local layout = require "bday.layout"
 
   volt.gen_data {
     {
@@ -50,7 +50,7 @@ M.open = function()
   state.win = vim.api.nvim_open_win(state.volt_buf, false, main_opts)
 
   require "volt.highlights"
-  require "exec.hl"(state.ns)
+  require "bday.hl"(state.ns)
   vim.api.nvim_win_set_hl_ns(state.win, state.ns)
 
   -- window for border
@@ -126,7 +126,7 @@ M.open = function()
   if vim.bo[state.term.buf].buftype ~= "terminal" then
     local tab = state.tabs[state.active_tab]
     local cmds = (tab and tab.commands) or {}
-    require("exec.api").exec_in_buf(
+    require("bday.api").bday_in_buf(
       state.term.buf,
       cmds,
       state.config.terminal,

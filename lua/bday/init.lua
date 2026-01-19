@@ -1,8 +1,8 @@
 local M = {}
 
-local api = require "exec.api"
-local state = require "exec.state"
-local utils = require "exec.utils"
+local api = require "bday.api"
+local state = require "bday.state"
+local utils = require "bday.utils"
 
 ---@param opts table? configuration options
 M.setup = function(opts)
@@ -30,9 +30,9 @@ M.open = function(opts)
   state.prev_win = vim.api.nvim_get_current_win()
 
   if state.last_mode == "float" then
-    api.exec_float()
+    api.bday_float()
   else
-    api.exec_split()
+    api.bday_split()
   end
 
   if state.win and vim.api.nvim_win_is_valid(state.win) then
