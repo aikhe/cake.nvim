@@ -49,6 +49,7 @@ M.open = function()
 
   state.win = vim.api.nvim_open_win(state.volt_buf, false, main_opts)
 
+  require "volt.highlights"
   require "exec.hl"(state.ns)
   vim.api.nvim_win_set_hl_ns(state.win, state.ns)
 

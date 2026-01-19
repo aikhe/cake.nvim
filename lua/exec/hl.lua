@@ -1,11 +1,12 @@
 local api = vim.api
-local get_hl = require("volt.utils").get_hl
+local volt_utils = require "volt.utils"
+local get_hl = volt_utils.get_hl
+local mix = require("volt.color").mix
 local lighten = require("volt.color").change_hex_lightness
 local state = require "exec.state"
 
 return function(ns)
   local bg
-
   if vim.g.base46_cache then
     bg = dofile(vim.g.base46_cache .. "colors").black
   else
@@ -37,14 +38,18 @@ return function(ns)
 
   api.nvim_set_hl(state.term_ns, "FoldColumn", { bg = "NONE" })
 
-  local blue = get_hl("Function").fg
-  local grey = get_hl("Comment").fg
+  local exblue = get_hl("ExBlue").fg
+  local commentfg = get_hl("CommentFg").fg
   local white = get_hl("Normal").fg
-  api.nvim_set_hl(ns, "ExecTitle", { fg = blue, bold = true })
-  api.nvim_set_hl(ns, "ExecLabel", { fg = grey })
+
+  api.nvim_set_hl(ns, "ExecTitle", { fg = exblue, bold = true })
+  api.nvim_set_hl(ns, "ExecLabel", { fg = commentfg })
   api.nvim_set_hl(ns, "ExecKey", { fg = white, bg = lighten(bg, 10) })
 
   local tab_bg = state.config.border and bg or lighten(bg, 2)
-  api.nvim_set_hl(ns, "ExecTabActive", { fg = white, bg = tab_bg, bold = true })
-  api.nvim_set_hl(ns, "ExecTabInactive", { fg = grey, bg = tab_bg })
+  local active_tab_bg = not state.config.border and mix(exblue, bg, 85)
+    or lighten(bg, 8)
+
+  api.nvim_set_hl(ns, "ExecTabActive", { fg = white, bg = bg, bold = true })
+  api.nvim_set_hl(ns, "ExecTabInactive", { fg = commentfg, bg = tab_bg })
 end
