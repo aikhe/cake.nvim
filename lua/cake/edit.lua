@@ -1,7 +1,7 @@
 local volt = require "volt"
 local voltui = require "volt.ui"
-local state = require "bday.state"
-local utils = require "bday.utils"
+local state = require "cake.state"
+local utils = require "cake.utils"
 
 local M = {}
 
@@ -14,13 +14,13 @@ M.open = function()
   end
 
   -- header
-  local layout = require "bday.layout"
+  local layout = require "cake.layout"
   state.edit.volt_buf = vim.api.nvim_create_buf(false, true)
 
   volt.gen_data {
     {
       buf = state.edit.volt_buf,
-      layout = layout.edit_header,
+      layout = layout.header,
       xpad = state.xpad,
       ns = state.ns,
     },
@@ -143,7 +143,7 @@ M.open = function()
   volt.run(state.edit.volt_buf, { h = header_h, w = state.w })
   volt.run(state.edit.footer_buf, { h = state.footer.h, w = state.w })
 
-  require("bday.api").setup_cursor_events(state.edit.buf)
+  require("cake.api").setup_cursor_events(state.edit.buf)
 
   -- cleanup
   local function close_all()
@@ -198,25 +198,25 @@ M.open = function()
   vim.keymap.set(
     "n",
     "?",
-    function() require("bday.help").open() end,
+    function() require("cake.help").open() end,
     { buffer = state.edit.buf, silent = true, nowait = true }
   )
 
   vim.keymap.set(
     "n",
     "<Esc>",
-    function() require("bday").open() end,
+    function() require("cake").open() end,
     { buffer = state.edit.buf, silent = true, nowait = true }
   )
 
   vim.keymap.set(
     "n",
     state.config.mappings.edit_commands,
-    function() require("bday").open() end,
+    function() require("cake").open() end,
     { buffer = state.edit.buf, silent = true }
   )
 
-  local group = vim.api.nvim_create_augroup("BdayEditSave", { clear = true })
+  local group = vim.api.nvim_create_augroup("CakeEditSave", { clear = true })
   vim.api.nvim_create_autocmd("BufWriteCmd", {
     buffer = state.edit.buf,
     group = group,
@@ -228,7 +228,7 @@ M.open = function()
         for _, line in ipairs(lines) do
           if line ~= "" then table.insert(current_tab.commands, line) end
         end
-        require("bday.utils").save_tabs()
+        require("cake.utils").save_tabs()
         vim.api.nvim_set_option_value(
           "modified",
           false,

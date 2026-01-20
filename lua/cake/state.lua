@@ -1,6 +1,6 @@
 local M = {
-  ns = vim.api.nvim_create_namespace "Bday",
-  term_ns = vim.api.nvim_create_namespace "BdayTerm",
+  ns = vim.api.nvim_create_namespace "Cake",
+  term_ns = vim.api.nvim_create_namespace "CakeTerm",
   xpad = 2,
   w = 50,
   h = 20,
@@ -60,6 +60,7 @@ local M = {
       h = 60,
       w = 50,
     },
+
     mappings = {
       edit_commands = "m",
       new_tab = "n",
@@ -72,9 +73,10 @@ local M = {
 
     -- WIP
     mode = "float", -- default mode e.g float, split, full
+    -- style = "fancy", -- fancy, minimal
     -- split_direction = "h", -- "v" or "h"
     -- split_size = nil, -- size in lines for split window
-    -- bday_at_start = true -- run commands at open
+    -- run_at_start = true -- run commands at open on float & split
   },
 }
 

@@ -2,7 +2,7 @@ local api = vim.api
 local volt_utils = require "volt.utils"
 local get_hl = volt_utils.get_hl
 local lighten = require("volt.color").change_hex_lightness
-local state = require "bday.state"
+local state = require "cake.state"
 
 return function(ns)
   local bg
@@ -21,13 +21,13 @@ return function(ns)
 
   for _, target_ns in ipairs(target_namespaces) do
     api.nvim_set_hl(target_ns, "Normal", { bg = win_bg })
-    api.nvim_set_hl(target_ns, "BdayHeaderBorder", { fg = win_bg, bg = win_bg })
+    api.nvim_set_hl(target_ns, "CakeHeaderBorder", { fg = win_bg, bg = win_bg })
 
-    api.nvim_set_hl(target_ns, "BdayTitle", { fg = exblue, bold = true })
-    api.nvim_set_hl(target_ns, "BdayLabel", { fg = commentfg })
+    api.nvim_set_hl(target_ns, "CakeTitle", { fg = exblue, bold = true })
+    api.nvim_set_hl(target_ns, "CakeLabel", { fg = commentfg })
     api.nvim_set_hl(
       target_ns,
-      "BdayKey",
+      "CakeKey",
       { fg = text_light, bg = lighten(bg, 10) }
     )
   end
@@ -43,8 +43,8 @@ return function(ns)
 
   api.nvim_set_hl(
     ns,
-    "BdayTabActive",
+    "CakeTabActive",
     { fg = text_light, bg = win_bg, bold = true }
   )
-  api.nvim_set_hl(ns, "BdayTabInactive", { fg = commentfg, bg = win_bg })
+  api.nvim_set_hl(ns, "CakeTabInactive", { fg = commentfg, bg = win_bg })
 end
