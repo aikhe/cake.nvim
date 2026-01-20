@@ -45,14 +45,15 @@ M.header = {
 M.footer = {
   {
     lines = function()
+      local m = state.config.mappings
       local line = {
-        { " " .. state.config.edit_key .. " ", "BdayKey" },
+        { " " .. m.edit_commands .. " ", "BdayKey" },
         { "  Edit Cmd ", "BdayLabel" },
         { " " },
-        { " r ", "BdayKey" },
+        { " " .. m.rerun .. " ", "BdayKey" },
         { "  Rerun ", "BdayLabel" },
         { " " },
-        { " n ", "BdayKey" },
+        { " " .. m.new_tab .. " ", "BdayKey" },
         { " 󰓩 New Tab ", "BdayLabel" },
         { " " },
         { " ? ", "BdayKey" },
@@ -114,8 +115,9 @@ M.edit_header = {
 M.edit_footer = {
   {
     lines = function()
+      local m = state.config.mappings
       local line = {
-        { " " .. state.config.edit_key .. " ", "BdayKey" },
+        { " " .. m.edit_commands .. " ", "BdayKey" },
         { "  Terminal ", "BdayLabel" },
       }
 

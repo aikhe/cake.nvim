@@ -211,7 +211,7 @@ M.open = function()
 
   vim.keymap.set(
     "n",
-    state.config.edit_key,
+    state.config.mappings.edit_commands,
     function() require("bday").open() end,
     { buffer = state.edit.buf, silent = true }
   )

@@ -54,14 +54,20 @@ local M = {
   },
 
   config = {
-
-    terminal = "", -- custom terminal e.g. "powershell", "zsh", "cmd"
+    terminal = "",
     border = false,
     size = {
       h = 60,
       w = 50,
     },
-    edit_key = "m",
+    mappings = {
+      edit_commands = "m",
+      new_tab = "n",
+      rerun = "r",
+      kill_tab = "x",
+      next_tab = "<C-n>",
+      prev_tab = "<C-p>",
+    },
     use_file_dir = false,
 
     -- WIP

@@ -1,5 +1,5 @@
 vim.api.nvim_create_user_command(
-  "Bday",
+  "BdayToggle",
   function() require("bday").toggle() end,
   {}
 )
@@ -16,8 +16,8 @@ vim.api.nvim_create_user_command(
 --   {}
 -- )
 
-vim.api.nvim_create_user_command(
-  "BdaySave",
-  function() require("bday.api").save_current_tab() end,
-  {}
-)
+-- vim.api.nvim_create_user_command(
+--   "BdaySave",
+--   function() require("bday.api").save_current_tab() end,
+--   {}
+-- )

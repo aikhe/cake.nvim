@@ -113,6 +113,22 @@ M.switch_tab = function(idx)
   M.redraw_footer()
 end
 
+---switches to the next tab
+M.next_tab = function()
+  if #state.tabs <= 1 then return end
+  local next_idx = state.active_tab + 1
+  if next_idx > #state.tabs then next_idx = 1 end
+  M.switch_tab(next_idx)
+end
+
+---switches to the previous tab
+M.prev_tab = function()
+  if #state.tabs <= 1 then return end
+  local prev_idx = state.active_tab - 1
+  if prev_idx < 1 then prev_idx = #state.tabs end
+  M.switch_tab(prev_idx)
+end
+
 ---saves the current session as the active tab
 M.save_current_tab = function()
   local utils = require "bday.utils"
@@ -337,14 +353,15 @@ end
 ---@param buf number buffer to set keymaps on
 M.setup_term_keymaps = function(buf)
   local utils = require "bday.utils"
+  local m = state.config.mappings
   local opts = { buffer = buf, noremap = true, silent = true }
 
-  vim.keymap.set("n", state.config.edit_key, function() M.edit_cmds() end, opts)
+  vim.keymap.set("n", m.edit_commands, function() M.edit_cmds() end, opts)
 
   -- escape to toggle/close UI (Normal mode)
   vim.keymap.set("n", "<Esc>", function() require("bday").toggle() end, opts)
 
-  vim.keymap.set("n", "n", function()
+  vim.keymap.set("n", m.new_tab, function()
     if #state.tabs >= 9 then
       vim.notify("Maximum of 9 tabs reached!", vim.log.levels.WARN)
       return
@@ -373,10 +390,10 @@ M.setup_term_keymaps = function(buf)
   end)
 
   -- kill current tab
-  vim.keymap.set("n", "x", function() M.kill_tab() end, opts)
+  vim.keymap.set("n", m.kill_tab, function() M.kill_tab() end, opts)
 
   -- rerun commands
-  vim.keymap.set("n", "r", function()
+  vim.keymap.set("n", m.rerun, function()
     local tab = state.tabs[state.active_tab]
     if tab and tab.commands and #tab.commands > 0 then
       state.resetting = true
@@ -385,6 +402,10 @@ M.setup_term_keymaps = function(buf)
       print "No commands to rerun!"
     end
   end, opts)
+
+  -- next/prev tab
+  vim.keymap.set("n", m.next_tab, function() M.next_tab() end, opts)
+  vim.keymap.set("n", m.prev_tab, function() M.prev_tab() end, opts)
 
   -- tab switching (1-9)
   for i = 1, 9 do

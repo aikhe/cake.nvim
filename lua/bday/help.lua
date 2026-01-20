@@ -20,17 +20,20 @@ M.open = function()
   if not state.help.buf or not vim.api.nvim_buf_is_valid(state.help.buf) then
     state.help.buf = vim.api.nvim_create_buf(false, true)
 
+    local m = state.config.mappings
     local help_text = {
       "",
       "Keybindings",
       "-----------",
       "",
-      string.format("%-6s Edit Commands", state.config.edit_key),
-      "n      New Tab",
-      "x      Kill Tab",
-      "r      Rerun Commands",
-      "1-9    Switch Tab",
-      "?      Help",
+      string.format("%-6s Edit Commands", m.edit_commands),
+      string.format("%-6s New Tab", m.new_tab),
+      string.format("%-6s Kill Tab", m.kill_tab),
+      string.format("%-6s Rerun Commands", m.rerun),
+      string.format("%-6s Next Tab", m.next_tab),
+      string.format("%-6s Prev Tab", m.prev_tab),
+      string.format("%-6s Switch Tab", "1-9"),
+      string.format("%-6s Help", "?"),
       "q      Quit in Help",
       "",
       ":w     Save Tab/Commands",
