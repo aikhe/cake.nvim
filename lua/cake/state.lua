@@ -55,11 +55,13 @@ local M = {
 
   config = {
     terminal = "",
+    title = " cake.nvim",
     border = false,
     size = {
       h = 60,
       w = 50,
     },
+    use_file_dir = false,
 
     mappings = {
       edit_commands = "m",
@@ -69,7 +71,6 @@ local M = {
       next_tab = "<C-n>",
       prev_tab = "<C-p>",
     },
-    use_file_dir = false,
 
     -- WIP
     mode = "float", -- default mode e.g float, split, full

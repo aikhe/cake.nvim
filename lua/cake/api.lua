@@ -4,19 +4,6 @@ local state = require "cake.state"
 
 M.cake_float = function() require("cake.ui").open() end
 
-M.cake_split = function()
-  if not state.term.buf or not vim.api.nvim_buf_is_valid(state.term.buf) then
-    M.init_term()
-  end
-
-  vim.cmd(state.config.split_direction or "split")
-  state.win = vim.api.nvim_get_current_win()
-  vim.api.nvim_win_set_buf(state.win, state.term.buf)
-
-  if state.config.split_size then
-    vim.cmd("resize " .. state.config.split_size)
-  end
-end
 
 M.edit_cmds = function()
   state.resetting = true
@@ -88,6 +75,8 @@ M.switch_tab = function(idx)
 
   state.active_tab = idx
   local tab = state.tabs[idx]
+  if not tab then return end
+
   state.term.buf = tab.buf
   state.cwd = tab.cwd
 
@@ -170,6 +159,8 @@ M.kill_tab = function(idx)
     new_tab = M.create_tab { cwd = state.cwd or vim.fn.getcwd() }
     new_active_idx = 1
   end
+
+  if not new_tab then return end
 
   -- switch window to new buffer immediately
   if state.term.win and vim.api.nvim_win_is_valid(state.term.win) then

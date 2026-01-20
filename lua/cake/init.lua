@@ -29,11 +29,11 @@ M.open = function(opts)
 
   state.prev_win = vim.api.nvim_get_current_win()
 
-  if state.last_mode == "float" then
-    api.cake_float()
-  else
-    api.cake_split()
-  end
+  -- if state.last_mode == "float" then
+  api.cake_float()
+  -- else
+  --   api.cake_split()
+  -- end
 
   if state.win and vim.api.nvim_win_is_valid(state.win) then
     vim.api.nvim_create_autocmd("WinClosed", {
@@ -67,6 +67,6 @@ end
 
 M.open_float = function() M.open { mode = "float", reset = true } end
 
-M.open_split = function() M.open { mode = "split", reset = true } end
+-- M.open_split = function() M.open { mode = "split", reset = true } end
 
 return M

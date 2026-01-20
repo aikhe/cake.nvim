@@ -1,6 +1,9 @@
-# 🍰 Cake
+<h1 align="center">🍰 Cake</h1>
 
-A birthday gift built to streamline my workflow and make commands go woosh, as easy as a piece of cake.
+<p align="center">
+  A birthday gift built to streamline my workflow and make commands go woosh! <br>
+  <b>As easy as a piece of cake</b>.
+</p>
 
 ## Installation
 
@@ -13,15 +16,17 @@ A birthday gift built to streamline my workflow and make commands go woosh, as e
 }
 ```
 
-## Configuration
+## Default Config
 
 ```lua
 {
   terminal = "",
+  title = " cake.nvim",
   border = false,
   size = { h = 60, w = 50 },
   use_file_dir = false, -- use file path as new tab default path
 
+  -- Override Default mappings
   mappings = {
     edit_commands = "m",
     new_tab = "n",
@@ -33,7 +38,7 @@ A birthday gift built to streamline my workflow and make commands go woosh, as e
 }
 ```
 
-## Mappings (Default)
+## Mappings (default)
 
 - `n`: New tab
 - `x`: Close tab

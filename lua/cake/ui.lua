@@ -9,6 +9,8 @@ M.open = function()
 
   require("cake.api").init_term()
 
+  if not state.term.buf then return end
+
   state.volt_buf = vim.api.nvim_create_buf(false, true)
   local layout = require "cake.layout"
 

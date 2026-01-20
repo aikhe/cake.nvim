@@ -9,7 +9,7 @@ M.header = {
     lines = function()
       local tabs = components.tabs()
       local nav = components.nav(state.current_view)
-      local title = { "  cake.nvim ", "CakeTitle" }
+      local title = { state.config.title, "CakeTitle" }
 
       local W = state.w - (state.xpad * 2)
       local w_tabs = voltui.line_w(tabs)
