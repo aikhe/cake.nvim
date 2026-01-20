@@ -5,6 +5,9 @@
   <b>As easy as a piece of cake</b>.
 </p>
 
+![Cake](https://github.com/user-attachments/assets/d43fcd14-04d4-47ea-83f9-169d21ca3fb2)
+![Cake Border](https://github.com/user-attachments/assets/3255d24e-6239-453f-b56f-e04feb758883)
+
 ## Install
 
 ```lua
