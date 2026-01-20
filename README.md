@@ -5,7 +5,7 @@
   <b>As easy as a piece of cake</b>.
 </p>
 
-## Installation
+## Install
 
 ```lua
 {
@@ -24,9 +24,9 @@
   title = " cake.nvim",
   border = false,
   size = { h = 60, w = 50 },
-  use_file_dir = false, -- use file path as new tab default path
+  use_file_dir = false, -- Use file path as new tab default path
 
-  -- Override Default mappings
+  -- Override default mappings
   mappings = {
     edit_commands = "m",
     new_tab = "n",

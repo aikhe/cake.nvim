@@ -81,6 +81,4 @@ local M = {
   },
 }
 
-M.w_with_pad = M.w - (2 * M.xpad)
-
 return M

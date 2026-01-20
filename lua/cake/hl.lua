@@ -21,7 +21,6 @@ return function(ns)
 
   for _, target_ns in ipairs(target_namespaces) do
     api.nvim_set_hl(target_ns, "Normal", { bg = win_bg })
-    api.nvim_set_hl(target_ns, "CakeHeaderBorder", { fg = win_bg, bg = win_bg })
 
     api.nvim_set_hl(target_ns, "CakeTitle", { fg = exblue, bold = true })
     api.nvim_set_hl(target_ns, "CakeLabel", { fg = commentfg })
@@ -33,7 +32,9 @@ return function(ns)
   end
 
   local term_border_fg = state.config.border and lighten(bg, 15) or win_bg
-  api.nvim_set_hl(ns, "FloatBorder", { fg = win_bg, bg = win_bg })
+  local header_border_fg = state.config.border and text_light or win_bg
+
+  api.nvim_set_hl(ns, "FloatBorder", { fg = header_border_fg, bg = win_bg })
   api.nvim_set_hl(
     state.term_ns,
     "FloatBorder",

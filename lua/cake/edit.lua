@@ -193,8 +193,6 @@ M.open = function()
     end,
   })
 
-  local close_ui = function() require("volt.utils").close(mappings_config) end
-
   vim.keymap.set(
     "n",
     "?",
@@ -222,12 +220,14 @@ M.open = function()
     group = group,
     callback = function()
       local lines = vim.api.nvim_buf_get_lines(state.edit.buf, 0, -1, false)
+
+      while #lines > 0 and lines[#lines] == "" do
+        table.remove(lines)
+      end
+
       local current_tab = state.tabs[state.active_tab]
       if current_tab then
-        current_tab.commands = {}
-        for _, line in ipairs(lines) do
-          if line ~= "" then table.insert(current_tab.commands, line) end
-        end
+        current_tab.commands = lines
         require("cake.utils").save_tabs()
         vim.api.nvim_set_option_value(
           "modified",
