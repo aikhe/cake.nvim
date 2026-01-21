@@ -76,7 +76,7 @@ local M = {
 
     mappings = {
       edit_commands = "m",
-      edit_cwd = "d",
+      edit_cwd = ";",
       new_tab = "n",
       rerun = "r",
       kill_tab = "x",

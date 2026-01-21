@@ -1,26 +1,24 @@
 <h1 align="center">🍰 Cake</h1>
 
 <p align="center">
-  A birthday gift to streamline workflow by making commands go woosh! in Neovim<br>
-  <i>"As easy as a piece of cake"</i>
+  A Neovim plugin to simplify command management into<br>
+  <i>a piece of cake.</i><br><br>
+  <img src="https://img.shields.io/badge/-neovim-%23eeeeee?style=flat-square&amp;logo=neovim&amp;logoColor=black" alt="" >
+  <img src="https://img.shields.io/badge/-lua-%23eeeeee?style=flat-square&amp;logo=lua&amp;logoColor=black" alt="" >
 </p>
 
-![Cake](https://github.com/user-attachments/assets/1bd0e633-0574-4cf3-a504-8797b51151b1)
-![Cake Border](https://github.com/user-attachments/assets/a2282faf-0649-4f89-b619-69b0b1e9e00a)
+![cake-nb](https://github.com/user-attachments/assets/21ecb7f0-3df8-4af3-b2fc-a262f17f2d27)
+![cake-wb](https://github.com/user-attachments/assets/95f4a53d-beda-49ab-9469-1a46137d1d56)
 
 > [!IMPORTANT]
-> I celebrated my birthday by building the first iteration of this plugin! It’s currently in its early stages, so I’d love to hear your feedback or see your contributions. 🍰
+> I celebrated my birthday by building the first iteration of this plugin! It’s still in its early stages, so I’d love to hear any feedbacks, issues, and contributions if you have any 🍰
 
 ## Features
 
 - **Tabbed Workflow**: Organize and run commands per tab.
 - **Command Management**: Create, edit, and execute reusable command lists.
 - **Session Persistence**: Save and restore tabs, commands, and working directories.
-- **Fast Reruns**: Rerun commands with a single keypress.
 - **UI Layer**: Built on top of [`nvzone/volt`](https://github.com/nvzone/volt).
-
-> [!NOTE]
-> Cake.nvim is not a terminal replacement like [toggleterm.nvim](https://github.com/akinsho/toggleterm.nvim), [floaterm](https://github.com/nvzone/floaterm) or [tmux](https://github.com/tmux/tmux); it handles lightweight command execution.
 
 ## Installation
 
@@ -39,6 +37,18 @@
 }
 ```
 
+**Keymaps (Optional)**:
+
+```lua
+vim.keymap.set('n', '<leader>cf', function()
+    require('cake').open_float()
+end, { desc = 'Cake Float' })
+
+vim.keymap.set('n', '<leader>ct', function()
+    require('cake').toggle()
+end, { desc = 'Cake Toggle' })
+```
+
 ## Default Config
 
 ```lua
@@ -51,8 +61,9 @@
 
   -- Override default mappings
   mappings = {
-    edit_commands = "m",
     new_tab = "n",
+    edit_commands = "m",
+    edit_cwd = ";",
     rerun = "r",
     kill_tab = "x",
     next_tab = "<C-n>",
@@ -65,34 +76,17 @@
 
 These are the default mappings that are available when cake is open:
 
-| Key     | Action         |
-| ------- | -------------- |
-| `n`     | New tab        |
-| `x`     | Close tab      |
-| `<C-n>` | Next tab       |
-| `<C-p>` | Previous tab   |
-| `1–9`   | Switch tabs    |
-| `m`     | Edit commands  |
-| `r`     | Rerun commands |
-| `?`     | Help           |
+| Key     | Action            |
+| ------- | ----------------- |
+| `m`     | Edit commands     |
+| `;`     | Edit commands cwd |
+| `r`     | Rerun commands    |
+| `n`     | New tab           |
+| `x`     | Close tab         |
+| `<C-n>` | Next tab          |
+| `<C-p>` | Previous tab      |
+| `1–9`   | Switch tabs       |
+| `?`     | Help              |
 
-Add Keymap:
-
-```lua
-keys = {
-  {
-    '<leader>cf',
-    function()
-      require('cake').open_float()
-    end,
-    desc = 'Cake Float',
-  },
-  {
-    '<leader>ct',
-    function()
-      require('cake').toggle()
-    end,
-    desc = 'Cake Toggle',
-  },
-},
-```
+> [!NOTE]
+> Cake isn’t a terminal replacement. It’s designed for fast, seamless command execution rather than full terminal workflows like those provided by [toggleterm.nvim](https://github.com/akinsho/toggleterm.nvim), [floaterm](https://github.com/nvzone/floaterm) or [tmux](https://github.com/tmux/tmux).
