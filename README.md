@@ -1,20 +1,40 @@
 <h1 align="center">🍰 Cake</h1>
 
 <p align="center">
-  A birthday gift built to streamline my workflow and make commands go woosh! <br>
-  <b>As easy as a piece of cake</b>.
+  A birthday gift to streamline workflow by making commands go woosh! in Neovim<br>
+  <i>"As easy as a piece of cake"</i>
 </p>
 
-![Cake](https://github.com/user-attachments/assets/d43fcd14-04d4-47ea-83f9-169d21ca3fb2)
-![Cake Border](https://github.com/user-attachments/assets/3255d24e-6239-453f-b56f-e04feb758883)
+![Cake](https://github.com/user-attachments/assets/1bd0e633-0574-4cf3-a504-8797b51151b1)
+![Cake Border](https://github.com/user-attachments/assets/a2282faf-0649-4f89-b619-69b0b1e9e00a)
 
-## Install
+> [!IMPORTANT]
+> I built this on my birthday, so it’s still in an early stage. feedbacks and contributions are very welcome! 🍰
+
+## Features
+
+- **Tabbed Workflow**: Organize and run commands per tab.
+- **Command Management**: Create, edit, and execute reusable command lists.
+- **Session Persistence**: Save and restore tabs, commands, and working directories.
+- **Fast Reruns**: Rerun commands with a single keypress.
+- **UI Layer**: Built on top of [`nvzone/volt`](https://github.com/nvzone/volt).
+
+> [!NOTE]
+> Cake.nvim is not a terminal replacement like [toggleterm.nvim](https://github.com/akinsho/toggleterm.nvim), [floaterm](https://github.com/nvzone/floaterm) or [tmux](https://github.com/tmux/tmux); it handles lightweight command execution.
+
+## Installation
+
+**Requirements**:
+
+- **Neovim** >= 0.9.0
+- [`nvzone/volt`](https://github.com/nvzone/volt) (UI framework dependency)
+- A [Nerd Font](https://www.nerdfonts.com/) (for icons)
 
 ```lua
 {
-  "aikhe/bday",
+  "aikhe/cake.nvim",
   dependencies = "nvzone/volt",
-  cmd = { "BdayToggle", "BdayFloat" },
+  cmd = { "CakeToggle", "CakeFloat" },
   opts = {},
 }
 ```
@@ -41,14 +61,39 @@
 }
 ```
 
-## Mappings (default)
+## Mappings
 
-- `n`: New tab
-- `x`: Close tab
-- `m`: Edit commands
-- `r`: Rerun commands
-- `<C-n>`: Next tab
-- `<C-p>`: Previous tab
-- `1-9`: Switch tabs
-- `?`: Help
-- `<Esc>`: Toggle/Close
+These are the default mappings that are available when cake is open:
+
+| Key     | Action         |
+| ------- | -------------- |
+| `n`     | New tab        |
+| `x`     | Close tab      |
+| `<C-n>` | Next tab       |
+| `<C-p>` | Previous tab   |
+| `1–9`   | Switch tabs    |
+| `m`     | Edit commands  |
+| `r`     | Rerun commands |
+| `?`     | Help           |
+
+Add Keymap:
+
+```lua
+keys = {
+  {
+    '<leader>cf',
+    function()
+      require('cake').open_float()
+    end,
+    desc = 'Cake Float',
+  },
+  {
+    '<leader>ct',
+    function()
+      require('cake').toggle()
+    end,
+    desc = 'Cake Toggle',
+  },
+},
+```
+
