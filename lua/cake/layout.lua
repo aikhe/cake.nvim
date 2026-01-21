@@ -81,6 +81,9 @@ M.edit_footer = {
       local line = {
         { " " .. m.edit_commands .. " ", "CakeKey" },
         { "  Terminal ", "CakeLabel" },
+        { " " },
+        { " " .. m.edit_cwd .. " ", "CakeKey" },
+        { "  Edit CWD ", "CakeLabel" },
       }
 
       table.insert(line, { "_pad_" })
@@ -94,6 +97,29 @@ M.edit_footer = {
       return { voltui.hpad(line, state.w - (state.xpad * 2)) }
     end,
     name = "edit_footer",
+  },
+}
+
+M.cwd_footer = {
+  {
+    lines = function()
+      local m = state.config.mappings
+      local line = {
+        { " " .. m.edit_cwd .. " ", "CakeKey" },
+        { "  Back ", "CakeLabel" },
+      }
+
+      table.insert(line, { "_pad_" })
+
+      local right = components.cursor_pos()
+
+      for _, v in ipairs(right) do
+        table.insert(line, v)
+      end
+
+      return { voltui.hpad(line, state.w - (state.xpad * 2)) }
+    end,
+    name = "cwd_footer",
   },
 }
 

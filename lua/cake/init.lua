@@ -21,6 +21,10 @@ M.open = function(opts)
     require("volt").close(state.edit.volt_buf)
   end
 
+  if state.cwd_edit.volt_buf and vim.api.nvim_buf_is_valid(state.cwd_edit.volt_buf) then
+    require("volt").close(state.cwd_edit.volt_buf)
+  end
+
   if state.volt_buf and vim.api.nvim_buf_is_valid(state.volt_buf) then
     require("volt").close(state.volt_buf)
   end

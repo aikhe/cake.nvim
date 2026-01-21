@@ -9,7 +9,7 @@
 ![Cake Border](https://github.com/user-attachments/assets/a2282faf-0649-4f89-b619-69b0b1e9e00a)
 
 > [!IMPORTANT]
-> I built this on my birthday, so it’s still in an early stage. feedbacks and contributions are very welcome! 🍰
+> I celebrated my birthday by building the first iteration of this plugin! It’s currently in its early stages, so I’d love to hear your feedback or see your contributions. 🍰
 
 ## Features
 
@@ -96,4 +96,3 @@ keys = {
   },
 },
 ```
-

@@ -47,6 +47,17 @@ local M = {
     footer_win = nil,
   },
 
+  cwd_edit = {
+    buf = nil,
+    win = nil,
+    container_buf = nil,
+    container_win = nil,
+    volt_buf = nil,
+    volt_win = nil,
+    footer_buf = nil,
+    footer_win = nil,
+  },
+
   help = {
     buf = nil,
     return_view = nil, -- "term" or "commands"
@@ -65,6 +76,7 @@ local M = {
 
     mappings = {
       edit_commands = "m",
+      edit_cwd = "d",
       new_tab = "n",
       rerun = "r",
       kill_tab = "x",
