@@ -10,17 +10,17 @@ local function cleanup_view_state(view_s)
       vim.api.nvim_win_close(w, true)
     end
   end
-  sc(view_s.volt_win)
+  sc(view_s.header_win)
   sc(view_s.win)
   sc(view_s.container_win)
   sc(view_s.footer_win)
 
-  view_s.volt_win = nil
+  view_s.header_win = nil
   view_s.win = nil
   view_s.container_win = nil
   view_s.container_buf = nil
   view_s.footer_win = nil
-  view_s.volt_buf = nil
+  view_s.header_buf = nil
   view_s.footer_buf = nil
 end
 
@@ -28,12 +28,12 @@ local function setup_view(opts)
   local view_s = opts.view_state
 
   -- setup volt buffers
-  view_s.volt_buf = vim.api.nvim_create_buf(false, true)
+  view_s.header_buf = vim.api.nvim_create_buf(false, true)
   view_s.footer_buf = vim.api.nvim_create_buf(false, true)
 
   volt.gen_data {
     {
-      buf = view_s.volt_buf,
+      buf = view_s.header_buf,
       layout = opts.header,
       xpad = state.xpad,
       ns = state.ns,
@@ -46,7 +46,7 @@ local function setup_view(opts)
     },
   }
 
-  local header_h = require("volt.state")[view_s.volt_buf].h
+  local header_h = require("volt.state")[view_s.header_buf].h
 
   -- sizing
   state.w = math.floor(vim.o.columns * (state.config.size.w / 100))
@@ -69,8 +69,8 @@ local function setup_view(opts)
     style = "minimal",
     border = "single",
   }
-  view_s.volt_win = vim.api.nvim_open_win(view_s.volt_buf, false, header_opts)
-  vim.api.nvim_win_set_hl_ns(view_s.volt_win, state.ns)
+  view_s.header_win = vim.api.nvim_open_win(view_s.header_buf, false, header_opts)
+  vim.api.nvim_win_set_hl_ns(view_s.header_win, state.ns)
 
   -- text buffer creation/reuse
   if not view_s.buf or not vim.api.nvim_buf_is_valid(view_s.buf) then
@@ -130,7 +130,7 @@ local function setup_view(opts)
   vim.api.nvim_win_set_hl_ns(view_s.footer_win, state.term_ns)
 
   -- volt events
-  require("volt.events").add { view_s.volt_buf, view_s.footer_buf }
+  require("volt.events").add { view_s.header_buf, view_s.footer_buf }
 
   vim.schedule(function()
     if view_s.win and vim.api.nvim_win_is_valid(view_s.win) then
@@ -138,7 +138,7 @@ local function setup_view(opts)
     end
   end)
 
-  volt.run(view_s.volt_buf, { h = header_h, w = state.w })
+  volt.run(view_s.header_buf, { h = header_h, w = state.w })
   volt.run(view_s.footer_buf, { h = state.footer.h, w = state.w })
 
   require("cake.api").setup_cursor_events(view_s.buf)
@@ -153,7 +153,7 @@ local function setup_view(opts)
   end
 
   local mappings_config = {
-    bufs = { view_s.volt_buf, view_s.footer_buf },
+    bufs = { view_s.header_buf, view_s.footer_buf },
     winclosed_event = true,
     after_close = close_all,
   }
@@ -197,20 +197,20 @@ M.open = function()
   state.current_view = "commands"
   vim.cmd "stopinsert"
 
-  if state.win and vim.api.nvim_win_is_valid(state.win) then
-    volt.close(state.volt_buf)
+  if state.header.win and vim.api.nvim_win_is_valid(state.header.win) then
+    volt.close(state.header.buf)
   end
   if
-    state.cwd_edit.volt_buf
-    and vim.api.nvim_buf_is_valid(state.cwd_edit.volt_buf)
+    state.cwd_edit.header_buf
+    and vim.api.nvim_buf_is_valid(state.cwd_edit.header_buf)
   then
-    volt.close(state.cwd_edit.volt_buf)
+    volt.close(state.cwd_edit.header_buf)
   end
 
   setup_view {
     view_state = state.edit,
     header = layout.header,
-    footer = layout.edit_footer,
+    footer = layout.footer,
     buf_name = "Commands",
     on_setup = function(buf)
       local tab = state.tabs[state.active_tab]
@@ -259,20 +259,20 @@ M.open = function()
 end
 
 M.open_cwd = function()
-  state.current_view = "commands"
+  state.current_view = "cwd"
   vim.cmd "stopinsert"
 
-  if state.win and vim.api.nvim_win_is_valid(state.win) then
-    volt.close(state.volt_buf)
+  if state.header.win and vim.api.nvim_win_is_valid(state.header.win) then
+    volt.close(state.header.buf)
   end
-  if state.edit.volt_buf and vim.api.nvim_buf_is_valid(state.edit.volt_buf) then
-    volt.close(state.edit.volt_buf)
+  if state.edit.header_buf and vim.api.nvim_buf_is_valid(state.edit.header_buf) then
+    volt.close(state.edit.header_buf)
   end
 
   setup_view {
     view_state = state.cwd_edit,
     header = layout.header,
-    footer = layout.cwd_footer,
+    footer = layout.footer,
     buf_name = "CWD",
     on_setup = function(buf)
       local tab = state.tabs[state.active_tab]

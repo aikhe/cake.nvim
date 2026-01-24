@@ -7,8 +7,8 @@
   <img src="https://img.shields.io/badge/-lua-%23eeeeee?style=flat-square&amp;logo=lua&amp;logoColor=black" alt="" >
 </p>
 
-![cake-nb](https://github.com/user-attachments/assets/21ecb7f0-3df8-4af3-b2fc-a262f17f2d27)
-![cake-wb](https://github.com/user-attachments/assets/95f4a53d-beda-49ab-9469-1a46137d1d56)
+![cake-nb](https://github.com/user-attachments/assets/a48b5777-8f8b-4d75-a5f7-e53cd1701d08)
+![cake-wb](https://github.com/user-attachments/assets/392f5f19-f3e9-4c4c-88df-497faf292af4)
 
 > [!IMPORTANT]
 > I celebrated my birthday by building the first iteration of this plugin! It’s still in its early stages, so I’d love to hear any feedbacks, issues, and contributions if you have any 🍰

@@ -21,9 +21,7 @@ M.header = {
       if pad1 < 1 then pad1 = 1 end
 
       local line = {}
-      for _, v in ipairs(tabs) do
-        table.insert(line, v)
-      end
+      vim.list_extend(line, tabs)
       table.insert(line, { string.rep(" ", pad1) })
       table.insert(line, title)
 
@@ -32,9 +30,7 @@ M.header = {
       if pad2 < 1 then pad2 = 1 end
 
       table.insert(line, { string.rep(" ", pad2) })
-      for _, v in ipairs(nav) do
-        table.insert(line, v)
-      end
+      vim.list_extend(line, nav)
 
       return { line }
     end,
@@ -46,102 +42,49 @@ M.footer = {
   {
     lines = function()
       local m = state.config.mappings
-      local line = {
-        { " " .. m.edit_commands .. " ", "CakeKey" },
-        { "  Edit Cmd ", "CakeLabel" },
-        { " " },
-        { " " .. m.rerun .. " ", "CakeKey" },
-        { "  Rerun ", "CakeLabel" },
-        { " " },
-        { " " .. m.new_tab .. " ", "CakeKey" },
-        { " 󰓩 New Tab ", "CakeLabel" },
-        { " " },
-        { " ? ", "CakeKey" },
-        { "  Help ", "CakeLabel" },
-      }
+      local line = {}
+      local view = state.current_view
+
+      if view == "term" then
+        vim.list_extend(line, {
+          { " " .. m.edit_commands .. " ", "CakeKey" },
+          { "  Edit Cmd ", "CakeLabel" },
+          { " " },
+          { " " .. m.rerun .. " ", "CakeKey" },
+          { "  Rerun ", "CakeLabel" },
+          { " " },
+          { " " .. m.new_tab .. " ", "CakeKey" },
+          { " 󰓩 New Tab ", "CakeLabel" },
+          { " " },
+          { " ? ", "CakeKey" },
+          { "  Help ", "CakeLabel" },
+        })
+      elseif view == "commands" then
+        vim.list_extend(line, {
+          { " " .. m.edit_commands .. " ", "CakeKey" },
+          { "  Terminal ", "CakeLabel" },
+          { " " },
+          { " " .. m.edit_cwd .. " ", "CakeKey" },
+          { "  Edit CWD ", "CakeLabel" },
+        })
+      elseif view == "cwd" then
+        vim.list_extend(line, {
+          { " " .. m.edit_cwd .. " ", "CakeKey" },
+          { "  Back ", "CakeLabel" },
+        })
+      elseif view == "help" then
+        vim.list_extend(line, {
+          { " q ", "CakeKey" },
+          { " 󰈆 Quit ", "CakeLabel" },
+        })
+      end
 
       table.insert(line, { "_pad_" })
-
-      local right = components.cursor_pos()
-
-      for _, v in ipairs(right) do
-        table.insert(line, v)
-      end
+      vim.list_extend(line, components.cursor_pos())
 
       return { voltui.hpad(line, state.w - (state.xpad * 2)) }
     end,
     name = "footer",
-  },
-}
-
-M.edit_footer = {
-  {
-    lines = function()
-      local m = state.config.mappings
-      local line = {
-        { " " .. m.edit_commands .. " ", "CakeKey" },
-        { "  Terminal ", "CakeLabel" },
-        { " " },
-        { " " .. m.edit_cwd .. " ", "CakeKey" },
-        { "  Edit CWD ", "CakeLabel" },
-      }
-
-      table.insert(line, { "_pad_" })
-
-      local right = components.cursor_pos()
-
-      for _, v in ipairs(right) do
-        table.insert(line, v)
-      end
-
-      return { voltui.hpad(line, state.w - (state.xpad * 2)) }
-    end,
-    name = "edit_footer",
-  },
-}
-
-M.cwd_footer = {
-  {
-    lines = function()
-      local m = state.config.mappings
-      local line = {
-        { " " .. m.edit_cwd .. " ", "CakeKey" },
-        { "  Back ", "CakeLabel" },
-      }
-
-      table.insert(line, { "_pad_" })
-
-      local right = components.cursor_pos()
-
-      for _, v in ipairs(right) do
-        table.insert(line, v)
-      end
-
-      return { voltui.hpad(line, state.w - (state.xpad * 2)) }
-    end,
-    name = "cwd_footer",
-  },
-}
-
-M.help_footer = {
-  {
-    lines = function()
-      local line = {
-        { " q ", "CakeKey" },
-        { " 󰈆 Quit ", "CakeLabel" },
-      }
-
-      table.insert(line, { "_pad_" })
-
-      local right = components.cursor_pos()
-
-      for _, v in ipairs(right) do
-        table.insert(line, v)
-      end
-
-      return { voltui.hpad(line, state.w - (state.xpad * 2)) }
-    end,
-    name = "help_footer",
   },
 }
 

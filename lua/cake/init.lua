@@ -17,16 +17,16 @@ M.open = function(opts)
 
   if opts.reset then api.reset_buf() end
 
-  if state.edit.volt_buf and vim.api.nvim_buf_is_valid(state.edit.volt_buf) then
-    require("volt").close(state.edit.volt_buf)
+  if state.edit.header_buf and vim.api.nvim_buf_is_valid(state.edit.header_buf) then
+    require("volt").close(state.edit.header_buf)
   end
 
-  if state.cwd_edit.volt_buf and vim.api.nvim_buf_is_valid(state.cwd_edit.volt_buf) then
-    require("volt").close(state.cwd_edit.volt_buf)
+  if state.cwd_edit.header_buf and vim.api.nvim_buf_is_valid(state.cwd_edit.header_buf) then
+    require("volt").close(state.cwd_edit.header_buf)
   end
 
-  if state.volt_buf and vim.api.nvim_buf_is_valid(state.volt_buf) then
-    require("volt").close(state.volt_buf)
+  if state.header.buf and vim.api.nvim_buf_is_valid(state.header.buf) then
+    require("volt").close(state.header.buf)
   end
 
   if not opts.reset then state.cwd = utils.get_context_cwd() end
@@ -39,9 +39,9 @@ M.open = function(opts)
   --   api.cake_split()
   -- end
 
-  if state.win and vim.api.nvim_win_is_valid(state.win) then
+  if state.header.win and vim.api.nvim_win_is_valid(state.header.win) then
     vim.api.nvim_create_autocmd("WinClosed", {
-      pattern = tostring(state.win),
+      pattern = tostring(state.header.win),
       once = true,
 
       callback = function()
@@ -58,8 +58,8 @@ M.open = function(opts)
 end
 
 M.toggle = function()
-  if state.win and vim.api.nvim_win_is_valid(state.win) then
-    require("volt").close(state.volt_buf)
+  if state.header.win and vim.api.nvim_win_is_valid(state.header.win) then
+    require("volt").close(state.header.buf)
 
     if vim.api.nvim_win_is_valid(state.prev_win) then
       vim.api.nvim_set_current_win(state.prev_win)

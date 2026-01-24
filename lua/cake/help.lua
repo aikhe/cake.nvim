@@ -58,13 +58,13 @@ M.open = function()
     volt.gen_data {
       {
         buf = footer_buf,
-        layout = layout.help_footer,
+        layout = layout.footer,
         xpad = state.xpad,
         ns = state.term_ns,
       },
     }
 
-    volt.redraw(footer_buf, "help_footer")
+    volt.redraw(footer_buf, "footer")
   end
 
   local opts = { buffer = state.help.buf, noremap = true, silent = true }
@@ -92,22 +92,18 @@ M.close = function()
 
   local footer_buf = (state.help.return_view == "term") and state.footer.buf
     or state.edit.footer_buf
-  local footer_layout = (state.help.return_view == "term") and layout.footer
-    or layout.edit_footer
-  local footer_key = (state.help.return_view == "term") and "footer"
-    or "edit_footer"
 
   if footer_buf and vim.api.nvim_buf_is_valid(footer_buf) then
     volt.gen_data {
       {
         buf = footer_buf,
-        layout = footer_layout,
+        layout = layout.footer,
         xpad = state.xpad,
         ns = state.term_ns,
       },
     }
 
-    volt.redraw(footer_buf, footer_key)
+    volt.redraw(footer_buf, "footer")
   end
 
   state.current_view = state.help.return_view

@@ -11,8 +11,10 @@ local M = {
   resetting = false,
   setup_done = false,
 
-  volt_buf = nil,
-  win = nil,
+  header = {
+    buf = nil,
+    win = nil,
+  },
 
   tabs = {}, -- each tab: { id, buf, cwd, commands = {} }
   active_tab = 1,
@@ -41,8 +43,8 @@ local M = {
     win = nil,
     container_buf = nil,
     container_win = nil,
-    volt_buf = nil,
-    volt_win = nil,
+    header_buf = nil,
+    header_win = nil,
     footer_buf = nil,
     footer_win = nil,
   },
@@ -52,8 +54,8 @@ local M = {
     win = nil,
     container_buf = nil,
     container_win = nil,
-    volt_buf = nil,
-    volt_win = nil,
+    header_buf = nil,
+    header_win = nil,
     footer_buf = nil,
     footer_win = nil,
   },

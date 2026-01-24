@@ -4,7 +4,6 @@ local state = require "cake.state"
 
 M.cake_float = function() require("cake.ui").open() end
 
-
 M.edit_cmds = function()
   state.resetting = true
   require("cake.edit").open()
@@ -204,11 +203,11 @@ end
 ---redraws the header to reflect tab changes
 M.redraw_header = function()
   local volt = require "volt"
-  if state.volt_buf and vim.api.nvim_buf_is_valid(state.volt_buf) then
-    volt.redraw(state.volt_buf, "header")
+  if state.header.buf and vim.api.nvim_buf_is_valid(state.header.buf) then
+    volt.redraw(state.header.buf, "header")
   end
-  if state.edit.volt_buf and vim.api.nvim_buf_is_valid(state.edit.volt_buf) then
-    volt.redraw(state.edit.volt_buf, "header")
+  if state.edit.header_buf and vim.api.nvim_buf_is_valid(state.edit.header_buf) then
+    volt.redraw(state.edit.header_buf, "header")
   end
 end
 
@@ -221,7 +220,7 @@ M.redraw_footer = function()
   if
     state.edit.footer_buf and vim.api.nvim_buf_is_valid(state.edit.footer_buf)
   then
-    volt.redraw(state.edit.footer_buf, "edit_footer")
+    volt.redraw(state.edit.footer_buf, "footer")
   end
 end
 
@@ -253,7 +252,7 @@ M.setup_cursor_events = function(buf)
         0,
         100,
         vim.schedule_wrap(function()
-          if state.win and vim.api.nvim_win_is_valid(state.win) then
+          if state.header.win and vim.api.nvim_win_is_valid(state.header.win) then
             M.redraw_footer()
           else
             if state.footer.cursor_timer then
