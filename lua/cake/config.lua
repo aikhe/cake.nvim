@@ -1,0 +1,23 @@
+local M = {}
+
+---@type CakeConfig
+M.defaults = {
+  terminal = "",
+  title = " cake.nvim",
+  border = false,
+  size = { h = 60, w = 50 },
+  use_file_dir = false,
+  mode = "float",
+
+  mappings = {
+    new_tab = "n",
+    edit_commands = "m",
+    edit_cwd = ";",
+    rerun = "r",
+    kill_tab = "x",
+    next_tab = "<C-n>",
+    prev_tab = "<C-p>",
+  },
+}
+
+return M

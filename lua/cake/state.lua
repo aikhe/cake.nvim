@@ -1,3 +1,39 @@
+---@class CakeTab
+---@field id number Tab identifier
+---@field buf number Buffer handle
+---@field cwd string Working directory
+---@field commands string[] List of commands
+
+---@class CakeWindowState
+---@field buf number|nil Buffer handle
+---@field win number|nil Window handle
+
+---@class CakeHeaderState : CakeWindowState
+
+---@class CakeTermState : CakeWindowState
+---@field h number Height
+---@field job_id number|nil Job ID
+
+---@class CakeFooterState : CakeWindowState
+---@field h number Height
+---@field cursor_timer userdata|nil Timer for cursor updates
+
+---@class CakeEditState : CakeWindowState
+---@field container_buf number|nil
+---@field container_win number|nil
+---@field header_buf number|nil
+---@field header_win number|nil
+---@field footer_buf number|nil
+---@field footer_win number|nil
+
+---@class CakeHelpState
+---@field buf number|nil
+---@field return_view "term"|"commands"|nil
+---@field prev_buf number|nil
+
+local config = require "cake.config"
+
+---@class CakeState
 local M = {
   ns = vim.api.nvim_create_namespace "Cake",
   term_ns = vim.api.nvim_create_namespace "CakeTerm",
@@ -10,15 +46,19 @@ local M = {
   cwd = nil,
   resetting = false,
   setup_done = false,
+  prev_win = nil,
 
+  ---@type CakeHeaderState
   header = {
     buf = nil,
     win = nil,
   },
 
-  tabs = {}, -- each tab: { id, buf, cwd, commands = {} }
+  ---@type CakeTab[]
+  tabs = {},
   active_tab = 1,
 
+  ---@type CakeTermState
   term = {
     buf = nil,
     win = nil,
@@ -26,11 +66,13 @@ local M = {
     job_id = nil,
   },
 
+  ---@type CakeWindowState
   container = {
     buf = nil,
     win = nil,
   },
 
+  ---@type CakeFooterState
   footer = {
     buf = nil,
     win = nil,
@@ -38,6 +80,7 @@ local M = {
     cursor_timer = nil,
   },
 
+  ---@type CakeEditState
   edit = {
     buf = nil,
     win = nil,
@@ -49,6 +92,7 @@ local M = {
     footer_win = nil,
   },
 
+  ---@type CakeEditState
   cwd_edit = {
     buf = nil,
     win = nil,
@@ -60,39 +104,15 @@ local M = {
     footer_win = nil,
   },
 
+  ---@type CakeHelpState
   help = {
     buf = nil,
-    return_view = nil, -- "term" or "commands"
-    prev_buf = nil, -- buffer ID to restore
+    return_view = nil,
+    prev_buf = nil,
   },
 
-  config = {
-    terminal = "",
-    title = " cake.nvim",
-    border = false,
-    size = {
-      h = 60,
-      w = 50,
-    },
-    use_file_dir = false,
-
-    mappings = {
-      edit_commands = "m",
-      edit_cwd = ";",
-      new_tab = "n",
-      rerun = "r",
-      kill_tab = "x",
-      next_tab = "<C-n>",
-      prev_tab = "<C-p>",
-    },
-
-    -- WIP
-    mode = "float", -- default mode e.g float, split, full
-    -- style = "fancy", -- fancy, minimal
-    -- split_direction = "h", -- "v" or "h"
-    -- split_size = nil, -- size in lines for split window
-    -- run_at_start = true -- run commands at open on float & split
-  },
+  ---@type CakeConfig
+  config = vim.deepcopy(config.defaults),
 }
 
 return M

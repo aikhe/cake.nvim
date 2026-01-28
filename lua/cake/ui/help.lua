@@ -1,10 +1,10 @@
 local M = {}
 
 local volt = require "volt"
-local layout = require "cake.layout"
+local layout = require "cake.ui.layout"
 local state = require "cake.state"
 
-M.open = function()
+function M.open()
   if state.current_view == "help" then return end
 
   state.help.return_view = state.current_view
@@ -67,15 +67,10 @@ M.open = function()
     volt.redraw(footer_buf, "footer")
   end
 
-  local opts = { buffer = state.help.buf, noremap = true, silent = true }
-
-  local close_help = function() M.close() end
-
-  vim.keymap.set("n", "q", close_help, opts)
-  vim.keymap.set("n", "<Esc>", close_help, opts)
+  require "cake.mappings"(state.help.buf, "help")
 end
 
-M.close = function()
+function M.close()
   if state.current_view ~= "help" then return end
 
   local target_win = (state.help.return_view == "term") and state.term.win

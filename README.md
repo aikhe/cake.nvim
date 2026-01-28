@@ -11,7 +11,7 @@
 ![cake-wb](https://github.com/user-attachments/assets/392f5f19-f3e9-4c4c-88df-497faf292af4)
 
 > [!IMPORTANT]
-> I celebrated my birthday by building the first iteration of this plugin! It’s still in its early stages, so I’d love to hear any feedbacks, issues, and contributions if you have any 🍰
+> I celebrated my birthday by building the first iteration of this plugin! It’s still in its early stages, so I’d love to hear any feedbacks, issues, and contributions if you have any. 🍰
 
 ## Features
 
@@ -90,3 +90,4 @@ These are the default mappings that are available when cake is open:
 
 > [!NOTE]
 > Cake isn’t a terminal replacement. It’s designed for fast, seamless command execution rather than full terminal workflows like those provided by [toggleterm.nvim](https://github.com/akinsho/toggleterm.nvim), [floaterm](https://github.com/nvzone/floaterm) or [tmux](https://github.com/tmux/tmux).
+> It behaves more like [yeet.nvim](https://github.com/samharju/yeet.nvim), sending commands quickly to an existing terminal target.

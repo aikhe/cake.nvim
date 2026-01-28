@@ -14,10 +14,11 @@ M.tabs = function()
     "󰎶",
     "󰎹",
     "󰎼",
+    "󰎹",
   }
 
   if #state.tabs == 0 then
-    -- placeholder
+    -- Placeholder
     local icon = num_icons[1] or "1"
     table.insert(line, { icon .. " ", "CakeTabActive" })
   else

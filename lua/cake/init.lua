@@ -1,54 +1,52 @@
 local M = {}
 
-local api = require "cake.api"
 local state = require "cake.state"
+local config = require "cake.config"
 local utils = require "cake.utils"
 
----@param opts table? configuration options
-M.setup = function(opts)
-  state.config = vim.tbl_deep_extend("force", state.config, opts or {})
+---@param opts CakeConfig?
+function M.setup(opts)
+  state.config = vim.tbl_deep_extend("force", config.defaults, opts or {})
   state.setup_done = true
 end
 
----@param opts table? { mode: 'float'|'split', reset: boolean }
-M.open = function(opts)
+---@param opts? {mode?: "float"|"split", reset?: boolean}
+function M.open(opts)
   opts = opts or {}
   state.last_mode = opts.mode or state.last_mode or state.config.mode
 
-  if opts.reset then api.reset_buf() end
+  if opts.reset then require("cake.core.terminal").reset_buf() end
 
-  if state.edit.header_buf and vim.api.nvim_buf_is_valid(state.edit.header_buf) then
-    require("volt").close(state.edit.header_buf)
+  local volt = require "volt"
+  if
+    state.edit.header_buf and vim.api.nvim_buf_is_valid(state.edit.header_buf)
+  then
+    volt.close(state.edit.header_buf)
   end
-
-  if state.cwd_edit.header_buf and vim.api.nvim_buf_is_valid(state.cwd_edit.header_buf) then
-    require("volt").close(state.cwd_edit.header_buf)
+  if
+    state.cwd_edit.header_buf
+    and vim.api.nvim_buf_is_valid(state.cwd_edit.header_buf)
+  then
+    volt.close(state.cwd_edit.header_buf)
   end
-
   if state.header.buf and vim.api.nvim_buf_is_valid(state.header.buf) then
-    require("volt").close(state.header.buf)
+    volt.close(state.header.buf)
   end
 
   if not opts.reset then state.cwd = utils.get_context_cwd() end
 
   state.prev_win = vim.api.nvim_get_current_win()
 
-  -- if state.last_mode == "float" then
-  api.cake_float()
-  -- else
-  --   api.cake_split()
-  -- end
+  require("cake.ui").open()
 
   if state.header.win and vim.api.nvim_win_is_valid(state.header.win) then
     vim.api.nvim_create_autocmd("WinClosed", {
       pattern = tostring(state.header.win),
       once = true,
-
       callback = function()
         if state.edit.win and vim.api.nvim_win_is_valid(state.edit.win) then
           vim.api.nvim_win_close(state.edit.win, true)
         end
-
         state.edit.win = nil
       end,
     })
@@ -57,7 +55,7 @@ M.open = function(opts)
   state.resetting = false
 end
 
-M.toggle = function()
+function M.toggle()
   if state.header.win and vim.api.nvim_win_is_valid(state.header.win) then
     require("volt").close(state.header.buf)
 
@@ -69,8 +67,6 @@ M.toggle = function()
   end
 end
 
-M.open_float = function() M.open { mode = "float", reset = true } end
-
--- M.open_split = function() M.open { mode = "split", reset = true } end
+function M.open_float() M.open { mode = "float", reset = true } end
 
 return M

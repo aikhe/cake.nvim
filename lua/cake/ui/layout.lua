@@ -1,6 +1,6 @@
 local state = require "cake.state"
 local voltui = require "volt.ui"
-local components = require "cake.components"
+local components = require "cake.ui.components"
 
 local M = {}
 
