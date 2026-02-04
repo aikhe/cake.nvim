@@ -2,7 +2,7 @@ local M = {}
 
 local state = require "cake.state"
 
----Creates a new tab and adds it to the list
+---creates a new tab and adds it to the list
 ---@param opts? {cwd?: string, commands?: string[]}
 ---@return CakeTab|nil
 function M.create(opts)
@@ -28,7 +28,7 @@ function M.create(opts)
   return tab
 end
 
----Creates a new tab from current context and switches to it
+---creates a new tab from current context and switches to it
 function M.create_new()
   if #state.tabs >= 9 then
     vim.notify("Maximum of 9 tabs reached!", vim.log.levels.WARN)
@@ -57,7 +57,7 @@ function M.create_new()
   M.redraw_header()
 end
 
----Switches to a tab by index
+---switches to a tab by index
 ---@param idx number
 function M.switch(idx)
   if idx < 1 or idx > #state.tabs then
@@ -97,7 +97,7 @@ function M.switch(idx)
   M.redraw_footer()
 end
 
----Switches to the next tab
+---switches to the next tab
 function M.next()
   if #state.tabs <= 1 then return end
   local next_idx = state.active_tab + 1
@@ -105,7 +105,7 @@ function M.next()
   M.switch(next_idx)
 end
 
----Switches to the previous tab
+---switches to the previous tab
 function M.prev()
   if #state.tabs <= 1 then return end
   local prev_idx = state.active_tab - 1
@@ -113,7 +113,7 @@ function M.prev()
   M.switch(prev_idx)
 end
 
----Saves the current session as the active tab
+---saves the current session as the active tab
 function M.save_current()
   local session = require "cake.core.session"
   if #state.tabs == 0 then
@@ -129,7 +129,7 @@ function M.save_current()
   end
 end
 
----Kills/deletes a tab by index
+---kills/deletes a tab by index
 ---@param idx? number
 function M.kill(idx)
   local session = require "cake.core.session"
@@ -186,7 +186,7 @@ function M.kill(idx)
   print "Tab killed!"
 end
 
----Redraws the header to reflect tab changes
+---redraws the header to reflect tab changes
 function M.redraw_header()
   local volt = require "volt"
   if state.header.buf and vim.api.nvim_buf_is_valid(state.header.buf) then
@@ -199,7 +199,7 @@ function M.redraw_header()
   end
 end
 
----Redraws the footer to reflect cursor changes
+---redraws the footer to reflect cursor changes
 function M.redraw_footer()
   local volt = require "volt"
   if state.footer.buf and vim.api.nvim_buf_is_valid(state.footer.buf) then

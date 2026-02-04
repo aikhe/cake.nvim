@@ -2,11 +2,11 @@ local M = {}
 
 local state = require "cake.state"
 
----Returns the path to the tabs save file
+---returns the path to the tabs save file
 ---@return string
 function M.get_tabs_path() return vim.fn.stdpath "data" .. "/cake_tabs.json" end
 
----Loads tabs from the save file
+---loads tabs from the save file
 ---@return CakeTab[]
 function M.load_tabs()
   local path = M.get_tabs_path()
@@ -24,7 +24,7 @@ function M.load_tabs()
   return {}
 end
 
----Saves the current tabs to save file
+---saves the current tabs to save file
 function M.save_tabs()
   local path = M.get_tabs_path()
   local f = io.open(path, "w")
@@ -39,11 +39,11 @@ function M.save_tabs()
   end
 end
 
----Returns the path to the commands JSON file
+---returns the path to the commands json file
 ---@return string
 function M.get_cmds_path() return vim.fn.stdpath "data" .. "/cake_commands.json" end
 
----Loads commands from the persistent JSON file
+---loads commands from the persistent json file
 ---@return string[]
 function M.load_commands()
   local path = M.get_cmds_path()
@@ -61,7 +61,7 @@ function M.load_commands()
   return {}
 end
 
----Saves the current list of commands to the persistent JSON file
+---saves the current list of commands to the persistent json file
 ---@param cmds string[]
 function M.save_commands(cmds)
   local path = M.get_cmds_path()

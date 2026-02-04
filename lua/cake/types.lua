@@ -10,15 +10,15 @@
 ---@field prev_tab string
 
 ---@class CakeSize
----@field h number Height percentage (0-100)
----@field w number Width percentage (0-100)
+---@field h number height percentage (0-100)
+---@field w number width percentage (0-100)
 
 ---@class CakeConfig
----@field terminal string Custom terminal command
----@field title string Title shown in header
----@field border boolean Show borders
----@field size CakeSize Size configuration
----@field use_file_dir boolean Use file path as new tab default
----@field mode "float"|"split" Window mode
----@field mappings CakeMappings Key mappings
----@field custom_mappings? fun(buf: number, view: string) User-defined custom mappings
+---@field terminal string custom terminal command
+---@field title string title shown in header
+---@field border boolean show borders
+---@field size CakeSize size configuration
+---@field use_file_dir boolean use file path as new tab default
+---@field mode "float"|"split" window mode
+---@field mappings CakeMappings key mappings
+---@field custom_mappings? fun(buf: number, view: string) user-defined custom mappings
