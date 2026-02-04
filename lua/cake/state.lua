@@ -39,15 +39,20 @@ local M = {
   term_ns = vim.api.nvim_create_namespace "CakeTerm",
   xpad = 2,
   ypad = 0,
+  split_ypad = 1,
   w = 50,
   h = 20,
   current_view = "term",
 
   last_mode = nil,
+  is_split = false,
+  split_direction = nil, -- horizontal or vertical
   cwd = nil,
   resetting = false,
   setup_done = false,
   prev_win = nil,
+  prev_win = nil,
+  mask_win = nil,
 
   ---@type CakeHeaderState
   header = {
@@ -63,6 +68,8 @@ local M = {
   term = {
     buf = nil,
     win = nil,
+    container_win = nil,
+    container_buf = nil,
     h = 15,
     job_id = nil,
   },

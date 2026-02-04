@@ -51,6 +51,12 @@ function M.open()
 
   vim.api.nvim_win_set_buf(target_win, state.help.buf)
 
+  -- disable line numbers in split mode
+  if state.is_split then
+    vim.api.nvim_set_option_value("number", false, { win = target_win })
+    vim.api.nvim_set_option_value("relativenumber", false, { win = target_win })
+  end
+
   local footer_buf = (state.help.return_view == "term") and state.footer.buf
     or state.edit.footer_buf
 

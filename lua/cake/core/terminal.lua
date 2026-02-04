@@ -2,7 +2,7 @@ local M = {}
 
 local state = require "cake.state"
 
----returns shell info for the given terminal
+---get shell info for the given terminal
 ---@param terminal? string
 ---@return {path: string, flag: string, sep: string}
 function M.get_shell_info(terminal)
@@ -26,7 +26,7 @@ function M.get_shell_info(terminal)
   return info
 end
 
----initializes terminal for the active tab
+---initialize terminal for the active tab
 function M.init()
   local session = require "cake.core.session"
   local tabs = require "cake.core.tabs"
@@ -58,7 +58,7 @@ function M.init()
   require "cake.mappings"(state.term.buf, "term")
 end
 
----execute a command in a buffer, converting it to a terminal
+---execute command in a buffer, converting to terminal
 ---@param buf integer
 ---@param cmd string|string[]|nil
 ---@param terminal? string
@@ -106,17 +106,26 @@ function M.run_in_buf(buf, cmd, terminal, cwd)
   end)
 end
 
----resets the current tab's terminal buffer (for rerun)
-function M.reset_buf()
+---reset the current tab's terminal buffer (for rerun)
+---@param opts? {defer_delete?: boolean}
+---@return number|nil old_buf the old buffer handle if not deleted
+function M.reset_buf(opts)
+  opts = opts or {}
   local tab = state.tabs[state.active_tab]
   if tab and tab.buf and vim.api.nvim_buf_is_valid(tab.buf) then
-    vim.api.nvim_buf_delete(tab.buf, { force = true })
+    local old_buf = tab.buf
     tab.buf = vim.api.nvim_create_buf(false, true)
     state.term.buf = tab.buf
+
+    if not opts.defer_delete then
+      vim.api.nvim_buf_delete(old_buf, { force = true })
+      return nil
+    end
+    return old_buf
   end
 end
 
----sets up cursor events for a buffer to update the footer
+---set up cursor events for a buffer to update footer
 ---@param buf number
 function M.setup_cursor_events(buf)
   local tabs = require "cake.core.tabs"

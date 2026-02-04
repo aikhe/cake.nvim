@@ -13,6 +13,12 @@ end
 ---@param opts? {mode?: "float"|"split", reset?: boolean}
 function M.open(opts)
   opts = opts or {}
+
+  -- close split if active
+  if state.is_split then
+    require("cake.ui.split").close()
+  end
+
   state.last_mode = opts.mode or state.last_mode or state.config.mode
 
   if opts.reset then require("cake.core.terminal").reset_buf() end
@@ -55,18 +61,64 @@ function M.open(opts)
   state.resetting = false
 end
 
-function M.toggle()
+local function close_float()
   if state.header.win and vim.api.nvim_win_is_valid(state.header.win) then
     require("volt").close(state.header.buf)
+  end
+end
 
+function M.toggle()
+  -- handle split mode: close and remember direction
+  if state.is_split then
+    require("cake.ui.split").close()
+    if state.prev_win and vim.api.nvim_win_is_valid(state.prev_win) then
+      vim.api.nvim_set_current_win(state.prev_win)
+    end
+    return
+  end
+
+  -- handle float mode
+  if state.header.win and vim.api.nvim_win_is_valid(state.header.win) then
+    close_float()
     if vim.api.nvim_win_is_valid(state.prev_win) then
       vim.api.nvim_set_current_win(state.prev_win)
     end
+    return
+  end
+
+  -- reopen last mode
+  if state.split_direction then
+    -- reopen split with last direction
+    state.prev_win = vim.api.nvim_get_current_win()
+    state.cwd = require("cake.utils").get_context_cwd()
+    state.is_split = true
+    require("cake.ui.split").open(state.split_direction)
   else
     M.open { mode = state.last_mode }
   end
 end
 
-function M.open_float() M.open { mode = "float", reset = true } end
+function M.open_float()
+  state.split_direction = nil
+  M.open { mode = "float", reset = true }
+end
+
+function M.open_split_h()
+  close_float()
+  state.prev_win = vim.api.nvim_get_current_win()
+  state.cwd = require("cake.utils").get_context_cwd()
+  state.is_split = true
+  state.split_direction = "horizontal"
+  require("cake.ui.split").open("horizontal")
+end
+
+function M.open_split_v()
+  close_float()
+  state.prev_win = vim.api.nvim_get_current_win()
+  state.cwd = require("cake.utils").get_context_cwd()
+  state.is_split = true
+  state.split_direction = "vertical"
+  require("cake.ui.split").open("vertical")
+end
 
 return M

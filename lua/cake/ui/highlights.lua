@@ -4,14 +4,17 @@ local get_hl = volt_utils.get_hl
 local lighten = require("volt.color").change_hex_lightness
 local state = require "cake.state"
 
-return function(ns)
-  local bg
-  if vim.g.base46_cache then
-    bg = dofile(vim.g.base46_cache .. "colors").black
-  else
-    bg = get_hl("Normal").bg
-  end
+local M = {}
 
+local function get_bg()
+  if vim.g.base46_cache then
+    return dofile(vim.g.base46_cache .. "colors").black
+  end
+  return get_hl("Normal").bg
+end
+
+function M.apply_float(ns)
+  local bg = get_bg()
   local win_bg = state.config.border and bg or lighten(bg, 2)
   local text_light = get_hl("Normal").fg
   local commentfg = get_hl("CommentFg").fg
@@ -21,7 +24,6 @@ return function(ns)
 
   for _, target_ns in ipairs(target_namespaces) do
     api.nvim_set_hl(target_ns, "Normal", { bg = win_bg })
-
     api.nvim_set_hl(target_ns, "CakeTitle", { fg = exblue, bold = true })
     api.nvim_set_hl(target_ns, "CakeLabel", { fg = commentfg })
     api.nvim_set_hl(
@@ -49,3 +51,25 @@ return function(ns)
   )
   api.nvim_set_hl(ns, "CakeTabInactive", { fg = commentfg, bg = win_bg })
 end
+
+function M.apply_split(win)
+  local bg = get_bg()
+  local win_bg = lighten(bg, 2)
+
+  -- set window-local highlights
+  vim.api.nvim_win_set_option(
+    win,
+    "winhighlight",
+    "Normal:CakeSplitNormal,WinSeparator:Normal,VertSplit:Normal"
+  )
+
+  -- define highlight groups
+  api.nvim_set_hl(0, "CakeSplitNormal", { bg = win_bg })
+
+  -- legacy: separators use normal directly
+end
+
+-- backward compatibility
+return setmetatable(M, {
+  __call = function(_, ns) M.apply_float(ns) end,
+})

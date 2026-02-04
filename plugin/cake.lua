@@ -10,9 +10,14 @@ vim.api.nvim_create_user_command(
   {}
 )
 
--- TODO
--- vim.api.nvim_create_user_command(
---   "CakeSplit",
---   function() require("cake").open_split() end,
---   {}
--- )
+vim.api.nvim_create_user_command(
+  "CakeSplitH",
+  function() require("cake").open_split_h() end,
+  {}
+)
+
+vim.api.nvim_create_user_command(
+  "CakeSplitV",
+  function() require("cake").open_split_v() end,
+  {}
+)

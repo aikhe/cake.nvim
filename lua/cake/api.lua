@@ -7,6 +7,8 @@ local session = require "cake.core.session"
 
 -- ui entry points
 M.cake_float = function() require("cake.ui").open() end
+M.cake_split_h = function() require("cake.ui.split").open("horizontal") end
+M.cake_split_v = function() require("cake.ui.split").open("vertical") end
 M.edit_cmds = function()
   state.resetting = true
   require("cake.ui.edit").open()

@@ -6,6 +6,7 @@ M.defaults = {
   title = " cake.nvim",
   border = false,
   size = { h = 60, w = 50 },
+  split = { w = 50, h = 25 },
   use_file_dir = false,
   mode = "float",
 
