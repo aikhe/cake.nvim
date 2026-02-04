@@ -27,7 +27,7 @@ end
 local function setup_view(opts)
   local view_s = opts.view_state
 
-  -- Setup volt buffers
+  -- setup volt buffers
   view_s.header_buf = vim.api.nvim_create_buf(false, true)
   view_s.footer_buf = vim.api.nvim_create_buf(false, true)
 
@@ -48,7 +48,7 @@ local function setup_view(opts)
 
   local header_h = require("volt.state")[view_s.header_buf].h
 
-  -- Sizing
+  -- sizing
   state.w = math.floor(vim.o.columns * (state.config.size.w / 100))
   local target_total_h = math.floor(vim.o.lines * (state.config.size.h / 100))
   local border_h = 2
@@ -59,7 +59,7 @@ local function setup_view(opts)
   local total_h = header_h + state.term.h + state.footer.h + total_borders
   local start_row = math.floor((vim.o.lines - total_h) / 2)
 
-  -- Header win
+  -- header win
   view_s.header_win = vim.api.nvim_open_win(view_s.header_buf, false, {
     relative = "editor",
     width = state.w,
@@ -71,18 +71,18 @@ local function setup_view(opts)
   })
   vim.api.nvim_win_set_hl_ns(view_s.header_win, state.ns)
 
-  -- Text buffer creation/reuse
+  -- text buffer creation/reuse
   if not view_s.buf or not vim.api.nvim_buf_is_valid(view_s.buf) then
     view_s.buf = vim.api.nvim_create_buf(false, true)
     pcall(vim.api.nvim_buf_set_name, view_s.buf, opts.buf_name)
     vim.api.nvim_set_option_value("buftype", "acwrite", { buf = view_s.buf })
   end
 
-  -- Populate buffer
+  -- populate buffer
   opts.on_setup(view_s.buf)
   vim.api.nvim_set_option_value("modified", false, { buf = view_s.buf })
 
-  -- Container win
+  -- container win
   local container_border = state.config.border and "single"
     or { " ", " ", " ", " ", " ", " ", " ", " " }
   view_s.container_buf = vim.api.nvim_create_buf(false, true)
@@ -97,7 +97,7 @@ local function setup_view(opts)
   })
   vim.api.nvim_win_set_hl_ns(view_s.container_win, state.term_ns)
 
-  -- Editor win
+  -- editor win
   local term_w = state.w - (state.xpad * 2)
   local term_col = (vim.o.columns - state.w) / 2 + state.xpad + 1
   view_s.win = vim.api.nvim_open_win(view_s.buf, true, {
@@ -111,7 +111,7 @@ local function setup_view(opts)
   })
   vim.api.nvim_win_set_hl_ns(view_s.win, state.term_ns)
 
-  -- Footer win
+  -- footer win
   view_s.footer_win = vim.api.nvim_open_win(view_s.footer_buf, false, {
     relative = "editor",
     width = state.w,
@@ -123,7 +123,7 @@ local function setup_view(opts)
   })
   vim.api.nvim_win_set_hl_ns(view_s.footer_win, state.term_ns)
 
-  -- Volt events
+  -- volt events
   require("volt.events").add { view_s.header_buf, view_s.footer_buf }
 
   vim.schedule(function()
@@ -137,7 +137,7 @@ local function setup_view(opts)
 
   require("cake.core.terminal").setup_cursor_events(view_s.buf)
 
-  -- Cleanup
+  -- cleanup
   local function close_all()
     cleanup_view_state(view_s)
     if state.footer.cursor_timer then
@@ -166,10 +166,10 @@ local function setup_view(opts)
     end,
   })
 
-  -- Keymaps
+  -- keymaps
   require "cake.mappings"(view_s.buf, opts.view_type)
 
-  -- Save logic
+  -- save logic
   if opts.on_save then
     local group = vim.api.nvim_create_augroup(
       "CakeEditSave_" .. opts.buf_name,

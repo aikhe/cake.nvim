@@ -12,7 +12,7 @@ function M.open()
 
   if not state.term.buf then return end
 
-  -- Setup data & sizing
+  -- setup data & sizing
   state.header.buf = vim.api.nvim_create_buf(false, true)
   state.footer.buf = vim.api.nvim_create_buf(false, true)
 
@@ -45,7 +45,7 @@ function M.open()
   local start_row = math.floor((vim.o.lines - total_h) / 2)
   local col = (vim.o.columns - state.w) / 2
 
-  -- Header window
+  -- header window
   state.header.win = vim.api.nvim_open_win(state.header.buf, false, {
     relative = "editor",
     width = state.w,
@@ -60,7 +60,7 @@ function M.open()
   require "cake.ui.highlights"(state.ns)
   vim.api.nvim_win_set_hl_ns(state.header.win, state.ns)
 
-  -- Term container
+  -- term container
   local container_border = state.config.border and "single"
     or { " ", " ", " ", " ", " ", " ", " ", " " }
   state.container.buf = vim.api.nvim_create_buf(false, true)
@@ -75,7 +75,7 @@ function M.open()
   })
   vim.api.nvim_win_set_hl_ns(state.container.win, state.term_ns)
 
-  -- Inner term
+  -- inner term
   state.term.win = vim.api.nvim_open_win(state.term.buf, true, {
     relative = "editor",
     width = state.w - (state.xpad * 2),
@@ -87,7 +87,7 @@ function M.open()
   })
   vim.api.nvim_win_set_hl_ns(state.term.win, state.term_ns)
 
-  -- Footer window
+  -- footer window
   state.footer.win = vim.api.nvim_open_win(state.footer.buf, false, {
     relative = "editor",
     width = state.w,
@@ -99,7 +99,7 @@ function M.open()
   })
   vim.api.nvim_win_set_hl_ns(state.footer.win, state.term_ns)
 
-  -- Finalize UI
+  -- finalize ui
   require("volt.events").add { state.header.buf, state.footer.buf }
   volt.run(state.header.buf, { h = state.h, w = state.w })
   volt.run(state.footer.buf, { h = state.footer.h, w = state.w })
@@ -114,7 +114,7 @@ function M.open()
     )
   end
 
-  -- Clean up & events
+  -- clean up & events
   volt.mappings {
     bufs = { state.header.buf, state.footer.buf },
     winclosed_event = true,

@@ -2,7 +2,7 @@ local M = {}
 
 local state = require "cake.state"
 
----Returns the current context CWD based on config
+---returns the current context cwd based on config
 ---@return string
 function M.get_context_cwd()
   local context_win = state.prev_win or vim.api.nvim_get_current_win()

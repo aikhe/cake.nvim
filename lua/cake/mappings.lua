@@ -1,8 +1,8 @@
 local state = require "cake.state"
 local map = vim.keymap.set
 
----@param buf number Buffer to set keymaps on
----@param view "term"|"commands"|"cwd"|"help" Current view type
+---@param buf number buffer to set keymaps on
+---@param view "term"|"commands"|"cwd"|"help" current view type
 return function(buf, view)
   local m = state.config.mappings
   local opts = { buffer = buf, noremap = true, silent = true }

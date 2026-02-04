@@ -1,22 +1,22 @@
 ---@class CakeTab
----@field id number Tab identifier
----@field buf number Buffer handle
----@field cwd string Working directory
----@field commands string[] List of commands
+---@field id number tab identifier
+---@field buf number buffer handle
+---@field cwd string working directory
+---@field commands string[] list of commands
 
 ---@class CakeWindowState
----@field buf number|nil Buffer handle
----@field win number|nil Window handle
+---@field buf number|nil buffer handle
+---@field win number|nil window handle
 
 ---@class CakeHeaderState : CakeWindowState
 
 ---@class CakeTermState : CakeWindowState
----@field h number Height
----@field job_id number|nil Job ID
+---@field h number height
+---@field job_id number|nil job id
 
 ---@class CakeFooterState : CakeWindowState
----@field h number Height
----@field cursor_timer userdata|nil Timer for cursor updates
+---@field h number height
+---@field cursor_timer userdata|nil timer for cursor updates
 
 ---@class CakeEditState : CakeWindowState
 ---@field container_buf number|nil
