@@ -126,6 +126,11 @@ function M.open()
         end
       end
 
+      -- enforce persistence before closing float
+      if state.term.buf and vim.api.nvim_buf_is_valid(state.term.buf) then
+        vim.api.nvim_set_option_value("bufhidden", "hide", { buf = state.term.buf })
+      end
+
       pclose(state.header.win)
       pclose(state.term.win)
       pclose(state.container.win)

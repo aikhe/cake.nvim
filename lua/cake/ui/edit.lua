@@ -321,6 +321,7 @@ function M.open_split_cwd()
   vim.api.nvim_set_option_value("relativenumber", false, { win = state.term.win })
 
   require "cake.mappings"(state.cwd_edit.buf, "cwd")
+  require("cake.api").redraw_header()
 end
 
 -- split mode: swap buffer in split window for editing commands
@@ -372,6 +373,7 @@ function M.open_split_edit()
 
   -- setup mappings
   require "cake.mappings"(state.edit.buf, "commands")
+  require("cake.api").redraw_header()
 end
 
 -- split mode: return to terminal from edit
@@ -386,6 +388,7 @@ function M.back_to_split_term()
     vim.api.nvim_win_set_buf(state.term.win, state.edit.prev_term_buf)
     require "cake.mappings"(state.edit.prev_term_buf, "term")
   end
+  require("cake.api").redraw_header()
 end
 
 return M

@@ -17,8 +17,8 @@ function M.open(direction)
   vim.cmd(split_cmd)
 
   -- resize based on direction
-  local size = direction == "horizontal" and state.config.split.w
-    or state.config.split.h
+  local size = state.split.last_sizes[direction]
+    or (direction == "horizontal" and state.config.split.w or state.config.split.h)
   local resize_cmd = direction == "horizontal" and "vertical resize" or "resize"
   vim.cmd(resize_cmd .. " " .. size)
 
@@ -28,7 +28,45 @@ function M.open(direction)
   vim.api.nvim_win_set_buf(state.term.container_win, state.term.container_buf)
 
   -- apply background to container
+  -- apply background to container
   require("cake.ui.highlights").apply_split(state.term.container_win)
+
+  -- setup header (reuse float logic)
+  local volt = require "volt"
+  local layout = require "cake.ui.layout"
+  local win_w = vim.api.nvim_win_get_width(state.term.container_win)
+  local border_h = 2
+  local border_offset = 1
+  state.w = win_w - border_h -- ensure layout uses internal split width
+
+  -- populate highlight namespace for tabs/title
+  require "volt.highlights"
+  require("cake.ui.highlights")(state.ns)
+
+  state.header.buf = vim.api.nvim_create_buf(false, true)
+  volt.gen_data {
+    {
+      buf = state.header.buf,
+      layout = layout.header,
+      xpad = state.xpad,
+      ns = state.ns,
+    },
+  }
+  state.h = require("volt.state")[state.header.buf].h
+
+  local border_style = { " ", " ", " ", " ", " ", " ", " ", " " }
+
+  state.header.win = vim.api.nvim_open_win(state.header.buf, false, {
+    relative = "win",
+    win = state.term.container_win,
+    width = win_w - border_h,
+    height = state.h,
+    col = 0,
+    row = 0,
+    style = "minimal",
+    border = border_style,
+  })
+  vim.api.nvim_win_set_hl_ns(state.header.win, state.ns)
 
   -- configure container (hidden text)
   vim.api.nvim_set_option_value(
@@ -50,17 +88,17 @@ function M.open(direction)
   vim.api.nvim_set_option_value("foldcolumn", "0", { win = state.term.container_win })
 
   -- calculate float size with padding
-  local win_w = vim.api.nvim_win_get_width(state.term.container_win)
   local win_h = vim.api.nvim_win_get_height(state.term.container_win)
-  local float_w = math.max(1, win_w - (state.xpad * 2))
-  local float_h = math.max(1, win_h - (state.split_ypad * 2))
+  local float_w = math.max(1, win_w - (state.xpad * 2) - border_h)
+  local header_total_h = state.h + border_h
+  local float_h = math.max(1, win_h - header_total_h - (state.split_ypad * 2) + 1)
 
   -- create float (terminal) inside container
   state.term.win = vim.api.nvim_open_win(state.term.buf, true, {
     relative = "win",
     win = state.term.container_win,
-    row = state.split_ypad,
-    col = state.xpad,
+    row = header_total_h + state.split_ypad - 1,
+    col = state.xpad + border_offset,
     width = float_w,
     height = float_h,
     style = "minimal",
@@ -70,6 +108,10 @@ function M.open(direction)
   -- apply highlights to terminal window
   require("cake.ui.highlights").apply_split(state.term.win)
 
+  -- finalize header UI
+  require("volt.events").add { state.header.buf }
+  volt.run(state.header.buf, { h = state.h, w = win_w - border_h })
+
   -- prevent line numbers in terminal window
   vim.api.nvim_set_option_value("number", false, { win = state.term.win })
   vim.api.nvim_set_option_value(
@@ -78,38 +120,18 @@ function M.open(direction)
     { win = state.term.win }
   )
 
-  -- auto-resize float when container resizes
-  vim.api.nvim_create_autocmd("WinResized", {
-    pattern = tostring(state.term.container_win),
-    callback = function()
-      if
-        state.term.container_win
-        and vim.api.nvim_win_is_valid(state.term.container_win)
-        and state.term.win
-        and vim.api.nvim_win_is_valid(state.term.win)
-      then
-        local w = vim.api.nvim_win_get_width(state.term.container_win)
-        local h = vim.api.nvim_win_get_height(state.term.container_win)
-        vim.api.nvim_win_set_config(state.term.win, {
-          width = math.max(1, w - (state.xpad * 2)),
-          height = math.max(1, h - (state.split_ypad * 2)),
-          row = state.split_ypad,
-          col = state.xpad,
-          relative = "win",
-          win = state.term.container_win,
-        })
-      end
-    end,
-  })
-
-  -- mask the separator line with a non-interactive float
-  -- this avoids patching adjacent windows which causes side effects
   local function update_mask()
-    if not state.term.container_win or not vim.api.nvim_win_is_valid(state.term.container_win) then return end
-    
+    if state.config.border then return end
+    if
+      not state.term.container_win
+      or not vim.api.nvim_win_is_valid(state.term.container_win)
+    then
+      return
+    end
+
     local width = vim.api.nvim_win_get_width(state.term.container_win)
     local height = vim.api.nvim_win_get_height(state.term.container_win)
-    
+
     local mask_opts = {
       relative = "win",
       win = state.term.container_win,
@@ -120,32 +142,124 @@ function M.open(direction)
     }
 
     if direction == "horizontal" then
-        -- vsplit: separator is to the left (since botright vsplit puts cake on right)
-        -- wait, botright vsplit puts cake on RIGHT? yes.
-        -- so separator is at col -1 relative to container.
-        mask_opts.row = 0
-        mask_opts.col = -1
-        mask_opts.width = 1
-        mask_opts.height = height
+      -- vsplit: separator is to the left (since botright vsplit puts cake on right)
+      mask_opts.row = 0
+      mask_opts.col = -1
+      mask_opts.width = 1
+      mask_opts.height = height
     else
-        -- split: separator is above (since botright split puts cake on bottom)
-        -- separator at row -1 relative to container.
-        mask_opts.row = -1
-        mask_opts.col = 0
-        mask_opts.width = width
-        mask_opts.height = 1
+      -- split: separator is above (since botright split puts cake on bottom)
+      mask_opts.row = -1
+      mask_opts.col = 0
+      mask_opts.width = width
+      mask_opts.height = 1
     end
 
     if state.mask_win and vim.api.nvim_win_is_valid(state.mask_win) then
-        vim.api.nvim_win_set_config(state.mask_win, mask_opts)
+      vim.api.nvim_win_set_config(state.mask_win, mask_opts)
     else
-        local mask_buf = vim.api.nvim_create_buf(false, true)
-        state.mask_win = vim.api.nvim_open_win(mask_buf, false, mask_opts)
-        vim.api.nvim_set_option_value("winhighlight", "Normal:Normal", { win = state.mask_win })
-        vim.api.nvim_set_option_value("fillchars", "eob: ", { win = state.mask_win })
+      local mask_buf = vim.api.nvim_create_buf(false, true)
+      state.mask_win = vim.api.nvim_open_win(mask_buf, false, mask_opts)
+      vim.api.nvim_set_option_value(
+        "winhighlight",
+        "Normal:Normal",
+        { win = state.mask_win }
+      )
+      vim.api.nvim_set_option_value(
+        "fillchars",
+        "eob: ",
+        { win = state.mask_win }
+      )
     end
   end
-  
+
+  -- auto-resize logic (handles container resize and redirects float resize)
+  local split_group = vim.api.nvim_create_augroup("CakeSplit", { clear = true })
+  vim.api.nvim_create_autocmd("WinResized", {
+    group = split_group,
+    callback = function()
+      if
+        not state.term.container_win
+        or not vim.api.nvim_win_is_valid(state.term.container_win)
+        or not state.term.win
+        or not vim.api.nvim_win_is_valid(state.term.win)
+      then
+        return
+      end
+
+      local resized_wins = vim.v.event.windows or {}
+      local float_resized = false
+      local container_resized = false
+      for _, w in ipairs(resized_wins) do
+        if w == state.term.win then float_resized = true end
+        if w == state.term.container_win then container_resized = true end
+      end
+
+      if not float_resized and not container_resized then return end
+
+      local cw = vim.api.nvim_win_get_width(state.term.container_win)
+      local ch = vim.api.nvim_win_get_height(state.term.container_win)
+      local header_h = state.h + border_h
+
+      -- Redirect: if user resized the FLOAT (via keybinds/commands), apply delta to CONTAINER
+      if float_resized then
+        local fw = vim.api.nvim_win_get_width(state.term.win)
+        local fh = vim.api.nvim_win_get_height(state.term.win)
+
+        local ideal_w = math.max(1, cw - (state.xpad * 2) - border_h)
+        local ideal_h =
+          math.max(1, ch - header_h - (state.split_ypad * 2) + 1)
+
+        local dx = fw - ideal_w
+        local dy = fh - ideal_h
+
+        if dx ~= 0 then
+          vim.api.nvim_win_set_width(state.term.container_win, cw + dx)
+        end
+        if dy ~= 0 then
+          vim.api.nvim_win_set_height(state.term.container_win, ch + dy)
+        end
+
+        cw = vim.api.nvim_win_get_width(state.term.container_win)
+        ch = vim.api.nvim_win_get_height(state.term.container_win)
+      end
+
+      -- save last split size
+      state.split.last_sizes[direction] = (direction == "horizontal") and cw or ch
+
+      -- Sync all windows to container
+      state.w = cw - border_h
+
+      -- update header
+      if state.header.win and vim.api.nvim_win_is_valid(state.header.win) then
+        vim.api.nvim_win_set_config(state.header.win, {
+          width = cw - border_h,
+          height = state.h,
+          row = 0,
+          col = 0,
+          relative = "win",
+          win = state.term.container_win,
+        })
+        -- ensure modifiable for volt redraw
+        vim.api.nvim_set_option_value("modifiable", true, { buf = state.header.buf })
+        volt.run(state.header.buf, { h = state.h, w = cw - border_h })
+      end
+
+      -- update terminal
+      vim.api.nvim_win_set_config(state.term.win, {
+        width = math.max(1, cw - (state.xpad * 2) - border_h),
+        height = math.max(1, ch - header_h - (state.split_ypad * 2) + 1),
+        row = header_h + state.split_ypad - 1,
+        col = state.xpad + border_offset,
+        relative = "win",
+        win = state.term.container_win,
+      })
+
+      -- update mask
+      update_mask()
+    end,
+  })
+
   update_mask()
 
   -- run terminal if needed
@@ -191,7 +305,16 @@ function M.open(direction)
       end
       state.mask_win = nil
 
+      if state.header.win and vim.api.nvim_win_is_valid(state.header.win) then
+        vim.api.nvim_win_close(state.header.win, true)
+      end
+      if state.header.buf and vim.api.nvim_buf_is_valid(state.header.buf) then
+        require("volt").close(state.header.buf)
+      end
+      state.header.win, state.header.buf = nil, nil
+
       pcall(vim.api.nvim_del_augroup_by_name, "CakeContainerFocus")
+      pcall(vim.api.nvim_del_augroup_by_name, "CakeSplit")
       
       state.term.container_win = nil
       state.term.win = nil
@@ -232,9 +355,16 @@ function M.open(direction)
 end
 
 function M.close()
+  -- enforce persistence before closing
+  if state.term.buf and vim.api.nvim_buf_is_valid(state.term.buf) then
+    vim.api.nvim_set_option_value("bufhidden", "hide", { buf = state.term.buf })
+  end
+
   -- explicit close: close float first, which triggers events to clean everything
   if state.term.win and vim.api.nvim_win_is_valid(state.term.win) then
     vim.api.nvim_win_close(state.term.win, true)
+  elseif state.header.win and vim.api.nvim_win_is_valid(state.header.win) then
+    vim.api.nvim_win_close(state.header.win, true)
   elseif state.term.container_win and vim.api.nvim_win_is_valid(state.term.container_win) then
     vim.api.nvim_win_close(state.term.container_win, true)
   end
