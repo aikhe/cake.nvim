@@ -8,6 +8,7 @@
 ---@field kill_tab string
 ---@field next_tab string
 ---@field prev_tab string
+---@field esc_esc boolean
 
 ---@class CakeSize
 ---@field h number

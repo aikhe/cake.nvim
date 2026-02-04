@@ -19,6 +19,7 @@ M.defaults = {
     kill_tab = "x",
     next_tab = "<C-n>",
     prev_tab = "<C-p>",
+    esc_esc = true,
   },
 }
 
