@@ -82,7 +82,7 @@ return function(buf, view)
 
     map(
       "t",
-      "<Esc>",
+      m.esc_esc and "<Esc><Esc>" or "<Esc>",
       [[<C-\><C-n>]],
       { buffer = buf, noremap = true, silent = true, nowait = true }
     )
