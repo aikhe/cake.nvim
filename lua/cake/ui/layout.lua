@@ -4,6 +4,31 @@ local components = require "cake.ui.components"
 
 local M = {}
 
+local function pad_vertical(lines, pos)
+  local ypad = state.ypad or 0
+  if ypad <= 0 then
+    return lines
+  end
+
+  local res = {}
+
+  if pos == "top" then
+    for _ = 1, ypad do
+      table.insert(res, { { " " } })
+    end
+  end
+
+  vim.list_extend(res, lines)
+
+  if pos == "bottom" then
+    for _ = 1, ypad do
+      table.insert(res, { { " " } })
+    end
+  end
+
+  return res
+end
+
 M.header = {
   {
     lines = function()
@@ -32,7 +57,7 @@ M.header = {
       table.insert(line, { string.rep(" ", pad2) })
       vim.list_extend(line, nav)
 
-      return { line }
+      return pad_vertical({ line }, "top")
     end,
     name = "header",
   },
@@ -82,7 +107,7 @@ M.footer = {
       table.insert(line, { "_pad_" })
       vim.list_extend(line, components.cursor_pos())
 
-      return { voltui.hpad(line, state.w - (state.xpad * 2)) }
+      return pad_vertical({ voltui.hpad(line, state.w - (state.xpad * 2)) }, "bottom")
     end,
     name = "footer",
   },

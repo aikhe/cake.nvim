@@ -13,6 +13,7 @@ function M.open()
   if not state.term.buf then return end
 
   -- setup data & sizing
+  state.w = math.floor(vim.o.columns * (state.config.size.w / 100))
   state.header.buf = vim.api.nvim_create_buf(false, true)
   state.footer.buf = vim.api.nvim_create_buf(false, true)
 
@@ -32,7 +33,7 @@ function M.open()
   }
 
   state.h = require("volt.state")[state.header.buf].h
-  state.w = math.floor(vim.o.columns * (state.config.size.w / 100))
+  state.footer.h = require("volt.state")[state.footer.buf].h
 
   local target_total_h = math.floor(vim.o.lines * (state.config.size.h / 100))
   local border_h = 2
