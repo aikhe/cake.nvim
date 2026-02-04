@@ -38,6 +38,7 @@ local M = {
   ns = vim.api.nvim_create_namespace "Cake",
   term_ns = vim.api.nvim_create_namespace "CakeTerm",
   xpad = 2,
+  ypad = 0,
   w = 50,
   h = 20,
   current_view = "term",

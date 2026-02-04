@@ -28,11 +28,9 @@ return function(buf, view)
 
     map("n", m.rerun, function()
       local tab = state.tabs[state.active_tab]
-      if tab and tab.commands and #tab.commands > 0 then
+      if tab then
         state.resetting = true
         require("cake").open { reset = true }
-      else
-        print "No commands to rerun!"
       end
     end, opts)
 
