@@ -49,6 +49,13 @@ function M.init()
     end
   end
 
+  -- ensure persistence
+  for _, tab in ipairs(state.tabs) do
+    if tab.buf and vim.api.nvim_buf_is_valid(tab.buf) then
+      vim.api.nvim_set_option_value("bufhidden", "hide", { buf = tab.buf })
+    end
+  end
+
   local tab = state.tabs[state.active_tab]
   if tab then
     state.term.buf = tab.buf

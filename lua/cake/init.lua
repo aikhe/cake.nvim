@@ -87,37 +87,39 @@ function M.toggle()
   end
 
   -- reopen last mode
-  if state.split_direction then
+  if state.split.direction then
     -- reopen split with last direction
     state.prev_win = vim.api.nvim_get_current_win()
     state.cwd = require("cake.utils").get_context_cwd()
     state.is_split = true
-    require("cake.ui.split").open(state.split_direction)
+    require("cake.ui.split").open(state.split.direction)
   else
     M.open { mode = state.last_mode }
   end
 end
 
 function M.open_float()
-  state.split_direction = nil
-  M.open { mode = "float", reset = true }
+  state.split.direction = nil
+  M.open { mode = "float" }
 end
 
 function M.open_split_h()
+  if state.is_split then require("cake.ui.split").close() end
   close_float()
   state.prev_win = vim.api.nvim_get_current_win()
   state.cwd = require("cake.utils").get_context_cwd()
   state.is_split = true
-  state.split_direction = "horizontal"
+  state.split.direction = "horizontal"
   require("cake.ui.split").open("horizontal")
 end
 
 function M.open_split_v()
+  if state.is_split then require("cake.ui.split").close() end
   close_float()
   state.prev_win = vim.api.nvim_get_current_win()
   state.cwd = require("cake.utils").get_context_cwd()
   state.is_split = true
-  state.split_direction = "vertical"
+  state.split.direction = "vertical"
   require("cake.ui.split").open("vertical")
 end
 

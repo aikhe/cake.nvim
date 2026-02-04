@@ -46,11 +46,16 @@ local M = {
 
   last_mode = nil,
   is_split = false,
-  split_direction = nil, -- horizontal or vertical
+  split = {
+    direction = nil, -- horizontal or vertical
+    last_sizes = {
+      horizontal = nil, -- width for vsplit (side-by-side)
+      vertical = nil,   -- height for split (stacked)
+    },
+  },
   cwd = nil,
   resetting = false,
   setup_done = false,
-  prev_win = nil,
   prev_win = nil,
   mask_win = nil,
 
