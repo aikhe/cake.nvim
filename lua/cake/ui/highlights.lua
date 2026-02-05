@@ -66,12 +66,10 @@ function M.apply_split(win)
   local win_bg = state.config.border and bg or lighten(bg, 2)
 
   local winhl = "WinSeparator:Normal,VertSplit:Normal"
-  if not state.config.border then
-    winhl = "Normal:CakeSplitNormal," .. winhl
-  end
+  if not state.config.border then winhl = "Normal:CakeSplitNormal," .. winhl end
 
   -- set window-local highlights
-  vim.api.nvim_win_set_option(win, "winhighlight", winhl)
+  vim.api.nvim_set_option_value("winhighlight", winhl, { win = win })
 
   -- define highlight groups
   api.nvim_set_hl(0, "CakeSplitNormal", { bg = win_bg })
