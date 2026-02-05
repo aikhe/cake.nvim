@@ -7,6 +7,9 @@ function M.open()
   local layout = require "cake.ui.layout"
   local terminal = require "cake.core.terminal"
 
+  require "volt.highlights"
+  require "cake.ui.highlights"(state.ns)
+
   state.current_view = "term"
   terminal.init()
 
@@ -57,8 +60,6 @@ function M.open()
     border = "single",
   })
 
-  require "volt.highlights"
-  require "cake.ui.highlights"(state.ns)
   vim.api.nvim_win_set_hl_ns(state.header.win, state.ns)
 
   -- term container
@@ -128,7 +129,11 @@ function M.open()
 
       -- enforce persistence before closing float
       if state.term.buf and vim.api.nvim_buf_is_valid(state.term.buf) then
-        vim.api.nvim_set_option_value("bufhidden", "hide", { buf = state.term.buf })
+        vim.api.nvim_set_option_value(
+          "bufhidden",
+          "hide",
+          { buf = state.term.buf }
+        )
       end
 
       pclose(state.header.win)
