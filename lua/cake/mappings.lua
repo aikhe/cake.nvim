@@ -1,4 +1,5 @@
 local state = require "cake.state"
+local ui = require "cake.ui"
 local map = vim.keymap.set
 
 ---@param buf number buffer to set keymaps on
@@ -7,14 +8,14 @@ return function(buf, view)
   local m = state.config.mappings
   local opts = { buffer = buf, noremap = true, silent = true }
 
-  map("n", "?", function() require("cake.ui.help").open() end, opts)
+  map("n", "?", function() ui.help.open() end, opts)
 
   if view == "term" then
     map("n", "<Esc>", function() require("cake").toggle() end, opts)
 
     map("n", m.edit_commands, function()
       state.resetting = true
-      require("cake.ui.edit").open()
+      ui.edit.open()
     end, opts)
 
     map(
@@ -93,17 +94,17 @@ return function(buf, view)
     local nav_dirs = { "h", "j", "k", "l" }
     for _, dir in ipairs(nav_dirs) do
       map("n", "<C-w>" .. dir, function()
-        require("cake.ui.split").navigate(dir)
+        ui.split.navigate(dir)
       end, opts)
       -- support user custom keybinds (ctrl+hjkl) directly
       map("n", "<C-" .. dir .. ">", function()
-        require("cake.ui.split").navigate(dir)
+        ui.split.navigate(dir)
       end, opts)
     end
   elseif view == "commands" then
     local function back_to_term()
       if state.is_split then
-        require("cake.ui.edit").back_to_split_term()
+        ui.edit.back_to_split_term()
       else
         require("cake").open()
       end
@@ -113,15 +114,15 @@ return function(buf, view)
     map(
       "n",
       m.edit_cwd,
-      function() require("cake.ui.edit").open_cwd() end,
+      function() ui.edit.open_cwd() end,
       opts
     )
   elseif view == "cwd" then
-    map("n", "<Esc>", function() require("cake.ui.edit").open() end, opts)
-    map("n", m.edit_cwd, function() require("cake.ui.edit").open() end, opts)
+    map("n", "<Esc>", function() ui.edit.open() end, opts)
+    map("n", m.edit_cwd, function() ui.edit.open() end, opts)
   elseif view == "help" then
-    map("n", "q", function() require("cake.ui.help").close() end, opts)
-    map("n", "<Esc>", function() require("cake.ui.help").close() end, opts)
+    map("n", "q", function() ui.help.close() end, opts)
+    map("n", "<Esc>", function() ui.help.close() end, opts)
   end
 
   if state.config.custom_mappings then

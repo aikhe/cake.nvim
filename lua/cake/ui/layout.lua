@@ -6,9 +6,7 @@ local M = {}
 
 local function pad_vertical(lines, pos)
   local ypad = state.ypad or 0
-  if ypad <= 0 then
-    return lines
-  end
+  if ypad <= 0 then return lines end
 
   local res = {}
 
@@ -107,7 +105,10 @@ M.footer = {
       table.insert(line, { "_pad_" })
       vim.list_extend(line, components.cursor_pos())
 
-      return pad_vertical({ voltui.hpad(line, state.w - (state.xpad * 2)) }, "bottom")
+      return pad_vertical(
+        { voltui.hpad(line, state.w - (state.xpad * 2)) },
+        "bottom"
+      )
     end,
     name = "footer",
   },

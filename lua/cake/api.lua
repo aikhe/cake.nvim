@@ -4,14 +4,15 @@ local state = require "cake.state"
 local tabs = require "cake.core.tabs"
 local terminal = require "cake.core.terminal"
 local session = require "cake.core.session"
+local ui = require "cake.ui"
 
 -- ui entry points
-M.cake_float = function() require("cake.ui").open() end
-M.cake_split_h = function() require("cake.ui.split").open("horizontal") end
-M.cake_split_v = function() require("cake.ui.split").open("vertical") end
+M.cake_float = function() ui.open() end
+M.cake_split_h = function() ui.split.open("horizontal") end
+M.cake_split_v = function() ui.split.open("vertical") end
 M.edit_cmds = function()
   state.resetting = true
-  require("cake.ui.edit").open()
+  ui.edit.open()
 end
 
 -- tab operations
