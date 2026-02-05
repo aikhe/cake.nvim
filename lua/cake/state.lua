@@ -13,6 +13,8 @@
 ---@class CakeTermState : CakeWindowState
 ---@field h number height
 ---@field job_id number|nil job id
+---@field container_win number|nil container window handle (for split mode)
+---@field container_buf number|nil container buffer handle (for split mode)
 
 ---@class CakeFooterState : CakeWindowState
 ---@field h number height
@@ -31,9 +33,41 @@
 ---@field return_view "term"|"commands"|nil
 ---@field prev_buf number|nil
 
+---@class CakeSplitState
+---@field direction "horizontal"|"vertical"|nil
+---@field last_sizes { horizontal: number|nil, vertical: number|nil }
+
 local config = require "cake.config"
 
 ---@class CakeState
+---@field ns number namespace for UI highlights
+---@field term_ns number namespace for terminal highlights
+---@field xpad number horizontal padding
+---@field ypad number vertical padding (floating)
+---@field split_ypad number vertical padding (split mode)
+---@field w number current layout width
+---@field h number current layout height
+---@field current_view "term"|"commands"|"edit"|"help" current active view
+---@field last_mode string|nil last nvim mode
+---@field is_split boolean whether we are in split mode
+---@field split CakeSplitState split specific state
+---@field cwd string|nil current working directory
+---@field resetting boolean flags to prevent loops during reset
+---@field setup_done boolean whether setup has been called
+---@field prev_win number|nil window handle before opening cake
+---@field mask_win number|nil window handle for split separator mask
+---@field header CakeHeaderState
+---@field tabs CakeTab[]
+---@field active_tab number index of the active tab
+---@field term CakeTermState
+---@field container CakeWindowState main container window
+---@field footer CakeFooterState
+---@field edit CakeEditState
+---@field cwd_edit CakeEditState
+---@field help CakeHelpState
+---@field config CakeConfig merged configuration
+
+---@type CakeState
 local M = {
   ns = vim.api.nvim_create_namespace "Cake",
   term_ns = vim.api.nvim_create_namespace "CakeTerm",
@@ -50,7 +84,7 @@ local M = {
     direction = nil, -- horizontal or vertical
     last_sizes = {
       horizontal = nil, -- width for vsplit (side-by-side)
-      vertical = nil,   -- height for split (stacked)
+      vertical = nil, -- height for split (stacked)
     },
   },
   cwd = nil,
