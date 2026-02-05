@@ -4,6 +4,13 @@ local layout = require "cake.ui.layout"
 
 local M = {}
 
+-- disable line numbers in window
+local function disable_linenr(win)
+  local o = { win = win }
+  vim.api.nvim_set_option_value("number", false, o)
+  vim.api.nvim_set_option_value("relativenumber", false, o)
+end
+
 local function cleanup_view_state(view_s)
   local function sc(w)
     if w and vim.api.nvim_win_is_valid(w) then
@@ -111,9 +118,7 @@ local function setup_view(opts)
   })
   vim.api.nvim_win_set_hl_ns(view_s.win, state.term_ns)
 
-  -- disable line numbers
-  vim.api.nvim_set_option_value("number", false, { win = view_s.win })
-  vim.api.nvim_set_option_value("relativenumber", false, { win = view_s.win })
+  disable_linenr(view_s.win)
 
   -- footer win
   view_s.footer_win = vim.api.nvim_open_win(view_s.footer_buf, false, {
@@ -317,8 +322,7 @@ function M.open_split_cwd()
 
   vim.api.nvim_win_set_buf(state.term.win, state.cwd_edit.buf)
 
-  vim.api.nvim_set_option_value("number", false, { win = state.term.win })
-  vim.api.nvim_set_option_value("relativenumber", false, { win = state.term.win })
+  disable_linenr(state.term.win)
 
   require "cake.mappings"(state.cwd_edit.buf, "cwd")
   require("cake.api").redraw_header()
@@ -367,9 +371,7 @@ function M.open_split_edit()
   -- swap buffer
   vim.api.nvim_win_set_buf(state.term.win, state.edit.buf)
 
-  -- disable line numbers
-  vim.api.nvim_set_option_value("number", false, { win = state.term.win })
-  vim.api.nvim_set_option_value("relativenumber", false, { win = state.term.win })
+  disable_linenr(state.term.win)
 
   -- setup mappings
   require "cake.mappings"(state.edit.buf, "commands")

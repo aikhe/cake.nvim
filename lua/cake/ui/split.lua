@@ -1,8 +1,25 @@
 local state = require "cake.state"
+local highlights = require "cake.ui.highlights"
 
 local M = {}
 
-local function update_mask()
+-- configure window for minimal ui appearance
+local function configure_minimal_win(win, opts)
+  opts = opts or {}
+  local o = { win = win }
+  vim.api.nvim_set_option_value("number", false, o)
+  vim.api.nvim_set_option_value("relativenumber", false, o)
+  if opts.fillchars then
+    vim.api.nvim_set_option_value("fillchars", "eob: ", o)
+  end
+  if opts.columns then
+    vim.api.nvim_set_option_value("signcolumn", "no", o)
+    vim.api.nvim_set_option_value("foldcolumn", "0", o)
+  end
+end
+
+-- this thing covers the split seperator line, it works but still thiking about a better way
+local function update_mask(direction)
   if state.config.border then return end
   if
     not state.term.container_win
@@ -19,7 +36,7 @@ local function update_mask()
     win = state.term.container_win,
     style = "minimal",
     border = "none",
-    zindex = 300, -- high enough to cover separator
+    zindex = 300, -- high enough to cover separator T~T
     focusable = false, -- non-interactive
   }
 
@@ -112,34 +129,10 @@ function M.open(direction)
   vim.api.nvim_win_set_buf(state.term.container_win, state.term.container_buf)
 
   -- apply background to container
-  require("cake.ui.highlights").apply_split(state.term.container_win)
+  highlights.apply_split(state.term.container_win)
 
   -- configure container (hidden text)
-  vim.api.nvim_set_option_value(
-    "number",
-    false,
-    { win = state.term.container_win }
-  )
-  vim.api.nvim_set_option_value(
-    "relativenumber",
-    false,
-    { win = state.term.container_win }
-  )
-  vim.api.nvim_set_option_value(
-    "fillchars",
-    "eob: ",
-    { win = state.term.container_win }
-  )
-  vim.api.nvim_set_option_value(
-    "signcolumn",
-    "no",
-    { win = state.term.container_win }
-  )
-  vim.api.nvim_set_option_value(
-    "foldcolumn",
-    "0",
-    { win = state.term.container_win }
-  )
+  configure_minimal_win(state.term.container_win, { fillchars = true, columns = true })
 
   -- setup header (reuse float logic since im freaking lazy rn)
   local win_w = vim.api.nvim_win_get_width(state.term.container_win)
@@ -195,15 +188,9 @@ function M.open(direction)
     style = "minimal",
     border = "none",
   })
-  require("cake.ui.highlights").apply_split(state.term.win)
+  highlights.apply_split(state.term.win)
 
-  -- prevent line numbers in terminal window
-  vim.api.nvim_set_option_value("number", false, { win = state.term.win })
-  vim.api.nvim_set_option_value(
-    "relativenumber",
-    false,
-    { win = state.term.win }
-  )
+  configure_minimal_win(state.term.win)
 
   -- auto-resize logic (handles container resize and redirects float resize)
   local split_group = vim.api.nvim_create_augroup("CakeSplit", { clear = true })
@@ -292,11 +279,11 @@ function M.open(direction)
       })
 
       -- update mask
-      update_mask()
+      update_mask(direction)
     end,
   })
 
-  update_mask()
+  update_mask(direction)
 
   -- run terminal if needed
   if vim.bo[state.term.buf].buftype ~= "terminal" then

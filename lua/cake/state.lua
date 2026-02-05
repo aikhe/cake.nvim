@@ -13,8 +13,8 @@
 ---@class CakeTermState : CakeWindowState
 ---@field h number height
 ---@field job_id number|nil job id
----@field container_win number|nil container window handle (for split mode)
----@field container_buf number|nil container buffer handle (for split mode)
+---@field container_win number|nil container window handle (split mode)
+---@field container_buf number|nil container buffer handle (split mode)
 
 ---@class CakeFooterState : CakeWindowState
 ---@field h number height
@@ -83,8 +83,8 @@ local M = {
   split = {
     direction = nil, -- horizontal or vertical
     last_sizes = {
-      horizontal = nil, -- width for vsplit (side-by-side)
-      vertical = nil, -- height for split (stacked)
+      horizontal = nil, -- width for hsplit (side-by-side)
+      vertical = nil, -- height for vsplit (stacked)
     },
   },
   cwd = nil,
