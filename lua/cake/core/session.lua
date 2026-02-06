@@ -1,6 +1,6 @@
-local M = {}
-
 local state = require "cake.state"
+
+local M = {}
 
 ---returns the path to the tabs save file
 ---@return string

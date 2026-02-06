@@ -1,6 +1,6 @@
-local M = {}
-
 local state = require "cake.state"
+
+local M = {}
 
 ---get shell info for the given terminal
 ---@param terminal? string

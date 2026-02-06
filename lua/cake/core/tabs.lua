@@ -1,6 +1,6 @@
-local M = {}
-
 local state = require "cake.state"
+
+local M = {}
 
 ---creates a new tab and adds it to the list
 ---@param opts? {cwd?: string, commands?: string[]}

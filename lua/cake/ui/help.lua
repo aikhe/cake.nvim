@@ -1,8 +1,8 @@
-local M = {}
-
 local volt = require "volt"
 local layout = require "cake.ui.layout"
 local state = require "cake.state"
+
+local M = {}
 
 function M.open()
   if state.current_view == "help" then return end

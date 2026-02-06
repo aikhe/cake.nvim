@@ -1,6 +1,6 @@
-local M = {}
-
 local state = require "cake.state"
+
+local M = {}
 
 ---returns the current context cwd based on config
 ---@return string

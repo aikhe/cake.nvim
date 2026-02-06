@@ -1,9 +1,9 @@
-local M = {}
-
 local state = require "cake.state"
 local config = require "cake.config"
 local utils = require "cake.utils"
 local ui = require "cake.ui"
+
+local M = {}
 
 ---@param opts CakeConfig?
 function M.setup(opts)
@@ -11,12 +11,9 @@ function M.setup(opts)
   state.setup_done = true
 end
 
----@param opts? {mode?: "float"|"split", reset?: boolean}
+---@param opts? {mode?: "float"|"split"|"splitv"|"splith", reset?: boolean}
 function M.open(opts)
   opts = opts or {}
-
-  -- close split if active
-  if state.is_split then ui.split.close() end
 
   state.last_mode = opts.mode or state.last_mode or state.config.mode
 
@@ -40,9 +37,19 @@ function M.open(opts)
 
   if not opts.reset then state.cwd = utils.get_context_cwd() end
 
+  if state.is_split then ui.split.close() end
+
   state.prev_win = vim.api.nvim_get_current_win()
 
-  ui.open()
+  if state.last_mode == "splitv" then
+    ui.split.open "vertical"
+  elseif state.last_mode == "splith" then
+    ui.split.open "horizontal"
+  elseif state.last_mode == "float" then
+    ui.float.open()
+  else
+    ui.float.open()
+  end
 
   if state.header.win and vim.api.nvim_win_is_valid(state.header.win) then
     vim.api.nvim_create_autocmd("WinClosed", {
@@ -93,7 +100,7 @@ function M.toggle()
     state.is_split = true
     ui.split.open(state.split.direction)
   else
-    M.open { mode = state.last_mode }
+    M.open { mode = state.last_mode or state.config.mode }
   end
 end
 
