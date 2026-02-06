@@ -172,4 +172,10 @@ function M.open()
   end)
 end
 
+function M.close()
+  if state.header.buf and vim.api.nvim_buf_is_valid(state.header.buf) then
+    require("volt").close(state.header.buf)
+  end
+end
+
 return M
