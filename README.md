@@ -2,9 +2,7 @@
 
 <p align="center">
   A Neovim plugin to simplify command management into<br>
-  <i>a piece of cake.</i><br><br>
-  <img src="https://img.shields.io/badge/-neovim-%23eeeeee?style=flat-square&amp;logo=neovim&amp;logoColor=black" alt="" >
-  <img src="https://img.shields.io/badge/-lua-%23eeeeee?style=flat-square&amp;logo=lua&amp;logoColor=black" alt="" >
+  a piece of cake<br>
 </p>
 
 ![cake-nb](https://github.com/user-attachments/assets/a48b5777-8f8b-4d75-a5f7-e53cd1701d08)
@@ -40,11 +38,19 @@
 **Keymaps (Optional)**:
 
 ```lua
-vim.keymap.set('n', '<leader>cf', function()
-    require('cake').open_float()
+vim.keymap.set('n', '<leader>ef', function()
+    require('cake').open({ mode = "float" })
 end, { desc = 'Cake Float' })
 
-vim.keymap.set('n', '<leader>ct', function()
+vim.keymap.set('n', '<leader>ev', function()
+    require('cake').open({ mode = "vertical" })
+end, { desc = 'Cake Split Vertical' })
+
+vim.keymap.set('n', '<leader>eh', function()
+    require('cake').open({ mode = "horizontal" })
+end, { desc = 'Cake Split Horizontal' })
+
+vim.keymap.set('n', '<leader>et', function()
     require('cake').toggle()
 end, { desc = 'Cake Toggle' })
 ```
@@ -52,12 +58,14 @@ end, { desc = 'Cake Toggle' })
 ## Default Config
 
 ```lua
-{
-  terminal = "",
-  title = " cake.nvim",
+require("cake").setup({
+  terminal = "", -- Terminal defaults to bash & cmd
+  title = " cake.nvim", -- Can be empty
   border = false,
-  size = { h = 60, w = 50 },
   use_file_dir = false, -- Use file path as new tab default path
+  mode = "float", -- "float", "splitv" (vertical), "splith" (horizontal)
+  size = { h = 60, w = 50 }, -- Default float size
+  split = { w = 50, h = 25 }, -- Default split sizes w: horizontal, h: vertical
 
   -- Override default mappings
   mappings = {
@@ -69,7 +77,7 @@ end, { desc = 'Cake Toggle' })
     next_tab = "<C-n>",
     prev_tab = "<C-p>",
   },
-}
+})
 ```
 
 ## Mappings
