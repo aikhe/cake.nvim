@@ -25,6 +25,6 @@
 ---@field size CakeSize
 ---@field split CakeSplitConfig
 ---@field use_file_dir boolean use file path as new tab default
----@field mode "float"|"split"
+---@field mode "float"|"split"|"splitv"|"splith"
 ---@field mappings CakeMappings
 ---@field custom_mappings? fun(buf: number, view: string)

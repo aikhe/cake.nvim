@@ -132,7 +132,10 @@ function M.open(direction)
   highlights.apply_split(state.term.container_win)
 
   -- configure container (hidden text)
-  configure_minimal_win(state.term.container_win, { fillchars = true, columns = true })
+  configure_minimal_win(
+    state.term.container_win,
+    { fillchars = true, columns = true }
+  )
 
   -- setup header (reuse float logic since im freaking lazy rn)
   local win_w = vim.api.nvim_win_get_width(state.term.container_win)
@@ -220,7 +223,7 @@ function M.open(direction)
       local ch = vim.api.nvim_win_get_height(state.term.container_win)
       local header_h = state.h + border_h
 
-      -- redirect: if user resized the FLOAT (via keybinds/commands), apply delta to CONTAINER
+      -- redirect: if user resized the float (via keybinds/commands), apply delta to container
       if float_resized then
         local fw = vim.api.nvim_win_get_width(state.term.win)
         local fh = vim.api.nvim_win_get_height(state.term.win)
