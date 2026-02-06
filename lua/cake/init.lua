@@ -11,11 +11,14 @@ function M.setup(opts)
   state.setup_done = true
 end
 
----@param opts? {mode?: "float"|"split"|"splitv"|"splith", reset?: boolean}
+---@param opts? {mode?: "float"|"vertical"|"horizontal", reset?: boolean}
 function M.open(opts)
   opts = opts or {}
 
   state.last_mode = opts.mode or state.last_mode or state.config.mode
+
+  -- close split if active
+  if state.is_split then ui.split.close() end
 
   if opts.reset then require("cake.core.terminal").reset_buf() end
 
@@ -37,13 +40,17 @@ function M.open(opts)
 
   if not opts.reset then state.cwd = utils.get_context_cwd() end
 
-  if state.is_split then ui.split.close() end
-
   state.prev_win = vim.api.nvim_get_current_win()
 
-  if state.last_mode == "splitv" then
+  if state.last_mode == "vertical" then
+    close_float()
+    state.split.direction = "vertical"
+    state.is_split = true
     ui.split.open "vertical"
-  elseif state.last_mode == "splith" then
+  elseif state.last_mode == "horizontal" then
+    close_float()
+    state.split.direction = "horizontal"
+    state.is_split = true
     ui.split.open "horizontal"
   elseif state.last_mode == "float" then
     ui.float.open()
@@ -74,7 +81,6 @@ local function close_float()
 end
 
 function M.toggle()
-  -- handle split mode: close and remember direction
   if state.is_split then
     ui.split.close()
     if state.prev_win and vim.api.nvim_win_is_valid(state.prev_win) then
@@ -83,7 +89,6 @@ function M.toggle()
     return
   end
 
-  -- handle float mode
   if state.header.win and vim.api.nvim_win_is_valid(state.header.win) then
     close_float()
     if vim.api.nvim_win_is_valid(state.prev_win) then
@@ -92,41 +97,7 @@ function M.toggle()
     return
   end
 
-  -- reopen last mode
-  if state.split.direction then
-    -- reopen split with last direction
-    state.prev_win = vim.api.nvim_get_current_win()
-    state.cwd = require("cake.utils").get_context_cwd()
-    state.is_split = true
-    ui.split.open(state.split.direction)
-  else
-    M.open { mode = state.last_mode or state.config.mode }
-  end
-end
-
-function M.open_float()
-  state.split.direction = nil
-  M.open { mode = "float" }
-end
-
-function M.open_split_h()
-  if state.is_split then ui.split.close() end
-  close_float()
-  state.prev_win = vim.api.nvim_get_current_win()
-  state.cwd = require("cake.utils").get_context_cwd()
-  state.is_split = true
-  state.split.direction = "horizontal"
-  ui.split.open "horizontal"
-end
-
-function M.open_split_v()
-  if state.is_split then ui.split.close() end
-  close_float()
-  state.prev_win = vim.api.nvim_get_current_win()
-  state.cwd = require("cake.utils").get_context_cwd()
-  state.is_split = true
-  state.split.direction = "vertical"
-  ui.split.open "vertical"
+  M.open { mode = state.last_mode or state.config.mode }
 end
 
 return M
