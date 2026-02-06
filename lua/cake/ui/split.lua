@@ -360,25 +360,6 @@ function M.open(direction)
   end)
 end
 
-function M.close()
-  -- enforce persistence before closing
-  if state.term.buf and vim.api.nvim_buf_is_valid(state.term.buf) then
-    vim.api.nvim_set_option_value("bufhidden", "hide", { buf = state.term.buf })
-  end
-
-  -- explicit close: close float first, which triggers events to clean everything
-  if state.term.win and vim.api.nvim_win_is_valid(state.term.win) then
-    vim.api.nvim_win_close(state.term.win, true)
-  elseif state.header.win and vim.api.nvim_win_is_valid(state.header.win) then
-    vim.api.nvim_win_close(state.header.win, true)
-  elseif
-    state.term.container_win
-    and vim.api.nvim_win_is_valid(state.term.container_win)
-  then
-    vim.api.nvim_win_close(state.term.container_win, true)
-  end
-end
-
 ---navigate from the split container
 ---@param direction "h"|"j"|"k"|"l"
 function M.navigate(direction)
@@ -401,6 +382,25 @@ function M.navigate(direction)
   if new_win == state.term.container_win then
     -- didn't move (hit edge), restore focus to float
     vim.api.nvim_set_current_win(current_float)
+  end
+end
+
+function M.close()
+  -- enforce persistence before closing
+  if state.term.buf and vim.api.nvim_buf_is_valid(state.term.buf) then
+    vim.api.nvim_set_option_value("bufhidden", "hide", { buf = state.term.buf })
+  end
+
+  -- explicit close: close float first, which triggers events to clean everything
+  if state.term.win and vim.api.nvim_win_is_valid(state.term.win) then
+    vim.api.nvim_win_close(state.term.win, true)
+  elseif state.header.win and vim.api.nvim_win_is_valid(state.header.win) then
+    vim.api.nvim_win_close(state.header.win, true)
+  elseif
+    state.term.container_win
+    and vim.api.nvim_win_is_valid(state.term.container_win)
+  then
+    vim.api.nvim_win_close(state.term.container_win, true)
   end
 end
 
