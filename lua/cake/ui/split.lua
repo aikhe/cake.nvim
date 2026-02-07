@@ -40,7 +40,7 @@ local function update_mask(direction)
     focusable = false, -- non-interactive
   }
 
-  if direction == "horizontal" then
+  if direction == "splith" then
     -- vsplit: separator is to the left (since botright vsplit puts cake on right)
     mask_opts.row = 0
     mask_opts.col = -1
@@ -95,7 +95,7 @@ local function cleanup()
   state.is_split = false
 end
 
----@param direction "horizontal"|"vertical"
+---@param direction "splith"|"splitv"
 function M.open(direction)
   local volt = require "volt"
   local layout = require "cake.ui.layout"
@@ -111,16 +111,16 @@ function M.open(direction)
   if not state.term.buf then return end
 
   -- create split (container) with botright (user preferred)
-  local split_cmd = direction == "horizontal" and "botright vsplit"
+  local split_cmd = direction == "splith" and "botright vsplit"
     or "botright split"
   vim.cmd(split_cmd)
 
   -- start size based on direction
   local size = state.split.last_sizes[direction]
     or (
-      direction == "horizontal" and state.config.split.w or state.config.split.h
+      direction == "splith" and state.config.split.w or state.config.split.h
     )
-  local resize_cmd = direction == "horizontal" and "vertical resize" or "resize"
+  local resize_cmd = direction == "splith" and "vertical resize" or "resize"
   vim.cmd(resize_cmd .. " " .. size)
 
   -- setup container window
@@ -246,7 +246,7 @@ function M.open(direction)
       end
 
       -- save last split size
-      state.split.last_sizes[direction] = (direction == "horizontal") and cw
+      state.split.last_sizes[direction] = (direction == "splith") and cw
         or ch
 
       -- sync all windows to container

@@ -51,11 +51,11 @@ vim.keymap.set('n', '<leader>ef', function()
 end, { desc = 'Cake Float' })
 
 vim.keymap.set('n', '<leader>ev', function()
-    require('cake').open({ mode = "vertical" })
+    require('cake').open({ mode = "splitv" })
 end, { desc = 'Cake Split Vertical' })
 
 vim.keymap.set('n', '<leader>eh', function()
-    require('cake').open({ mode = "horizontal" })
+    require('cake').open({ mode = "splith" })
 end, { desc = 'Cake Split Horizontal' })
 
 vim.keymap.set('n', '<leader>et', function()

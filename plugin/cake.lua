@@ -12,12 +12,12 @@ vim.api.nvim_create_user_command(
 
 vim.api.nvim_create_user_command(
   "CakeSplitH",
-  function() require("cake").open { mode = "horizontal" } end,
+  function() require("cake").open { mode = "splith" } end,
   {}
 )
 
 vim.api.nvim_create_user_command(
   "CakeSplitV",
-  function() require("cake").open { mode = "vertical" } end,
+  function() require("cake").open { mode = "splitv" } end,
   {}
 )

@@ -11,7 +11,7 @@ function M.setup(opts)
   state.setup_done = true
 end
 
----@param opts? {mode?: "float"|"vertical"|"horizontal", reset?: boolean}
+---@param opts? {mode?: "float"|"splitv"|"splith", reset?: boolean}
 function M.open(opts)
   opts = opts or {}
 
@@ -39,20 +39,20 @@ function M.open(opts)
 
   state.prev_win = vim.api.nvim_get_current_win()
 
-  if state.last_mode == "vertical" then
+  if state.last_mode == "splitv" then
     ui.float.close()
     ui.split.close()
 
-    state.split.direction = "vertical"
+    state.split.direction = "splitv"
     state.is_split = true
-    ui.split.open "vertical"
-  elseif state.last_mode == "horizontal" then
+    ui.split.open "splitv"
+  elseif state.last_mode == "splith" then
     ui.float.close()
     ui.split.close()
 
-    state.split.direction = "horizontal"
+    state.split.direction = "splith"
     state.is_split = true
-    ui.split.open "horizontal"
+    ui.split.open "splith"
   elseif state.last_mode == "float" then
     ui.split.close()
     ui.float.open()
