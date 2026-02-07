@@ -64,7 +64,7 @@ local function setup_view(opts)
   if state.term.h < 1 then state.term.h = 1 end
 
   local total_h = header_h + state.term.h + state.footer.h + total_borders
-  local start_row = math.floor((vim.o.lines - total_h) / 2)
+  local start_row = math.floor((vim.o.lines - total_h) / 2) - 1
 
   -- header win
   view_s.header_win = vim.api.nvim_open_win(view_s.header_buf, false, {

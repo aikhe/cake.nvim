@@ -9,7 +9,7 @@ M.defaults = {
 
   mode = "float",
   size = { h = 60, w = 50 },
-  split = { w = 50, h = 25 },
+  split = { w = 80, h = 25 },
 
   mappings = {
     new_tab = "n",

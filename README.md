@@ -1,15 +1,22 @@
-<h1 align="center">🍰 Cake</h1>
-
 <p align="center">
-  A Neovim plugin to simplify command management into<br>
-  a piece of cake<br>
+  <br />
+  <a href="https://github.com/aikhe/cake.nvim">
+    <picture>
+      <img width="340" alt="cake" src="https://github.com/user-attachments/assets/bb08fb17-873a-46c3-8bf1-e77c8f0201f1" />
+    </picture>
+  </a>
 </p>
 
-![cake-nb](https://github.com/user-attachments/assets/a48b5777-8f8b-4d75-a5f7-e53cd1701d08)
-![cake-wb](https://github.com/user-attachments/assets/392f5f19-f3e9-4c4c-88df-497faf292af4)
+<br />
 
-> [!IMPORTANT]
-> I celebrated my birthday by building the first iteration of this plugin! It’s still in its early stages, so I’d love to hear any feedbacks, issues, and contributions if you have any. 🍰
+<img width="1400" alt="info" src="https://github.com/user-attachments/assets/58aa604d-5d8d-4875-b0d2-deaf5e8ad414" />
+
+![cake-dark](https://github.com/user-attachments/assets/2b469903-28dd-4b00-8157-bd2ca5521a5d)
+![cake-light](https://github.com/user-attachments/assets/2f95f004-6fc3-49e3-90d9-3b72d0ed0602)
+
+# Cake
+
+A Neovim plugin to simplify command management into a piece of cake<br>
 
 ## Features
 
@@ -17,6 +24,9 @@
 - **Command Management**: Create, edit, and execute reusable command lists.
 - **Session Persistence**: Save and restore tabs, commands, and working directories.
 - **UI Layer**: Built on top of [`nvzone/volt`](https://github.com/nvzone/volt).
+
+> [!IMPORTANT]
+> I celebrated my birthday by building the first iteration of this plugin! It’s still in its early stages, so I’d love to hear any feedbacks, issues, and contributions if you have any.
 
 ## Installation
 
@@ -30,7 +40,7 @@
 {
   "aikhe/cake.nvim",
   dependencies = "nvzone/volt",
-  cmd = { "CakeToggle", "CakeFloat" },
+  cmd = { "CakeToggle", "CakeFloat", "CakeSplitV", "CakeSplitH" },
   opts = {},
 }
 ```
