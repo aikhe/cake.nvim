@@ -46,7 +46,7 @@ function M.open()
   if state.term.h < 1 then state.term.h = 1 end
 
   local total_h = state.h + state.term.h + state.footer.h + total_borders
-  local start_row = math.floor((vim.o.lines - total_h) / 2)
+  local start_row = math.floor((vim.o.lines - total_h) / 2) - 1
   local col = (vim.o.columns - state.w) / 2
 
   -- header window

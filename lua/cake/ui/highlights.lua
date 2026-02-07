@@ -52,7 +52,7 @@ function M.apply_float(ns)
   local term_border_fg = state.config.border and lighten(bg, 15) or win_bg
   local header_border_fg = state.config.border and text_light or win_bg
 
-  api.nvim_set_hl(ns, "FloatBorder", { fg = header_border_fg, bg = border_bg })
+  api.nvim_set_hl(ns, "FloatBorder", { fg = term_border_fg, bg = border_bg })
   api.nvim_set_hl(
     state.term_ns,
     "FloatBorder",
