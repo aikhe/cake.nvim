@@ -25,6 +25,6 @@
 ---@field size CakeSize
 ---@field split CakeSplitConfig
 ---@field use_file_dir boolean
----@field mode "float"|"vertical"|"horizontal"
+---@field mode "float"|"splitv"|"splith"
 ---@field mappings CakeMappings
 ---@field custom_mappings? fun(buf: number, view: string)

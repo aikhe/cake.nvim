@@ -8,8 +8,8 @@ local M = {}
 
 -- ui
 M.cake_float = function() ui.float.open() end
-M.cake_split_h = function() ui.split.open "horizontal" end
-M.cake_split_v = function() ui.split.open "vertical" end
+M.cake_split_h = function() ui.split.open "splith" end
+M.cake_split_v = function() ui.split.open "splitv" end
 M.edit_cmds = function()
   state.resetting = true
   ui.edit.open()

@@ -34,8 +34,8 @@
 ---@field prev_buf number|nil
 
 ---@class CakeSplitState
----@field direction "horizontal"|"vertical"|nil
----@field last_sizes { horizontal: number|nil, vertical: number|nil }
+---@field direction "splith"|"splitv"|nil
+---@field last_sizes { splith: number|nil, splitv: number|nil }
 
 local config = require "cake.config"
 
@@ -81,10 +81,10 @@ local M = {
   last_mode = nil,
   is_split = false,
   split = {
-    direction = nil, -- horizontal or vertical
+    direction = nil, -- splith or splitv
     last_sizes = {
-      horizontal = nil, -- width for hsplit (side-by-side)
-      vertical = nil, -- height for vsplit (stacked)
+      splith = nil, -- width for hsplit (side-by-side)
+      splitv = nil, -- height for vsplit (stacked)
     },
   },
   cwd = nil,
