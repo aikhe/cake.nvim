@@ -1,9 +1,7 @@
 <p align="center">
   <br />
   <a href="https://github.com/aikhe/cake.nvim">
-    <picture>
-      <img width="340" alt="cake" src="https://github.com/user-attachments/assets/bb08fb17-873a-46c3-8bf1-e77c8f0201f1" />
-    </picture>
+    <img width="300" alt="cake" src="https://github.com/user-attachments/assets/bb08fb17-873a-46c3-8bf1-e77c8f0201f1" />
   </a>
 </p>
 
