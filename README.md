@@ -1,15 +1,15 @@
 <p align="center">
   <br />
   <a href="https://github.com/aikhe/cake.nvim">
-    <img width="300" alt="cake" src="https://github.com/user-attachments/assets/bb08fb17-873a-46c3-8bf1-e77c8f0201f1" />
+    <img width="300" alt="Cake Logo" src="https://github.com/user-attachments/assets/bb08fb17-873a-46c3-8bf1-e77c8f0201f1" />
   </a>
 </p>
 
 <br />
 
-<img width="1400" alt="info" src="https://github.com/user-attachments/assets/58aa604d-5d8d-4875-b0d2-deaf5e8ad414" />
+<img width="1400" alt="Cake Info" src="https://github.com/user-attachments/assets/58aa604d-5d8d-4875-b0d2-deaf5e8ad414" />
 
-![cake-dark](https://github.com/user-attachments/assets/2b469903-28dd-4b00-8157-bd2ca5521a5d)
+![cake-dark](https://github.com/user-attachments/assets/2b396daa-3786-4722-8f8b-84e3ca88d666)
 ![cake-light](https://github.com/user-attachments/assets/2f95f004-6fc3-49e3-90d9-3b72d0ed0602)
 
 # Cake
@@ -38,7 +38,7 @@ A Neovim plugin to simplify command management into a piece of cake<br>
 {
   "aikhe/cake.nvim",
   dependencies = "nvzone/volt",
-  cmd = { "CakeToggle", "CakeFloat", "CakeSplitV", "CakeSplitH" },
+  cmd = { "CakeToggle", "CakeFloat", "CakeSplitV", "CakeSplitH", "CakeRun" },
   opts = {},
 }
 ```
@@ -61,6 +61,10 @@ end, { desc = 'Cake Split Horizontal' })
 vim.keymap.set('n', '<leader>et', function()
     require('cake').toggle()
 end, { desc = 'Cake Toggle' })
+
+vim.keymap.set('n', '<leader>er', function()
+    require('cake').run()
+end, { desc = 'Cake Run' })
 ```
 
 ## Default Config

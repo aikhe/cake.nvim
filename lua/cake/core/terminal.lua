@@ -13,7 +13,7 @@ function M.get_shell_info(terminal)
   local info = {
     path = shell,
     flag = "-c",
-    sep = "\n",
+    sep = "; ",
   }
 
   if lower:find "powershell" or lower:find "pwsh" then
@@ -21,6 +21,9 @@ function M.get_shell_info(terminal)
   elseif lower:find "cmd" then
     info.flag = "/c"
     info.sep = " && "
+  elseif lower:find "wsl" then
+    info.flag = { "-e", "bash", "-c" }
+    info.sep = "; "
   end
 
   return info
@@ -78,18 +81,34 @@ function M.run_in_buf(buf, cmd, terminal, cwd)
   local final_cmd = cmd
 
   if type(cmd) == "table" then
-    if #cmd == 0 then
+    local valid_cmds = {}
+    for _, line in ipairs(cmd) do
+      if line and line:match "%S" then table.insert(valid_cmds, line) end
+    end
+
+    if #valid_cmds == 0 then
       final_cmd = nil
     else
-      final_cmd = table.concat(cmd, shell_info.sep)
+      final_cmd = table.concat(valid_cmds, shell_info.sep)
     end
   end
 
-  local job_cmd
+  local job_cmd = { shell_info.path }
+
   if final_cmd and final_cmd ~= "" then
-    job_cmd = { shell_info.path, shell_info.flag, final_cmd }
-  else
-    job_cmd = shell_info.path
+    local flags = shell_info.flag
+    if type(flags) ~= "table" then
+      if flags and flags ~= "" then
+        flags = { flags }
+      else
+        flags = {}
+      end
+    end
+
+    for _, f in ipairs(flags) do
+      table.insert(job_cmd, f)
+    end
+    table.insert(job_cmd, final_cmd)
   end
 
   vim.api.nvim_buf_call(buf, function()

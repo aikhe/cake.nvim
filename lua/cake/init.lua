@@ -96,4 +96,51 @@ function M.toggle()
   M.open { mode = state.last_mode or state.config.mode }
 end
 
+---@param opts? {tab?: number, mode?: "float"|"splitv"|"splith"}
+function M.run(opts)
+  opts = opts or {}
+  local terminal = require "cake.core.terminal"
+  local session = require "cake.core.session"
+  local tabs = require "cake.core.tabs"
+
+  -- load tabs if empty
+  if #state.tabs == 0 then
+    local saved = session.load_tabs()
+    if #saved > 0 then
+      for _, t in ipairs(saved) do
+        tabs.create { cwd = t.cwd, commands = t.commands or {} }
+      end
+    end
+  end
+
+  -- resolve target tab (default to active tab or 1)
+  local tab_idx = opts.tab or state.active_tab
+  if tab_idx < 1 then tab_idx = 1 end
+
+  -- validate tab exists
+  if tab_idx > #state.tabs then
+    vim.notify("Tab " .. tab_idx .. " does not exist", vim.log.levels.ERROR)
+    return
+  end
+
+  local tab = state.tabs[tab_idx]
+
+  -- validate tab has commands
+  if not tab.commands or #tab.commands == 0 then
+    vim.notify("Tab " .. tab_idx .. " has no commands", vim.log.levels.ERROR)
+    return
+  end
+
+  -- switch to target tab
+  state.active_tab = tab_idx
+  state.term.buf = tab.buf
+  state.cwd = tab.cwd
+
+  -- reset buffer for fresh execution
+  terminal.reset_buf()
+
+  -- open in specified mode
+  M.open { mode = opts.mode, reset = true }
+end
+
 return M
