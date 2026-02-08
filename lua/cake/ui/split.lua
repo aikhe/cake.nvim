@@ -193,7 +193,7 @@ function M.open(direction)
   })
   highlights.apply_split(state.term.win)
 
-  configure_minimal_win(state.term.win)
+  configure_minimal_win(state.term.win, { fillchars = true })
 
   -- auto-resize logic (handles container resize and redirects float resize)
   local split_group = vim.api.nvim_create_augroup("CakeSplit", { clear = true })
