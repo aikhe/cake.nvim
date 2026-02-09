@@ -37,8 +37,6 @@
 ---@field direction "splith"|"splitv"|nil
 ---@field last_sizes { splith: number|nil, splitv: number|nil }
 
-local config = require "cake.config"
-
 ---@class CakeState
 ---@field ns number namespace for UI highlights
 ---@field term_ns number namespace for terminal highlights
@@ -66,6 +64,8 @@ local config = require "cake.config"
 ---@field cwd_edit CakeEditState
 ---@field help CakeHelpState
 ---@field config CakeConfig merged configuration
+
+local config = require "cake.config"
 
 ---@type CakeState
 local M = {

@@ -9,6 +9,12 @@ local M = {}
 function M.setup(opts)
   state.config = vim.tbl_deep_extend("force", config.defaults, opts or {})
   state.setup_done = true
+
+  require("cake.ui.highlights").set_colors()
+
+  vim.api.nvim_create_autocmd("ColorScheme", {
+    callback = function() require("cake.ui.highlights").set_colors() end,
+  })
 end
 
 ---@param opts? {mode?: "float"|"splitv"|"splith", reset?: boolean}

@@ -7,6 +7,25 @@ local state = require "cake.state"
 
 local M = {}
 
+M._get_highlights = function()
+  return {
+    { name = "CakeTitle", link = "Title", desc = "header title" },
+    { name = "CakeLabel", link = "Comment", desc = "labels in ui" },
+    { name = "CakeKey", link = "Special", desc = "keybind indicators" },
+    { name = "CakeTabActive", link = "Title", desc = "active tab" },
+    { name = "CakeTabInactive", link = "Comment", desc = "inactive tabs" },
+    { name = "CakeSplitNormal", link = "Normal", desc = "split background" },
+  }
+end
+
+function M.set_colors()
+  for _, hl in ipairs(M._get_highlights()) do
+    if hl.link then
+      vim.api.nvim_set_hl(0, hl.name, { default = true, link = hl.link })
+    end
+  end
+end
+
 local function get_bg()
   if vim.g.base46_cache then
     return dofile(vim.g.base46_cache .. "colors").black
@@ -71,16 +90,11 @@ function M.apply_split(win)
       .. winhl
   end
 
-  -- set window-local highlights
   vim.api.nvim_set_option_value("winhighlight", winhl, { win = win })
 
-  -- define highlight groups
   api.nvim_set_hl(0, "CakeSplitNormal", { bg = win_bg })
-
-  -- legacy: separators use normal directly
 end
 
--- backward compatibility
 return setmetatable(M, {
   __call = function(_, ns) M.apply_float(ns) end,
 })

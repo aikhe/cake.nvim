@@ -4,7 +4,7 @@ local M = {}
 
 ---get shell info for the given terminal
 ---@param terminal? string
----@return {path: string, flag: string, sep: string}
+---@return {path: string, flag: string|string[], sep: string}
 function M.get_shell_info(terminal)
   local shell = terminal or state.config.terminal
   if shell == nil or shell == "" then shell = vim.o.shell end
@@ -33,7 +33,6 @@ end
 function M.init()
   local session = require "cake.core.session"
   local tabs = require "cake.core.tabs"
-  local utils = require "cake.utils"
 
   if #state.tabs == 0 then
     local saved_tabs = session.load_tabs()
@@ -97,16 +96,10 @@ function M.run_in_buf(buf, cmd, terminal, cwd)
 
   if final_cmd and final_cmd ~= "" then
     local flags = shell_info.flag
-    if type(flags) ~= "table" then
-      if flags and flags ~= "" then
-        flags = { flags }
-      else
-        flags = {}
-      end
-    end
+    local flag_list = type(flags) == "table" and flags or { flags }
 
-    for _, f in ipairs(flags) do
-      table.insert(job_cmd, f)
+    for _, f in ipairs(flag_list) do
+      if f and f ~= "" then table.insert(job_cmd, f) end
     end
     table.insert(job_cmd, final_cmd)
   end
