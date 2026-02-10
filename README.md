@@ -1,20 +1,18 @@
 <p align="center">
   <br />
   <a href="https://github.com/aikhe/cake.nvim">
-    <img width="300" alt="Cake Logo" src="https://github.com/user-attachments/assets/bb08fb17-873a-46c3-8bf1-e77c8f0201f1" />
+    <img width="280" alt="Cake Logo" src="https://github.com/user-attachments/assets/bb08fb17-873a-46c3-8bf1-e77c8f0201f1" />
   </a>
 </p>
 
-<br />
-
-<img width="1400" alt="cake-info" src="https://github.com/user-attachments/assets/d66f7761-4dff-45b1-8991-5a84fada0948" />
+<img width="971" height="219" alt="cake-info" src="https://github.com/user-attachments/assets/f49ec8c5-b4a3-4fe4-a7e7-a8464a1c85c8" />
 
 ![cake-dark](https://github.com/user-attachments/assets/2b396daa-3786-4722-8f8b-84e3ca88d666)
 ![cake-light](https://github.com/user-attachments/assets/2f95f004-6fc3-49e3-90d9-3b72d0ed0602)
 
 # Cake
 
-A Neovim plugin to simplify command management into a piece of cake<br>
+A Neovim plugin for organizing, managing, and executing shell commands with ease — streamline your command workflows
 
 ## Features
 

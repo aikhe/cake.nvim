@@ -67,9 +67,10 @@ function M.apply_float(ns)
     )
   end
 
+  api.nvim_set_hl(0, "CakeNormal", { bg = win_bg, fg = text_light })
+
   local border_bg = is_split_border and "NONE" or win_bg
   local term_border_fg = state.config.border and lighten(bg, 15) or win_bg
-  local header_border_fg = state.config.border and text_light or win_bg
 
   api.nvim_set_hl(ns, "FloatBorder", { fg = term_border_fg, bg = border_bg })
   api.nvim_set_hl(
@@ -81,18 +82,25 @@ function M.apply_float(ns)
 end
 
 function M.apply_split(win)
+  local winhl = "WinSeparator:Normal,VertSplit:Normal"
+  vim.api.nvim_set_option_value("winhighlight", winhl, { win = win })
+end
+
+function M.apply_help_win(win)
+  local prev_winhl =
+    vim.api.nvim_get_option_value("winhighlight", { win = win })
+
   local bg = get_bg()
   local win_bg = state.config.border and bg or lighten(bg, 2)
+  local text_light = get_hl("Normal").fg
+  api.nvim_set_hl(0, "CakeNormal", { bg = win_bg, fg = text_light })
 
-  local winhl = "WinSeparator:Normal,VertSplit:Normal"
-  if not state.config.border then
-    winhl = "Normal:CakeSplitNormal,NormalNC:CakeSplitNormal,EndOfBuffer:CakeSplitNormal,"
-      .. winhl
-  end
-
-  vim.api.nvim_set_option_value("winhighlight", winhl, { win = win })
-
-  api.nvim_set_hl(0, "CakeSplitNormal", { bg = win_bg })
+  vim.api.nvim_set_option_value(
+    "winhighlight",
+    "Normal:CakeNormal,NormalNC:CakeNormal,SignColumn:CakeNormal,EndOfBuffer:CakeNormal",
+    { win = win }
+  )
+  return prev_winhl
 end
 
 return setmetatable(M, {

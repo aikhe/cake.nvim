@@ -23,10 +23,10 @@ M.defaults = {
   },
 
   split_nav = {
-    h = { "<C-h>" },
-    j = { "<C-j>" },
-    k = { "<C-k>" },
-    l = { "<C-l>" },
+    left = { "<C-h>" },
+    down = { "<C-j>" },
+    up = { "<C-k>" },
+    right = { "<C-l>" },
   },
 }
 

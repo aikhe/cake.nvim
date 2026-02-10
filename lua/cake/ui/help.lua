@@ -19,39 +19,27 @@ function M.open()
 
   if not state.help.buf or not vim.api.nvim_buf_is_valid(state.help.buf) then
     state.help.buf = vim.api.nvim_create_buf(false, true)
-
-    local m = state.config.mappings
-    local help_text = {
-      "",
-      "Keybindings",
-      "-----------",
-      "",
-      string.format("%-6s Edit Commands", m.edit_commands),
-      string.format("└─%-4s Edit CWD", m.edit_cwd),
-      "",
-      string.format("%-6s New Tab", m.new_tab),
-      string.format("%-6s Kill Tab", m.kill_tab),
-      string.format("%-6s Rerun Commands", m.rerun),
-      "",
-      string.format("%-6s Next Tab", m.next_tab),
-      string.format("%-6s Prev Tab", m.prev_tab),
-      string.format("%-6s Switch Tab", "1-9"),
-      "",
-      string.format("%-6s Help", "?"),
-      "└─q    Quit in Help",
-      "",
-      ":w     Save Tab/Commands",
-      "",
-    }
-
-    vim.api.nvim_buf_set_lines(state.help.buf, 0, -1, false, help_text)
-    vim.api.nvim_set_option_value("modifiable", false, { buf = state.help.buf })
-    vim.api.nvim_set_option_value(
-      "filetype",
-      "cake_help",
-      { buf = state.help.buf }
-    )
+  else
+    vim.api.nvim_set_option_value("modifiable", true, { buf = state.help.buf })
   end
+
+  volt.gen_data {
+    {
+      buf = state.help.buf,
+      layout = layout.help,
+      xpad = 0,
+      ns = state.term_ns,
+    },
+  }
+
+  local help_h = require("volt.state")[state.help.buf].h
+  local win_width = vim.api.nvim_win_get_width(target_win)
+  volt.set_empty_lines(state.help.buf, help_h, win_width)
+
+  volt.redraw(state.help.buf, "all")
+
+  vim.api.nvim_set_option_value("wrap", false, { win = target_win })
+  vim.api.nvim_set_option_value("modifiable", false, { buf = state.help.buf })
 
   vim.api.nvim_win_set_buf(target_win, state.help.buf)
 
@@ -77,6 +65,9 @@ function M.open()
     volt.redraw(footer_buf, "footer")
   end
 
+  state.help.prev_winhl =
+    require("cake.ui.highlights").apply_help_win(target_win)
+
   require "cake.mappings"(state.help.buf, "help")
 end
 
@@ -85,6 +76,19 @@ function M.close()
 
   local target_win = (state.help.return_view == "term") and state.term.win
     or state.edit.win
+
+  if
+    target_win
+    and vim.api.nvim_win_is_valid(target_win)
+    and state.help.prev_winhl
+  then
+    vim.api.nvim_set_option_value(
+      "winhighlight",
+      state.help.prev_winhl,
+      { win = target_win }
+    )
+    state.help.prev_winhl = nil
+  end
 
   if
     target_win
