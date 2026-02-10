@@ -278,6 +278,7 @@ function M.open_cwd()
       local current_tab = state.tabs[state.active_tab]
       if current_tab then
         current_tab.cwd = new_cwd
+        state.cwd = new_cwd
         require("cake.core.session").save_tabs()
         vim.notify("CWD saved!", vim.log.levels.INFO)
       end
@@ -307,6 +308,7 @@ function M.open_split_cwd()
         local current_tab = state.tabs[state.active_tab]
         if current_tab then
           current_tab.cwd = new_cwd
+          state.cwd = new_cwd
           require("cake.core.session").save_tabs()
           vim.notify("CWD saved!", vim.log.levels.INFO)
         end

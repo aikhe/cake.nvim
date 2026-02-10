@@ -14,7 +14,9 @@ function M.get_context_cwd()
 
   if state.config.use_file_dir and buftype ~= "terminal" then
     local path = vim.api.nvim_buf_get_name(context_buf)
-    if path ~= "" then return vim.fn.fnamemodify(path, ":p:h") end
+    if path ~= "" and not path:match "^%w+://" then
+      return vim.fn.fnamemodify(path, ":p:h")
+    end
   end
 
   return vim.fn.getcwd()

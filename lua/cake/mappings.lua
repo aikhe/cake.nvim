@@ -33,19 +33,28 @@ return function(buf, view)
         state.resetting = true
         if state.is_split then
           -- rerun in split: reset terminal buffer and rerun commands
-          local old_buf = require("cake.core.terminal").reset_buf { defer_delete = true }
-          
+          local old_buf =
+            require("cake.core.terminal").reset_buf { defer_delete = true }
+
           -- attach new buffer to split window
           if state.term.win and vim.api.nvim_win_is_valid(state.term.win) then
             vim.api.nvim_win_set_buf(state.term.win, state.term.buf)
             -- disable line numbers on new buffer
-            vim.api.nvim_set_option_value("number", false, { win = state.term.win })
-            vim.api.nvim_set_option_value("relativenumber", false, { win = state.term.win })
-            
+            vim.api.nvim_set_option_value(
+              "number",
+              false,
+              { win = state.term.win }
+            )
+            vim.api.nvim_set_option_value(
+              "relativenumber",
+              false,
+              { win = state.term.win }
+            )
+
             -- re-apply mappings to new buffer
             require "cake.mappings"(state.term.buf, "term")
           end
-          
+
           -- delete old buffer now that window has new buffer
           if old_buf and vim.api.nvim_buf_is_valid(old_buf) then
             vim.api.nvim_buf_delete(old_buf, { force = true })
@@ -55,7 +64,7 @@ return function(buf, view)
             state.term.buf,
             tab.commands or {},
             state.config.terminal,
-            state.cwd
+            tab.cwd
           )
         else
           require("cake").open { reset = true }
