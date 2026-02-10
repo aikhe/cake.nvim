@@ -32,6 +32,8 @@ A Neovim plugin for organizing, managing, and executing shell commands with ease
 - [`nvzone/volt`](https://github.com/nvzone/volt) (UI framework dependency)
 - A [Nerd Font](https://www.nerdfonts.com/) (for icons)
 
+**Lazy**:
+
 ```lua
 {
   "aikhe/cake.nvim",

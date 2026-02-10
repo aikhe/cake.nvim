@@ -15,6 +15,7 @@ M._get_highlights = function()
     { name = "CakeTabActive", link = "Title", desc = "active tab" },
     { name = "CakeTabInactive", link = "Comment", desc = "inactive tabs" },
     { name = "CakeSplitNormal", link = "Normal", desc = "split background" },
+    { name = "CakeNavHover", link = "CursorLine", desc = "nav button hover" },
   }
 end
 
@@ -65,6 +66,11 @@ function M.apply_float(ns)
       "CakeTabInactive",
       { fg = commentfg, bg = tab_bg }
     )
+    api.nvim_set_hl(target_ns, "CakeNavHover", {
+      fg = text_light,
+      bg = "NONE",
+      bold = true,
+    })
   end
 
   api.nvim_set_hl(0, "CakeNormal", { bg = win_bg, fg = text_light })

@@ -29,7 +29,12 @@ M.tabs = function()
 
       local actions = {
         click = function() require("cake.api").switch_tab(i) end,
+        hover = { id = "tab_" .. i, redraw = "header" },
       }
+
+      if vim.g.nvmark_hovered == "tab_" .. i and not is_active then
+        hl = "CakeNavHover"
+      end
 
       table.insert(line, { icon .. "  ", hl, actions })
     end
@@ -43,17 +48,30 @@ M.nav = function(active)
   local term_hl = (active == "term") and "CakeTabActive" or "CakeTabInactive"
   local cmd_hl = (active == "commands") and "CakeTabActive" or "CakeTabInactive"
 
+  if vim.g.nvmark_hovered == "nav_term" and active ~= "term" then
+    term_hl = "CakeNavHover"
+  end
+  if vim.g.nvmark_hovered == "nav_cmd" and active ~= "commands" then
+    cmd_hl = "CakeNavHover"
+  end
+
   return {
     {
       " Terminal ",
       term_hl,
-      { click = function() require("cake").open() end },
+      {
+        click = function() require("cake").open() end,
+        hover = { id = "nav_term", redraw = "header" },
+      },
     },
     { " " },
     {
       " Commands",
       cmd_hl,
-      { click = function() require("cake.api").edit_cmds() end },
+      {
+        click = function() require("cake.api").edit_cmds() end,
+        hover = { id = "nav_cmd", redraw = "header" },
+      },
     },
   }
 end
