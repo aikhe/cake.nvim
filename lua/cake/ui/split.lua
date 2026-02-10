@@ -130,6 +130,7 @@ function M.open(direction)
 
   -- apply background to container
   highlights.apply_split(state.term.container_win)
+  vim.api.nvim_win_set_hl_ns(state.term.container_win, state.term_ns)
 
   -- configure container (hidden text)
   configure_minimal_win(
@@ -192,6 +193,7 @@ function M.open(direction)
     border = "none",
   })
   highlights.apply_split(state.term.win)
+  vim.api.nvim_win_set_hl_ns(state.term.win, state.term_ns)
 
   configure_minimal_win(state.term.win, { fillchars = true })
 

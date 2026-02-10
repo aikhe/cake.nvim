@@ -114,4 +114,33 @@ M.footer = {
   },
 }
 
+M.help = {
+  {
+    lines = function()
+      local m = state.config.mappings
+
+      local tbl = {
+        { "Key", "Action" },
+        { m.edit_commands, "Edit Commands" },
+        { m.edit_cwd, "Edit CWD" },
+        { m.new_tab, "New Tab" },
+        { m.kill_tab, "Kill Tab" },
+        { m.rerun, "Rerun Commands" },
+        { m.next_tab, "Next Tab" },
+        { m.prev_tab, "Prev Tab" },
+        { "1-9", "Switch Tab" },
+        { "?", "Help" },
+        { "q", "Quit Help" },
+        { ":w", "Save" },
+      }
+
+      local title_lines = { {}, { { "Keybindings", "CakeTitle" } }, {} }
+      local table_lines = voltui.table(tbl, "fit", "CakeTitle")
+
+      return voltui.grid_row { title_lines, table_lines, { {} } }
+    end,
+    name = "help",
+  },
+}
+
 return M

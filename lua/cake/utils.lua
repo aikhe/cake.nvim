@@ -47,9 +47,11 @@ function M.split_nav(buf)
   end, opts)
 
   -- apply user-defined navigation keys
-  for dir, keys in pairs(state.config.split_nav or {}) do
+  local dir_map = { left = "h", down = "j", up = "k", right = "l" }
+  for dir_name, keys in pairs(state.config.split_nav or {}) do
+    local wincmd_dir = dir_map[dir_name] or dir_name -- fallback for old config (h/j/k/l)
     for _, key in ipairs(keys) do
-      map("n", key, function() ui.split.navigate(dir) end, opts)
+      map("n", key, function() ui.split.navigate(wincmd_dir) end, opts)
     end
   end
 end
