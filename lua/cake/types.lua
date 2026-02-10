@@ -27,4 +27,5 @@
 ---@field use_file_dir boolean
 ---@field mode "float"|"splitv"|"splith"
 ---@field mappings CakeMappings
+---@field split_nav? table<string, string[]>
 ---@field custom_mappings? fun(buf: number, view: string)

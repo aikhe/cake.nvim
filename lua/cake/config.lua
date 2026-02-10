@@ -21,6 +21,13 @@ M.defaults = {
     prev_tab = "<C-p>",
     esc_esc = true,
   },
+
+  split_nav = {
+    h = { "<C-h>" },
+    j = { "<C-j>" },
+    k = { "<C-k>" },
+    l = { "<C-l>" },
+  },
 }
 
 return M

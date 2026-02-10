@@ -98,18 +98,9 @@ return function(buf, view)
     )
 
     require("cake.core.terminal").setup_cursor_events(buf)
-    
-    -- split navigation from float
-    local nav_dirs = { "h", "j", "k", "l" }
-    for _, dir in ipairs(nav_dirs) do
-      map("n", "<C-w>" .. dir, function()
-        ui.split.navigate(dir)
-      end, opts)
-      -- support user custom keybinds (ctrl+hjkl) directly
-      map("n", "<C-" .. dir .. ">", function()
-        ui.split.navigate(dir)
-      end, opts)
-    end
+
+    -- split navigation
+    require("cake.utils").split_nav(buf)
   elseif view == "commands" then
     local function back_to_term()
       if state.is_split then
@@ -120,12 +111,7 @@ return function(buf, view)
     end
     map("n", "<Esc>", back_to_term, opts)
     map("n", m.edit_commands, back_to_term, opts)
-    map(
-      "n",
-      m.edit_cwd,
-      function() ui.edit.open_cwd() end,
-      opts
-    )
+    map("n", m.edit_cwd, function() ui.edit.open_cwd() end, opts)
   elseif view == "cwd" then
     map("n", "<Esc>", function() ui.edit.open() end, opts)
     map("n", m.edit_cwd, function() ui.edit.open() end, opts)

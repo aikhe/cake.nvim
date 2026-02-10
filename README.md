@@ -7,7 +7,7 @@
 
 <br />
 
-<img width="1400" alt="Cake Info" src="https://github.com/user-attachments/assets/58aa604d-5d8d-4875-b0d2-deaf5e8ad414" />
+<img width="1400" alt="cake-info" src="https://github.com/user-attachments/assets/d66f7761-4dff-45b1-8991-5a84fada0948" />
 
 ![cake-dark](https://github.com/user-attachments/assets/2b396daa-3786-4722-8f8b-84e3ca88d666)
 ![cake-light](https://github.com/user-attachments/assets/2f95f004-6fc3-49e3-90d9-3b72d0ed0602)
@@ -88,6 +88,14 @@ require("cake").setup({
     kill_tab = "x",
     next_tab = "<C-n>",
     prev_tab = "<C-p>",
+  },
+
+  -- split term navigation keys
+  split_nav = {
+    h = { "<C-h>" },
+    j = { "<C-j>" },
+    k = { "<C-k>" },
+    l = { "<C-l>" },
   },
 })
 ```

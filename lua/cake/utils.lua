@@ -22,4 +22,36 @@ function M.get_context_cwd()
   return vim.fn.getcwd()
 end
 
+---split navigation
+---@param buf number
+function M.split_nav(buf)
+  local ui = require "cake.ui"
+  local map = vim.keymap.set
+  local opts = { buffer = buf, noremap = true, silent = true }
+
+  -- intercept <C-w> + direction
+  map("n", "<C-w>", function()
+    local ok, char = pcall(vim.fn.getcharstr)
+    if not ok or not char then return end
+
+    local dir = ({ h = "h", j = "j", k = "k", l = "l" })[char:lower()]
+    if dir then
+      ui.split.navigate(dir)
+    else
+      vim.api.nvim_feedkeys(
+        vim.api.nvim_replace_termcodes("<C-w>" .. char, true, true, true),
+        "n",
+        false
+      )
+    end
+  end, opts)
+
+  -- apply user-defined navigation keys
+  for dir, keys in pairs(state.config.split_nav or {}) do
+    for _, key in ipairs(keys) do
+      map("n", key, function() ui.split.navigate(dir) end, opts)
+    end
+  end
+end
+
 return M
