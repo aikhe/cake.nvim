@@ -39,38 +39,4 @@ function M.save_tabs()
   end
 end
 
----returns the path to the commands json file
----@return string
-function M.get_cmds_path() return vim.fn.stdpath "data" .. "/cake_commands.json" end
-
----loads commands from the persistent json file
----@return string[]
-function M.load_commands()
-  local path = M.get_cmds_path()
-  local f = io.open(path, "r")
-
-  if f then
-    local content = f:read "*a"
-    f:close()
-
-    if content then
-      local ok, decoded = pcall(vim.fn.json_decode, content)
-      if ok and type(decoded) == "table" then return decoded end
-    end
-  end
-  return {}
-end
-
----saves the current list of commands to the persistent json file
----@param cmds string[]
-function M.save_commands(cmds)
-  local path = M.get_cmds_path()
-  local f = io.open(path, "w")
-
-  if f then
-    f:write(vim.fn.json_encode(cmds))
-    f:close()
-  end
-end
-
 return M

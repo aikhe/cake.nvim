@@ -32,7 +32,7 @@ A Neovim plugin for organizing, managing, and executing shell commands with ease
 - [`nvzone/volt`](https://github.com/nvzone/volt) (UI framework dependency)
 - A [Nerd Font](https://www.nerdfonts.com/) (for icons)
 
-**Lazy**:
+### Lazy
 
 ```lua
 {
@@ -43,7 +43,7 @@ A Neovim plugin for organizing, managing, and executing shell commands with ease
 }
 ```
 
-**Keymaps (Optional)**:
+### Keymaps (Optional):
 
 ```lua
 vim.keymap.set('n', '<leader>ef', function()

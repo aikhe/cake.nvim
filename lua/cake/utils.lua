@@ -36,7 +36,7 @@ function M.split_nav(buf)
 
     local dir = ({ h = "h", j = "j", k = "k", l = "l" })[char:lower()]
     if dir then
-      ui.split.navigate(dir)
+      ui.win.navigate(dir)
     else
       vim.api.nvim_feedkeys(
         vim.api.nvim_replace_termcodes("<C-w>" .. char, true, true, true),
@@ -51,7 +51,7 @@ function M.split_nav(buf)
   for dir_name, keys in pairs(state.config.split_nav or {}) do
     local wincmd_dir = dir_map[dir_name] or dir_name -- fallback for old config (h/j/k/l)
     for _, key in ipairs(keys) do
-      map("n", key, function() ui.split.navigate(wincmd_dir) end, opts)
+      map("n", key, function() ui.win.navigate(wincmd_dir) end, opts)
     end
   end
 end

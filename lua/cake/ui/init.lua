@@ -1,7 +1,6 @@
 local M = {}
 
-M.float = require "cake.ui.float"
-M.split = require "cake.ui.split"
+M.win = require "cake.ui.win"
 M.edit = require "cake.ui.edit"
 M.help = require "cake.ui.help"
 M.layout = require "cake.ui.layout"

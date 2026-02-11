@@ -199,4 +199,21 @@ function M.setup_cursor_events(buf)
   })
 end
 
+---ensure terminal is running in the current buffer
+function M.ensure_running()
+  if not state.term.buf or not vim.api.nvim_buf_is_valid(state.term.buf) then
+    return
+  end
+
+  if vim.bo[state.term.buf].buftype ~= "terminal" then
+    local tab = state.tabs[state.active_tab]
+    M.run_in_buf(
+      state.term.buf,
+      tab and tab.commands or {},
+      state.config.terminal,
+      state.cwd
+    )
+  end
+end
+
 return M

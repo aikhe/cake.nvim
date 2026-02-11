@@ -28,7 +28,7 @@ M.tabs = function()
       local icon = num_icons[i] or tostring(i)
 
       local actions = {
-        click = function() require("cake.api").switch_tab(i) end,
+        click = function() require("cake.core.tabs").switch(i) end,
         hover = { id = "tab_" .. i, redraw = "header" },
       }
 
@@ -69,7 +69,10 @@ M.nav = function(active)
       " Commands",
       cmd_hl,
       {
-        click = function() require("cake.api").edit_cmds() end,
+        click = function()
+          state.resetting = true
+          require("cake.ui.edit").open()
+        end,
         hover = { id = "nav_cmd", redraw = "header" },
       },
     },

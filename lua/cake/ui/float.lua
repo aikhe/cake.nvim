@@ -1,21 +1,16 @@
 local state = require "cake.state"
+local volt = require "volt"
+local layout = require "cake.ui.layout"
 
 local M = {}
 
+local function pclose(win)
+  if win and vim.api.nvim_win_is_valid(win) then
+    vim.api.nvim_win_close(win, true)
+  end
+end
+
 function M.open()
-  local volt = require "volt"
-  local layout = require "cake.ui.layout"
-  local terminal = require "cake.core.terminal"
-
-  require "volt.highlights"
-  require "cake.ui.highlights"(state.ns)
-
-  state.current_view = "term"
-  terminal.init()
-
-  if not state.term.buf then return end
-
-  -- setup data & sizing
   state.w = math.floor(vim.o.columns * (state.config.size.w / 100))
   state.header.buf = vim.api.nvim_create_buf(false, true)
   state.footer.buf = vim.api.nvim_create_buf(false, true)
@@ -49,7 +44,6 @@ function M.open()
   local start_row = math.floor((vim.o.lines - total_h) / 2) - 1
   local col = (vim.o.columns - state.w) / 2
 
-  -- header window
   state.header.win = vim.api.nvim_open_win(state.header.buf, false, {
     relative = "editor",
     width = state.w,
@@ -59,10 +53,8 @@ function M.open()
     style = "minimal",
     border = "single",
   })
-
   vim.api.nvim_win_set_hl_ns(state.header.win, state.ns)
 
-  -- term container
   local container_border = state.config.border and "single"
     or { " ", " ", " ", " ", " ", " ", " ", " " }
   state.container.buf = vim.api.nvim_create_buf(false, true)
@@ -77,7 +69,6 @@ function M.open()
   })
   vim.api.nvim_win_set_hl_ns(state.container.win, state.term_ns)
 
-  -- inner term
   state.term.win = vim.api.nvim_open_win(state.term.buf, true, {
     relative = "editor",
     width = state.w - (state.xpad * 2),
@@ -89,7 +80,6 @@ function M.open()
   })
   vim.api.nvim_win_set_hl_ns(state.term.win, state.term_ns)
 
-  -- footer window
   state.footer.win = vim.api.nvim_open_win(state.footer.buf, false, {
     relative = "editor",
     width = state.w,
@@ -101,33 +91,17 @@ function M.open()
   })
   vim.api.nvim_win_set_hl_ns(state.footer.win, state.term_ns)
 
-  -- finalize ui
   require("volt.events").add { state.header.buf, state.footer.buf }
   volt.run(state.header.buf, { h = state.h, w = state.w })
   volt.run(state.footer.buf, { h = state.footer.h, w = state.w })
 
-  if vim.bo[state.term.buf].buftype ~= "terminal" then
-    local tab = state.tabs[state.active_tab]
-    terminal.run_in_buf(
-      state.term.buf,
-      tab and tab.commands or {},
-      state.config.terminal,
-      state.cwd
-    )
-  end
+  require("cake.core.terminal").ensure_running()
+  require "cake.mappings"(state.term.buf, "term")
 
-  -- clean up & events
   volt.mappings {
     bufs = { state.header.buf, state.footer.buf },
     winclosed_event = true,
     after_close = function()
-      local pclose = function(win)
-        if win and vim.api.nvim_win_is_valid(win) then
-          vim.api.nvim_win_close(win, true)
-        end
-      end
-
-      -- enforce persistence before closing float
       if state.term.buf and vim.api.nvim_buf_is_valid(state.term.buf) then
         vim.api.nvim_set_option_value(
           "bufhidden",
@@ -164,18 +138,6 @@ function M.open()
       end)
     end,
   })
-
-  vim.schedule(function()
-    if state.term.win and vim.api.nvim_win_is_valid(state.term.win) then
-      vim.api.nvim_set_current_win(state.term.win)
-    end
-  end)
-end
-
-function M.close()
-  if state.header.buf and vim.api.nvim_buf_is_valid(state.header.buf) then
-    require("volt").close(state.header.buf)
-  end
 end
 
 return M

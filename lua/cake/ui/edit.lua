@@ -4,7 +4,6 @@ local layout = require "cake.ui.layout"
 
 local M = {}
 
--- disable line numbers in window
 local function disable_linenr(win)
   local o = { win = win }
   vim.api.nvim_set_option_value("number", false, o)
@@ -34,7 +33,6 @@ end
 local function setup_view(opts)
   local view_s = opts.view_state
 
-  -- setup volt buffers
   view_s.header_buf = vim.api.nvim_create_buf(false, true)
   view_s.footer_buf = vim.api.nvim_create_buf(false, true)
 
@@ -55,7 +53,6 @@ local function setup_view(opts)
 
   local header_h = require("volt.state")[view_s.header_buf].h
 
-  -- sizing
   state.w = math.floor(vim.o.columns * (state.config.size.w / 100))
   local target_total_h = math.floor(vim.o.lines * (state.config.size.h / 100))
   local border_h = 2
@@ -66,7 +63,6 @@ local function setup_view(opts)
   local total_h = header_h + state.term.h + state.footer.h + total_borders
   local start_row = math.floor((vim.o.lines - total_h) / 2) - 1
 
-  -- header win
   view_s.header_win = vim.api.nvim_open_win(view_s.header_buf, false, {
     relative = "editor",
     width = state.w,
@@ -78,18 +74,15 @@ local function setup_view(opts)
   })
   vim.api.nvim_win_set_hl_ns(view_s.header_win, state.ns)
 
-  -- text buffer creation/reuse
   if not view_s.buf or not vim.api.nvim_buf_is_valid(view_s.buf) then
     view_s.buf = vim.api.nvim_create_buf(false, true)
     pcall(vim.api.nvim_buf_set_name, view_s.buf, opts.buf_name)
     vim.api.nvim_set_option_value("buftype", "acwrite", { buf = view_s.buf })
   end
 
-  -- populate buffer
   opts.on_setup(view_s.buf)
   vim.api.nvim_set_option_value("modified", false, { buf = view_s.buf })
 
-  -- container win
   local container_border = state.config.border and "single"
     or { " ", " ", " ", " ", " ", " ", " ", " " }
   view_s.container_buf = vim.api.nvim_create_buf(false, true)
@@ -104,7 +97,6 @@ local function setup_view(opts)
   })
   vim.api.nvim_win_set_hl_ns(view_s.container_win, state.term_ns)
 
-  -- editor win
   local term_w = state.w - (state.xpad * 2)
   local term_col = (vim.o.columns - state.w) / 2 + state.xpad + 1
   view_s.win = vim.api.nvim_open_win(view_s.buf, true, {
@@ -120,7 +112,6 @@ local function setup_view(opts)
 
   disable_linenr(view_s.win)
 
-  -- footer win
   view_s.footer_win = vim.api.nvim_open_win(view_s.footer_buf, false, {
     relative = "editor",
     width = state.w,
@@ -132,7 +123,6 @@ local function setup_view(opts)
   })
   vim.api.nvim_win_set_hl_ns(view_s.footer_win, state.term_ns)
 
-  -- volt events
   require("volt.events").add { view_s.header_buf, view_s.footer_buf }
 
   vim.schedule(function()
@@ -146,7 +136,6 @@ local function setup_view(opts)
 
   require("cake.core.terminal").setup_cursor_events(view_s.buf)
 
-  -- cleanup
   local function close_all()
     cleanup_view_state(view_s)
     if state.footer.cursor_timer then
@@ -175,10 +164,8 @@ local function setup_view(opts)
     end,
   })
 
-  -- keymaps
   require "cake.mappings"(view_s.buf, opts.view_type)
 
-  -- save logic
   if opts.on_save then
     local group = vim.api.nvim_create_augroup(
       "CakeEditSave_" .. opts.buf_name,
@@ -200,7 +187,6 @@ function M.open()
   state.current_view = "commands"
   vim.cmd "stopinsert"
 
-  -- split mode: swap buffer in split window
   if state.is_split then
     M.open_split_edit()
     return
@@ -246,7 +232,6 @@ function M.open_cwd()
   state.current_view = "cwd"
   vim.cmd "stopinsert"
 
-  -- split mode: swap buffer in split window
   if state.is_split then
     M.open_split_cwd()
     return
@@ -286,101 +271,89 @@ function M.open_cwd()
   }
 end
 
--- split mode: swap buffer in split window for editing cwd
+-- shared split-mode buffer swap logic
+local function open_split_view(opts)
+  if not state.term.win or not vim.api.nvim_win_is_valid(state.term.win) then
+    return
+  end
+
+  state.edit.prev_term_buf = state.term.buf
+  local view_s = opts.view_state
+
+  if not view_s.buf or not vim.api.nvim_buf_is_valid(view_s.buf) then
+    view_s.buf = vim.api.nvim_create_buf(false, true)
+    pcall(vim.api.nvim_buf_set_name, view_s.buf, opts.buf_name)
+    vim.api.nvim_set_option_value("buftype", "acwrite", { buf = view_s.buf })
+
+    vim.api.nvim_create_autocmd("BufWriteCmd", {
+      buffer = view_s.buf,
+      callback = function()
+        opts.on_save(view_s.buf)
+        vim.api.nvim_set_option_value("modified", false, { buf = view_s.buf })
+      end,
+    })
+  end
+
+  opts.on_setup(view_s.buf)
+  vim.api.nvim_set_option_value("modified", false, { buf = view_s.buf })
+  vim.api.nvim_win_set_buf(state.term.win, view_s.buf)
+  disable_linenr(state.term.win)
+  require "cake.mappings"(view_s.buf, opts.view_type)
+  require("cake.core.tabs").redraw_header()
+end
+
 function M.open_split_cwd()
-  if not state.term.win or not vim.api.nvim_win_is_valid(state.term.win) then
-    return
-  end
-
-  state.edit.prev_term_buf = state.term.buf
-
-  if not state.cwd_edit.buf or not vim.api.nvim_buf_is_valid(state.cwd_edit.buf) then
-    state.cwd_edit.buf = vim.api.nvim_create_buf(false, true)
-    pcall(vim.api.nvim_buf_set_name, state.cwd_edit.buf, "CWD")
-    vim.api.nvim_set_option_value("buftype", "acwrite", { buf = state.cwd_edit.buf })
-
-    -- save autocmd
-    vim.api.nvim_create_autocmd("BufWriteCmd", {
-      buffer = state.cwd_edit.buf,
-      callback = function()
-        local lines = vim.api.nvim_buf_get_lines(state.cwd_edit.buf, 0, -1, false)
-        local new_cwd = lines[1] or ""
-        local current_tab = state.tabs[state.active_tab]
-        if current_tab then
-          current_tab.cwd = new_cwd
-          state.cwd = new_cwd
-          require("cake.core.session").save_tabs()
-          vim.notify("CWD saved!", vim.log.levels.INFO)
-        end
-        vim.api.nvim_set_option_value("modified", false, { buf = state.cwd_edit.buf })
-      end,
-    })
-  end
-
-  local tab = state.tabs[state.active_tab]
-  local cwd = (tab and tab.cwd) or ""
-  vim.api.nvim_buf_set_lines(state.cwd_edit.buf, 0, -1, false, { cwd })
-  vim.api.nvim_set_option_value("modified", false, { buf = state.cwd_edit.buf })
-
-  vim.api.nvim_win_set_buf(state.term.win, state.cwd_edit.buf)
-
-  disable_linenr(state.term.win)
-
-  require "cake.mappings"(state.cwd_edit.buf, "cwd")
-  require("cake.api").redraw_header()
+  open_split_view {
+    view_state = state.cwd_edit,
+    view_type = "cwd",
+    buf_name = "CWD",
+    on_setup = function(buf)
+      local tab = state.tabs[state.active_tab]
+      vim.api.nvim_buf_set_lines(buf, 0, -1, false, { (tab and tab.cwd) or "" })
+    end,
+    on_save = function(buf)
+      local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+      local current_tab = state.tabs[state.active_tab]
+      if current_tab then
+        current_tab.cwd = lines[1] or ""
+        state.cwd = current_tab.cwd
+        require("cake.core.session").save_tabs()
+        vim.notify("CWD saved!", vim.log.levels.INFO)
+      end
+    end,
+  }
 end
 
--- split mode: swap buffer in split window for editing commands
 function M.open_split_edit()
-  if not state.term.win or not vim.api.nvim_win_is_valid(state.term.win) then
-    return
-  end
-
-  -- store current terminal buffer to restore later
-  state.edit.prev_term_buf = state.term.buf
-
-  -- create or reuse edit buffer
-  if not state.edit.buf or not vim.api.nvim_buf_is_valid(state.edit.buf) then
-    state.edit.buf = vim.api.nvim_create_buf(false, true)
-    pcall(vim.api.nvim_buf_set_name, state.edit.buf, "Commands")
-    vim.api.nvim_set_option_value("buftype", "acwrite", { buf = state.edit.buf })
-
-    -- save autocmd
-    vim.api.nvim_create_autocmd("BufWriteCmd", {
-      buffer = state.edit.buf,
-      callback = function()
-        local lines = vim.api.nvim_buf_get_lines(state.edit.buf, 0, -1, false)
-        while #lines > 0 and lines[#lines] == "" do
-          table.remove(lines)
-        end
-        local current_tab = state.tabs[state.active_tab]
-        if current_tab then
-          current_tab.commands = lines
-          require("cake.core.session").save_tabs()
-          vim.notify("Commands saved!", vim.log.levels.INFO)
-        end
-        vim.api.nvim_set_option_value("modified", false, { buf = state.edit.buf })
-      end,
-    })
-  end
-
-  -- populate with current commands
-  local tab = state.tabs[state.active_tab]
-  local cmds = (tab and tab.commands) or {}
-  vim.api.nvim_buf_set_lines(state.edit.buf, 0, -1, false, cmds)
-  vim.api.nvim_set_option_value("modified", false, { buf = state.edit.buf })
-
-  -- swap buffer
-  vim.api.nvim_win_set_buf(state.term.win, state.edit.buf)
-
-  disable_linenr(state.term.win)
-
-  -- setup mappings
-  require "cake.mappings"(state.edit.buf, "commands")
-  require("cake.api").redraw_header()
+  open_split_view {
+    view_state = state.edit,
+    view_type = "commands",
+    buf_name = "Commands",
+    on_setup = function(buf)
+      local tab = state.tabs[state.active_tab]
+      vim.api.nvim_buf_set_lines(
+        buf,
+        0,
+        -1,
+        false,
+        (tab and tab.commands) or {}
+      )
+    end,
+    on_save = function(buf)
+      local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+      while #lines > 0 and lines[#lines] == "" do
+        table.remove(lines)
+      end
+      local current_tab = state.tabs[state.active_tab]
+      if current_tab then
+        current_tab.commands = lines
+        require("cake.core.session").save_tabs()
+        vim.notify("Commands saved!", vim.log.levels.INFO)
+      end
+    end,
+  }
 end
 
--- split mode: return to terminal from edit
 function M.back_to_split_term()
   if not state.term.win or not vim.api.nvim_win_is_valid(state.term.win) then
     return
@@ -388,11 +361,14 @@ function M.back_to_split_term()
 
   state.current_view = "term"
 
-  if state.edit.prev_term_buf and vim.api.nvim_buf_is_valid(state.edit.prev_term_buf) then
+  if
+    state.edit.prev_term_buf
+    and vim.api.nvim_buf_is_valid(state.edit.prev_term_buf)
+  then
     vim.api.nvim_win_set_buf(state.term.win, state.edit.prev_term_buf)
     require "cake.mappings"(state.edit.prev_term_buf, "term")
   end
-  require("cake.api").redraw_header()
+  require("cake.core.tabs").redraw_header()
 end
 
 return M
