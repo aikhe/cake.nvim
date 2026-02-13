@@ -30,6 +30,23 @@ local function cleanup_view_state(view_s)
   view_s.footer_buf = nil
 end
 
+local function get_shell_syntax()
+  local shell = state.config.terminal
+  if not shell or shell == "" then shell = vim.o.shell end
+  if not shell then return "sh" end
+  local lower = shell:lower()
+  if lower:find "powershell" or lower:find "pwsh" then
+    return "ps1"
+  elseif lower:find "cmd" then
+    return "dosbatch"
+  elseif lower:find "zsh" then
+    return "zsh"
+  elseif lower:find "bash" then
+    return "sh"
+  end
+  return "sh"
+end
+
 local function setup_view(opts)
   local view_s = opts.view_state
 
@@ -82,6 +99,15 @@ local function setup_view(opts)
 
   opts.on_setup(view_s.buf)
   vim.api.nvim_set_option_value("modified", false, { buf = view_s.buf })
+
+  if opts.view_type == "commands" then
+    local syntax = get_shell_syntax()
+    vim.schedule(function()
+      if view_s.buf and vim.api.nvim_buf_is_valid(view_s.buf) then
+        vim.api.nvim_set_option_value("filetype", syntax, { buf = view_s.buf })
+      end
+    end)
+  end
 
   local container_border = state.config.border and "single"
     or { " ", " ", " ", " ", " ", " ", " ", " " }
@@ -296,6 +322,15 @@ local function open_split_view(opts)
 
   opts.on_setup(view_s.buf)
   vim.api.nvim_set_option_value("modified", false, { buf = view_s.buf })
+
+  if opts.view_type == "commands" then
+    local syntax = get_shell_syntax()
+    vim.schedule(function()
+      if view_s.buf and vim.api.nvim_buf_is_valid(view_s.buf) then
+        vim.api.nvim_set_option_value("filetype", syntax, { buf = view_s.buf })
+      end
+    end)
+  end
   vim.api.nvim_win_set_buf(state.term.win, view_s.buf)
   disable_linenr(state.term.win)
   require "cake.mappings"(view_s.buf, opts.view_type)

@@ -13,13 +13,13 @@
 ---@class CakeHeaderState : CakeWindowState
 
 ---@class CakeTermState : CakeWindowState
----@field h number height
----@field job_id number|nil job id
+---@field h number
+---@field job_id number|nil
 ---@field container_win number|nil container window handle (split mode)
 ---@field container_buf number|nil container buffer handle (split mode)
 
 ---@class CakeFooterState : CakeWindowState
----@field h number height
+---@field h number
 ---@field cursor_timer userdata|nil timer for cursor updates
 
 ---@class CakeEditState : CakeWindowState
