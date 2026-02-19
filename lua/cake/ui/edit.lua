@@ -80,6 +80,9 @@ local function setup_view(opts)
   local total_h = header_h + state.term.h + state.footer.h + total_borders
   local start_row = math.floor((vim.o.lines - total_h) / 2) - 1
 
+  local border_style = state.config.border and "single"
+    or { " ", " ", " ", " ", " ", " ", " ", " " }
+
   view_s.header_win = vim.api.nvim_open_win(view_s.header_buf, false, {
     relative = "editor",
     width = state.w,
@@ -87,7 +90,7 @@ local function setup_view(opts)
     col = (vim.o.columns - state.w) / 2,
     row = start_row,
     style = "minimal",
-    border = "single",
+    border = border_style,
   })
   vim.api.nvim_win_set_hl_ns(view_s.header_win, state.ns)
 
@@ -109,8 +112,6 @@ local function setup_view(opts)
     end)
   end
 
-  local container_border = state.config.border and "single"
-    or { " ", " ", " ", " ", " ", " ", " ", " " }
   view_s.container_buf = vim.api.nvim_create_buf(false, true)
   view_s.container_win = vim.api.nvim_open_win(view_s.container_buf, false, {
     relative = "editor",
@@ -119,7 +120,7 @@ local function setup_view(opts)
     col = (vim.o.columns - state.w) / 2,
     row = start_row + header_h + border_h,
     style = "minimal",
-    border = container_border,
+    border = border_style,
   })
   vim.api.nvim_win_set_hl_ns(view_s.container_win, state.term_ns)
 
@@ -145,7 +146,7 @@ local function setup_view(opts)
     col = (vim.o.columns - state.w) / 2,
     row = start_row + header_h + border_h + state.term.h + border_h,
     style = "minimal",
-    border = "single",
+    border = border_style,
   })
   vim.api.nvim_win_set_hl_ns(view_s.footer_win, state.term_ns)
 

@@ -27,16 +27,24 @@ function M.set_colors()
   end
 end
 
+---@return string? bg
 local function get_bg()
   if vim.g.base46_cache then
-    return dofile(vim.g.base46_cache .. "colors").black
+    local ok, colors = pcall(dofile, vim.g.base46_cache .. "colors")
+    if ok and colors then return colors.black end
   end
   return get_hl("Normal").bg
 end
 
 function M.apply_float(ns)
   local bg = get_bg()
-  local win_bg = state.config.border and bg or lighten(bg, 2)
+  local is_transparent = not bg
+  local fallback_bg = bg or "#000000"
+
+  local win_bg_col = is_transparent and fallback_bg or bg
+  local win_bg = is_transparent and "NONE"
+    or (state.config.border and win_bg_col or lighten(win_bg_col, 2)) ---@type string?
+
   local text_light = get_hl("Normal").fg
   local commentfg = get_hl("CommentFg").fg
   local exblue = get_hl("ExBlue").fg
@@ -44,27 +52,34 @@ function M.apply_float(ns)
   local is_split_border = state.is_split and state.config.border
   local target_namespaces = { ns, state.term_ns }
 
-  for _, target_ns in ipairs(target_namespaces) do
-    local normal_bg = is_split_border and "NONE" or win_bg
-    local tab_bg = is_split_border and "NONE" or win_bg
+  local border_bg = is_split_border and "NONE" or win_bg
+  local term_border_fg = state.config.border and lighten(win_bg_col, 15)
+    or win_bg
 
-    api.nvim_set_hl(target_ns, "Normal", { bg = normal_bg })
-    api.nvim_set_hl(target_ns, "CakeTitle", { fg = exblue, bold = true })
-    api.nvim_set_hl(target_ns, "CakeLabel", { fg = commentfg })
+  for _, target_ns in ipairs(target_namespaces) do
+    local bg_val = is_split_border and "NONE" or win_bg
+
+    api.nvim_set_hl(target_ns, "Normal", { bg = bg_val })
     api.nvim_set_hl(
       target_ns,
-      "CakeKey",
-      { fg = text_light, bg = is_split_border and "NONE" or lighten(bg, 10) }
+      "FloatBorder",
+      { fg = term_border_fg, bg = border_bg }
     )
+    api.nvim_set_hl(target_ns, "CakeTitle", { fg = exblue, bold = true })
+    api.nvim_set_hl(target_ns, "CakeLabel", { fg = commentfg })
+    api.nvim_set_hl(target_ns, "CakeKey", {
+      fg = text_light,
+      bg = is_split_border and "NONE" or lighten(win_bg_col, 10),
+    })
     api.nvim_set_hl(
       target_ns,
       "CakeTabActive",
-      { fg = text_light, bg = tab_bg, bold = true }
+      { fg = text_light, bg = bg_val, bold = true }
     )
     api.nvim_set_hl(
       target_ns,
       "CakeTabInactive",
-      { fg = commentfg, bg = tab_bg }
+      { fg = commentfg, bg = bg_val }
     )
     api.nvim_set_hl(target_ns, "CakeNavHover", {
       fg = text_light,
@@ -74,16 +89,6 @@ function M.apply_float(ns)
   end
 
   api.nvim_set_hl(0, "CakeNormal", { bg = win_bg, fg = text_light })
-
-  local border_bg = is_split_border and "NONE" or win_bg
-  local term_border_fg = state.config.border and lighten(bg, 15) or win_bg
-
-  api.nvim_set_hl(ns, "FloatBorder", { fg = term_border_fg, bg = border_bg })
-  api.nvim_set_hl(
-    state.term_ns,
-    "FloatBorder",
-    { fg = term_border_fg, bg = border_bg }
-  )
   api.nvim_set_hl(state.term_ns, "FoldColumn", { bg = "NONE" })
 end
 
@@ -97,7 +102,13 @@ function M.apply_help_win(win)
     vim.api.nvim_get_option_value("winhighlight", { win = win })
 
   local bg = get_bg()
-  local win_bg = state.config.border and bg or lighten(bg, 2)
+  local is_transparent = not bg
+  local fallback_bg = bg or "#000000"
+
+  local win_bg_col = is_transparent and fallback_bg or bg
+  local win_bg = is_transparent and "NONE"
+    or (state.config.border and win_bg_col or lighten(win_bg_col, 2)) ---@type string?
+
   local text_light = get_hl("Normal").fg
   api.nvim_set_hl(0, "CakeNormal", { bg = win_bg, fg = text_light })
 
