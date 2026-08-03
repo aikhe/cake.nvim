@@ -78,6 +78,7 @@ require("cake").setup({
   mode = "float", -- "float", "splitv" (vertical), "splith" (horizontal)
   size = { h = 60, w = 50 }, -- Default float size
   split = { w = 50, h = 25 }, -- Default split sizes w: horizontal, h: vertical
+  line_num = { term_win = true, edit_cmd_win = true },
 
   -- Override default mappings
   mappings = {
